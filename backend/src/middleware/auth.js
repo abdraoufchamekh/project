@@ -37,4 +37,11 @@ const designerOrAdmin = (req, res, next) => {
   next();
 };
 
-module.exports = { authMiddleware, adminOnly, designerOrAdmin };
+const adminOrAtelier = (req, res, next) => {
+  if (req.user.role !== 'admin' && req.user.role !== 'atelier') {
+    return res.status(403).json({ error: 'Access denied. Admin or Atelier only.' });
+  }
+  next();
+};
+
+module.exports = { authMiddleware, adminOnly, designerOrAdmin, adminOrAtelier };

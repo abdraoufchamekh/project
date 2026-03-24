@@ -13,11 +13,11 @@ export default function LoginPage() {
     setLoading(true);
 
     const result = await login(email, password);
-    
+
     if (!result.success) {
       setError(result.error);
     }
-    
+
     setLoading(false);
   };
 
@@ -81,11 +81,6 @@ export default function LoginPage() {
           </button>
         </div>
 
-        <div className="mt-6 text-sm text-gray-400 text-center space-y-1">
-          <p className="font-semibold text-gray-300">Comptes de démonstration:</p>
-          <p>👨‍💼 Admin: admin@aurea.dz / admin123</p>
-          <p>🎨 Designer: designer@aurea.dz / designer123</p>
-        </div>
       </div>
     </div>
   );

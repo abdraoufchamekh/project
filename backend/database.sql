@@ -21,6 +21,7 @@ CREATE TABLE orders (
     client_name VARCHAR(255) NOT NULL,
     phone VARCHAR(50) NOT NULL,
     address TEXT,
+    status VARCHAR(50) DEFAULT 'Nouvelle commande',
     assigned_designer INTEGER REFERENCES users(id) ON DELETE SET NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -38,12 +39,12 @@ CREATE TABLE products (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Images Table
-CREATE TABLE images (
+-- Photos Table (Replaces Images)
+CREATE TABLE photos (
     id SERIAL PRIMARY KEY,
-    product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+    order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
     filename VARCHAR(255) NOT NULL,
-    type VARCHAR(50) NOT NULL, -- 'client' or 'designer'
+    type VARCHAR(50) NOT NULL DEFAULT 'client', -- 'client' or 'designer'
     uploaded_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -52,25 +53,26 @@ CREATE TABLE images (
 CREATE INDEX idx_orders_designer ON orders(assigned_designer);
 CREATE INDEX idx_orders_created ON orders(created_at DESC);
 CREATE INDEX idx_products_order ON products(order_id);
-CREATE INDEX idx_images_product ON images(product_id);
+CREATE INDEX idx_photos_order ON photos(order_id);
 CREATE INDEX idx_users_email ON users(email);
 
--- Insert default admin user (password: admin123)
--- Password hash generated with: bcrypt.hash('admin123', 10)
+-- Insert default admin user (password: AureaAdmin!2026Secure$)
+-- Password hash generated with: bcrypt.hash('AureaAdmin!2026Secure$', 10)
 INSERT INTO users (name, email, password, role) VALUES 
-('Admin User', 'admin@aurea.dz', '$2a$10$K9pQ9Z7L9Z7L9Z7L9Z7L9eYqQhXfZ1bH8F7x9J5y4K6L3M8N9O0P1', 'admin');
+('Admin User', 'admin@aurea.dz', '$2a$10$wCb0rTXfrOUwAGV31bYK9OtqLdzUTPZUj0azawpgQjfdqPo7T.2X2', 'admin');
 
--- Insert default designer user (password: designer123)
+-- Insert default Atelier user (password: AureaAtelier#2026Safe*)
+-- Password hash generated with: bcrypt.hash('AureaAtelier#2026Safe*', 10)
 INSERT INTO users (name, email, password, role) VALUES 
-('Designer User', 'designer@aurea.dz', '$2a$10$L8qR0M1M1M1M1M1M1M1MfZpRiYgA2cI9G8y0K6z5L7M4N9O0P1Q2', 'designer');
+('Atelier User', 'atelier@aurea.dz', '$2a$10$1hLGmRm5.ip3yBBqBngR3uSkh/smFG.VbOOVgZTM85nYNW0Obv2VW', 'designer');
 
 -- Insert sample order for testing
-INSERT INTO orders (client_name, phone, address, assigned_designer) VALUES 
-('Fatima Benali', '0555 123 456', 'Cité 20 Août, Sétif', 2);
+INSERT INTO orders (client_name, phone, address, status, assigned_designer) VALUES 
+('Fatima Benali', '0555 123 456', 'Cité 20 Août, Sétif', 'Nouvelle commande', 2);
 
 -- Insert sample products
 INSERT INTO products (order_id, type, quantity, unit_price, status) VALUES 
-(1, 'Cadre', 2, 1500.00, 'Design en cours'),
+(1, 'Cadre', 2, 1500.00, 'En attente'),
 (1, 'Couvre', 1, 3000.00, 'En attente');
 
 -- Create function to update updated_at timestamp

@@ -5,8 +5,8 @@ export default function DesignersPage() {
   const [designers, setDesigners] = useState([
     {
       id: 2,
-      name: 'Designer User',
-      email: 'designer@aurea.dz',
+      name: 'Atelier User',
+      email: 'atelier@aurea.dz',
       activeOrders: 1,
       completedOrders: 5
     },
@@ -50,13 +50,13 @@ export default function DesignersPage() {
     ]);
     setNewDesigner({ name: '', email: '', password: '' });
     setShowAddForm(false);
-    alert('Designer ajouté avec succès!');
+    alert('Membre ajouté avec succès!');
   };
 
   const handleDeleteDesigner = (id) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce designer ?')) {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce membre ?')) {
       setDesigners(designers.filter(d => d.id !== id));
-      alert('Designer supprimé avec succès');
+      alert('Membre supprimé avec succès');
     }
   };
 
@@ -64,22 +64,22 @@ export default function DesignersPage() {
     <div className="p-8">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h2 className="text-3xl font-bold text-white">Gestion des Designers</h2>
-          <p className="text-gray-400 mt-2">{designers.length} designer(s) actif(s)</p>
+          <h2 className="text-3xl font-bold text-white">Gestion de l'Atelier</h2>
+          <p className="text-gray-400 mt-2">{designers.length} membre(s) actif(s)</p>
         </div>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
         >
           <Plus size={20} />
-          Ajouter Designer
+          Ajouter Membre
         </button>
       </div>
 
       {showAddForm && (
         <div className="bg-gray-800 rounded-lg p-6 mb-6 border border-blue-500">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold text-white">Nouveau Designer</h3>
+            <h3 className="text-xl font-semibold text-white">Nouveau Membre de l'Atelier</h3>
             <button
               onClick={() => setShowAddForm(false)}
               className="text-gray-400 hover:text-white transition"
@@ -135,7 +135,7 @@ export default function DesignersPage() {
                 onClick={handleAddDesigner}
                 className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-medium"
               >
-                ✓ Ajouter Designer
+                ✓ Ajouter Membre
               </button>
               <button
                 onClick={() => {
@@ -205,12 +205,12 @@ export default function DesignersPage() {
       {designers.length === 0 && (
         <div className="bg-gray-800 rounded-lg p-12 text-center">
           <Briefcase size={48} className="mx-auto text-gray-600 mb-4" />
-          <p className="text-gray-400">Aucun designer pour le moment</p>
+          <p className="text-gray-400">Aucun membre pour le moment</p>
           <button
             onClick={() => setShowAddForm(true)}
             className="mt-4 text-blue-500 hover:text-blue-400"
           >
-            Ajouter le premier designer
+            Ajouter le premier membre
           </button>
         </div>
       )}

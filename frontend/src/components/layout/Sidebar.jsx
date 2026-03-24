@@ -1,24 +1,40 @@
 import React from 'react';
-import { Plus, Package, Users, Settings, LogOut } from 'lucide-react';
+import { Plus, Package, Settings, LogOut, Archive, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
-export default function Sidebar({ active, setActive }) {
+export default function Sidebar({ active, setActive, isOpen, setIsOpen }) {
   const { logout, user } = useAuth();
 
   const navItems = [
     { id: 'dashboard', label: 'Commandes', icon: Package, roles: ['admin', 'designer'] },
+    { id: 'stock', label: 'Gestion de Stock', icon: Package, roles: ['admin'] },
+    { id: 'archived', label: 'Archivées', icon: Archive, roles: ['admin', 'designer'] },
     { id: 'create', label: 'Nouvelle Commande', icon: Plus, roles: ['admin'] },
-    { id: 'designers', label: 'Designers', icon: Users, roles: ['admin'] },
+    { id: 'create-atelier', label: 'Nouvelle Commande', icon: Plus, roles: ['designer'] },
     { id: 'settings', label: 'Paramètres', icon: Settings, roles: ['admin'] }
   ];
 
   return (
-    <div className="w-64 bg-gray-900 border-r border-gray-800 h-screen flex flex-col">
-      <div className="p-6 border-b border-gray-800">
-        <h1 className="text-2xl font-bold text-blue-500">Auréa Déco</h1>
-        <p className="text-sm text-gray-400 mt-1">{user?.name}</p>
-        <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
-      </div>
+    <>
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* Sidebar Content */}
+      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-gray-900 border-r border-gray-800 h-screen flex flex-col transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 ${isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}`}>
+        <div className="p-6 border-b border-gray-800 flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-blue-500">Auréa Déco</h1>
+            <p className="text-sm text-gray-400 mt-1">{user?.name}</p>
+          </div>
+          <button onClick={() => setIsOpen(false)} className="md:hidden text-gray-400 hover:text-white p-1">
+             <X size={20} />
+          </button>
+        </div>
 
       <nav className="flex-1 p-4 space-y-2">
         {navItems
@@ -29,11 +45,10 @@ export default function Sidebar({ active, setActive }) {
               <button
                 key={item.id}
                 onClick={() => setActive(item.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${
-                  active === item.id
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-400 hover:bg-gray-800 hover:text-white'
-                }`}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${active === item.id
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                  }`}
               >
                 <Icon size={20} />
                 <span>{item.label}</span>
@@ -51,6 +66,7 @@ export default function Sidebar({ active, setActive }) {
           <span>Déconnexion</span>
         </button>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

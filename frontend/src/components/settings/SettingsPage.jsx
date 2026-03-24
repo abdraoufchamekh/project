@@ -1,153 +1,176 @@
-import React, { useState } from 'react';
-import { Save } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Save, Loader2, Info } from 'lucide-react';
+import { API_BASE_URL } from '../../utils/constants';
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState({
-    companyName: 'Auréa Déco',
-    email: 'contact@aurea.dz',
-    phone: '0555 000 000',
-    address: 'Sétif, Algérie',
-    yalidineApiKey: '',
-    yalidineEnabled: false,
-    emailNotifications: true,
-    smsNotifications: false
+    company_name: '',
+    vendor_name: '',
+    activity: '',
+    address: '',
+    phone: ''
   });
+  
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState({ type: '', text: '' });
 
-  const handleSave = () => {
-    // Save settings to backend
-    alert('Paramètres enregistrés avec succès!');
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  const fetchSettings = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/settings`, {
+        headers: {
+          'Authorization': `Bearer ${sessionStorage.getItem('aurea_token')}`
+        }
+      });
+      if (!response.ok) throw new Error('Failed to fetch settings');
+      const data = await response.json();
+      setSettings(prev => ({ ...prev, ...data }));
+    } catch (err) {
+      console.error(err);
+      setMessage({ type: 'error', text: 'Erreur lors du chargement des paramètres.' });
+    } finally {
+      setLoading(false);
+    }
   };
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setSettings(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setMessage({ type: '', text: '' });
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/settings`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sessionStorage.getItem('aurea_token')}`
+        },
+        body: JSON.stringify(settings)
+      });
+      
+      if (!response.ok) throw new Error('Failed to save settings');
+      
+      const updatedSettings = await response.json();
+      setSettings(prev => ({ ...prev, ...updatedSettings }));
+      setMessage({ type: 'success', text: 'Paramètres sauvegardés avec succès !' });
+      
+      setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+    } catch (err) {
+      console.error(err);
+      setMessage({ type: 'error', text: 'Erreur lors de la sauvegarde des paramètres. Assurez-vous d\'être administrateur.' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <Loader2 className="animate-spin text-blue-500 mr-2" />
+        <span className="text-gray-400">Chargement...</span>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-8">
-      <h2 className="text-3xl font-bold text-white mb-8">Paramètres</h2>
+    <div className="p-4 md:p-8 max-w-4xl mx-auto">
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-white mb-2">Paramètres de l'entreprise</h2>
+        <p className="text-gray-400">Gérez les informations de l'entreprise qui apparaîtront sur les factures générées.</p>
+      </div>
 
-      <div className="space-y-6">
-        {/* Company Information */}
-        <div className="bg-gray-800 rounded-lg p-6">
-          <h3 className="text-xl font-semibold text-white mb-4">Informations Entreprise</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Nom de l'entreprise
-              </label>
-              <input
-                type="text"
-                value={settings.companyName}
-                onChange={(e) => setSettings({ ...settings, companyName: e.target.value })}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-              />
-            </div>
+      {message.text && (
+        <div className={`mb-6 p-4 rounded-lg flex items-center gap-3 ${
+          message.type === 'success' ? 'bg-green-900/50 text-green-400 border border-green-800' : 'bg-red-900/50 text-red-400 border border-red-800'
+        }`}>
+          <Info size={20} />
+          {message.text}
+        </div>
+      )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Email
-              </label>
-              <input
-                type="email"
-                value={settings.email}
-                onChange={(e) => setSettings({ ...settings, email: e.target.value })}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-              />
-            </div>
+      <form onSubmit={handleSubmit} className="bg-gray-800 rounded-lg p-6 shadow-xl border border-gray-700">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="col-span-1 md:col-span-2">
+            <label className="block text-sm font-medium text-gray-300 mb-1">Nom de l'entreprise</label>
+            <input
+              type="text"
+              name="company_name"
+              value={settings.company_name || ''}
+              onChange={handleChange}
+              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              required
+            />
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Téléphone
-              </label>
-              <input
-                type="tel"
-                value={settings.phone}
-                onChange={(e) => setSettings({ ...settings, phone: e.target.value })}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-              />
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Nom du vendeur / gérant</label>
+            <input
+              type="text"
+              name="vendor_name"
+              value={settings.vendor_name || ''}
+              onChange={handleChange}
+              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Adresse
-              </label>
-              <input
-                type="text"
-                value={settings.address}
-                onChange={(e) => setSettings({ ...settings, address: e.target.value })}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-              />
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Activité</label>
+            <input
+              type="text"
+              name="activity"
+              value={settings.activity || ''}
+              onChange={handleChange}
+              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="col-span-1 md:col-span-2">
+            <label className="block text-sm font-medium text-gray-300 mb-1">Adresse</label>
+            <input
+              type="text"
+              name="address"
+              value={settings.address || ''}
+              onChange={handleChange}
+              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Numéro de téléphone</label>
+            <input
+              type="text"
+              name="phone"
+              value={settings.phone || ''}
+              onChange={handleChange}
+              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
           </div>
         </div>
 
-        {/* Yalidine Integration */}
-        <div className="bg-gray-800 rounded-lg p-6">
-          <h3 className="text-xl font-semibold text-white mb-4">Intégration Yalidine</h3>
-          <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <input
-                type="checkbox"
-                checked={settings.yalidineEnabled}
-                onChange={(e) => setSettings({ ...settings, yalidineEnabled: e.target.checked })}
-                className="w-5 h-5 rounded bg-gray-700 border-gray-600 cursor-pointer"
-              />
-              <label className="text-gray-300">Activer l'intégration Yalidine</label>
-            </div>
-
-            {settings.yalidineEnabled && (
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Clé API Yalidine
-                </label>
-                <input
-                  type="text"
-                  value={settings.yalidineApiKey}
-                  onChange={(e) => setSettings({ ...settings, yalidineApiKey: e.target.value })}
-                  placeholder="Entrez votre clé API Yalidine"
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                />
-                <p className="text-sm text-gray-500 mt-2">
-                  Obtenez votre clé API depuis votre tableau de bord Yalidine
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Notifications */}
-        <div className="bg-gray-800 rounded-lg p-6">
-          <h3 className="text-xl font-semibold text-white mb-4">Notifications</h3>
-          <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <input
-                type="checkbox"
-                checked={settings.emailNotifications}
-                onChange={(e) => setSettings({ ...settings, emailNotifications: e.target.checked })}
-                className="w-5 h-5 rounded bg-gray-700 border-gray-600 cursor-pointer"
-              />
-              <label className="text-gray-300">Notifications par email</label>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <input
-                type="checkbox"
-                checked={settings.smsNotifications}
-                onChange={(e) => setSettings({ ...settings, smsNotifications: e.target.checked })}
-                className="w-5 h-5 rounded bg-gray-700 border-gray-600 cursor-pointer"
-              />
-              <label className="text-gray-300">Notifications par SMS</label>
-            </div>
-          </div>
-        </div>
-
-        {/* Save Button */}
-        <div className="flex justify-end">
+        <div className="mt-8 flex justify-end">
           <button
-            onClick={handleSave}
-            className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-medium"
+            type="submit"
+            disabled={saving}
+            className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:opacity-50 text-white rounded-lg transition shadow-md font-medium"
           >
-            <Save size={20} />
-            Enregistrer les paramètres
+            {saving ? (
+              <Loader2 size={20} className="animate-spin" />
+            ) : (
+              <Save size={20} />
+            )}
+            Sauvegarder les paramètres
           </button>
         </div>
-      </div>
+      </form>
     </div>
   );
 }

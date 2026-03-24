@@ -1,24 +1,27 @@
 const express = require('express');
 const router = express.Router();
 const orderController = require('../controllers/orderController');
-const { authMiddleware, adminOnly } = require('../middleware/auth');
+const { authMiddleware, adminOnly, designerOrAdmin } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 
 // All routes require authentication
 router.use(authMiddleware);
 
 // Order routes
-router.post('/', adminOnly, orderController.createOrder);
+router.post('/', designerOrAdmin, orderController.createOrder);
 router.get('/', orderController.getOrders);
+router.get('/stats', orderController.getOrderStats);
 router.get('/:id', orderController.getOrderById);
-router.put('/:id', adminOnly, orderController.updateOrder);
-router.delete('/:id', adminOnly, orderController.deleteOrder);
+router.put('/:id', designerOrAdmin, orderController.updateOrder);
+router.delete('/:id', designerOrAdmin, orderController.deleteOrder);
+router.get('/:id/invoice', require('../controllers/invoiceController').generateInvoice);
 
 // Product routes
 router.patch('/products/:productId/status', orderController.updateProductStatus);
+router.put('/products/:productId/image', upload.single('image'), orderController.updateProductImage);
 
-// Image routes
-router.post('/products/:productId/images', upload.array('images', 10), orderController.uploadImages);
-router.delete('/images/:imageId', orderController.deleteImage);
+// Photo routes
+router.post('/:orderId/photos', upload.array('photos', 10), orderController.uploadPhotos);
+router.delete('/photos/:photoId', orderController.deletePhoto);
 
 module.exports = router;

@@ -1,196 +1,539 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Plus, X } from 'lucide-react';
-import { productTypes } from '../../utils/constants';
+import axios from 'axios';
+import { API_BASE_URL } from '../../utils/constants';
+import { wilayas, communesByWilaya } from '../../utils/algeria';
 
 export default function CreateOrder({ onSave }) {
-  const [clientName, setClientName] = useState('');
+  // Destinataire
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
+  const [phone2, setPhone2] = useState('');
+  const [showPhone2, setShowPhone2] = useState(false);
+  const [wilaya, setWilaya] = useState('');
+  const [commune, setCommune] = useState('');
+  const [customCommune, setCustomCommune] = useState('');
   const [address, setAddress] = useState('');
+
+  // Livraison
+  const [isFreeDelivery, setIsFreeDelivery] = useState(false);
+  const [deliveryFee, setDeliveryFee] = useState(0);
+  const [hasExchange, setHasExchange] = useState(false);
+
+  // Assurance
+  const [hasInsurance, setHasInsurance] = useState(false);
+  const [declaredValue, setDeclaredValue] = useState('');
+
+  // Colis (Produits & Photos)
+  const [stockProducts, setStockProducts] = useState([]);
   const [products, setProducts] = useState([{
-    type: 'Cadre',
+    type: '',
     quantity: 1,
-    unitPrice: 0
+    unitPrice: 0,
+    inventoryItemId: ''
   }]);
+  const [photos, setPhotos] = useState([]);
+
+  // Derived total — always in sync with products, no separate state
+  const totalPrice = useMemo(() => {
+    return products.reduce((sum, p) => {
+      const qty = Number(p.quantity) || 0;
+      const price = Number(p.unitPrice) || 0;
+      return sum + qty * price;
+    }, 0);
+  }, [products]);
+
+  useEffect(() => {
+    fetchStock();
+  }, []);
+
+  const fetchStock = async () => {
+    try {
+      const { data } = await axios.get(`${API_BASE_URL}/stock`, {
+          headers: { Authorization: `Bearer ${sessionStorage.getItem('aurea_token')}` }
+      });
+      setStockProducts(data.products || []);
+    } catch (error) {
+      console.error('Error fetching stock:', error);
+    }
+  };
 
   const addProduct = () => {
-    setProducts([...products, { type: 'Cadre', quantity: 1, unitPrice: 0 }]);
+    setProducts([...products, { type: '', quantity: 1, unitPrice: 0, inventoryItemId: '' }]);
   };
 
   const removeProduct = (idx) => {
     setProducts(products.filter((_, i) => i !== idx));
   };
 
+  // Immutable update: new object for the row so other rows and fields are never overwritten
   const updateProduct = (idx, field, value) => {
-    const updated = [...products];
-    updated[idx][field] = value;
-    setProducts(updated);
+    setProducts(prev => prev.map((p, i) =>
+      i === idx ? { ...p, [field]: value } : p
+    ));
+  };
+
+  // Batch update when selecting a product (type, unitPrice, inventoryItemId) in one setState to avoid stale state
+  const setProductFromStock = (idx, inventoryItemId, typeLabel, unitPriceFromStock) => {
+    setProducts(prev => prev.map((p, i) =>
+      i === idx
+        ? { ...p, inventoryItemId, type: typeLabel, unitPrice: unitPriceFromStock ?? p.unitPrice }
+        : p
+    ));
   };
 
   const handleSubmit = () => {
-    if (!clientName || !phone) {
-      alert('Veuillez remplir le nom et le téléphone du client');
-      return;
-    }
-
-    if (products.some(p => p.unitPrice <= 0)) {
-      alert('Veuillez entrer un prix valide pour tous les produits');
-      return;
-    }
-
     const newOrder = {
       id: Date.now(),
-      clientName,
+      firstName,
+      lastName,
+      clientName: `${firstName} ${lastName}`,
       phone,
+      phone2: showPhone2 ? phone2 : null,
+      wilaya,
+      commune: commune === 'Autre' ? customCommune : commune,
       address,
+      deliveryType: 'domicile',
+      isFreeDelivery,
+      hasExchange,
+      hasInsurance,
+      declaredValue: hasInsurance ? declaredValue : null,
       createdAt: new Date().toISOString().split('T')[0],
-      assignedDesigner: 2, // Default designer
+      status: 'Nouvelle commande',
+      deliveryFee: isFreeDelivery ? 0 : (Number(deliveryFee) || 0),
+      delivery_fee: isFreeDelivery ? 0 : (Number(deliveryFee) || 0),
+      discount: 0,
+      source: 'admin',
       products: products.map((p, i) => ({
         id: Date.now() + i,
         type: p.type,
-        quantity: p.quantity,
-        unitPrice: p.unitPrice,
+        quantity: Number(p.quantity) || 1,
+        unitPrice: Number(p.unitPrice) || 0,
         status: 'En attente',
-        clientImages: 0,
-        designerImages: 0
+        inventoryItemId: p.inventoryItemId
       }))
     };
 
-    onSave(newOrder);
+    onSave(newOrder, photos);
 
     // Reset form
-    setClientName('');
+    setFirstName('');
+    setLastName('');
     setPhone('');
+    setPhone2('');
+    setShowPhone2(false);
+    setWilaya('');
+    setCommune('');
+    setCustomCommune('');
     setAddress('');
-    setProducts([{ type: 'Cadre', quantity: 1, unitPrice: 0 }]);
+    setIsFreeDelivery(false);
+    setDeliveryFee(0);
+    setHasExchange(false);
+    setHasInsurance(false);
+    setDeclaredValue('');
+    setProducts([{ type: '', quantity: 1, unitPrice: 0, inventoryItemId: '' }]);
+    setPhotos([]);
   };
 
+
   return (
-    <div className="p-8">
-      <h2 className="text-3xl font-bold text-white mb-8">Nouvelle Commande</h2>
+    <div className="p-8 max-w-4xl mx-auto">
+      <h2 className="text-3xl font-bold text-white mb-8">Ajouter un colis</h2>
 
-      <div className="bg-gray-800 rounded-lg p-6 space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Nom du Client <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={clientName}
-              onChange={(e) => setClientName(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-              placeholder="Nom complet"
-            />
+      <div className="bg-gray-800 rounded-lg p-6 space-y-8">
+
+        {/* Destinataire & Assignation */}
+        <div className="bg-gray-700/50 rounded-lg overflow-hidden border border-gray-600">
+          <div className="p-4 bg-gray-800 border-b border-gray-600">
+            <h3 className="font-bold text-gray-200">Détails de la commande</h3>
           </div>
+          <div className="p-4 space-y-4">
 
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Téléphone <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-              placeholder="0555 000 000"
-            />
-          </div>
+            {/* Designer Assignment Removed */}
 
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Adresse
-            </label>
-            <input
-              type="text"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-              placeholder="Adresse complète"
-            />
+            <hr className="border-gray-600/50 my-4" />
+
+            <div className="flex flex-col md:flex-row bg-gray-800/80 rounded border border-gray-600 overflow-hidden mt-4">
+              <span className="w-full md:w-1/3 p-2 text-gray-400 border-b md:border-b-0 md:border-r border-gray-600">Nom du client</span>
+              <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} className="w-full md:w-2/3 p-2 bg-transparent text-white outline-none" />
+            </div>
+
+            <div className="flex flex-col md:flex-row bg-gray-800/80 rounded border border-gray-600 overflow-hidden mt-4">
+              <span className="w-full md:w-1/3 p-2 text-gray-400 border-b md:border-b-0 md:border-r border-gray-600">Prénom</span>
+              <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="w-full md:w-2/3 p-2 bg-transparent text-white outline-none" />
+            </div>
+
+            <div className="flex flex-col md:flex-row bg-gray-800/80 rounded border border-gray-600 overflow-hidden mt-4">
+              <span className="w-full md:w-1/3 p-2 text-gray-400 border-b md:border-b-0 md:border-r border-gray-600">Téléphone 1</span>
+              <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full md:w-2/3 p-2 bg-transparent text-white outline-none" />
+            </div>
+
+            {!showPhone2 ? (
+              <button
+                onClick={() => setShowPhone2(true)}
+                className="bg-blue-600/20 text-blue-400 border border-blue-500/30 px-4 py-2 rounded hover:bg-blue-600/40 transition w-full md:w-auto mt-4"
+              >
+                Ajouter un autre téléphone
+              </button>
+            ) : (
+              <div className="flex flex-col md:flex-row bg-gray-800/80 rounded border border-gray-600 overflow-hidden relative mt-4">
+                <span className="w-full md:w-1/3 p-2 text-gray-400 border-b md:border-b-0 md:border-r border-gray-600">Téléphone 2</span>
+                <input type="tel" value={phone2} onChange={(e) => setPhone2(e.target.value)} className="w-full md:w-2/3 p-2 bg-transparent text-white outline-none" />
+                <button onClick={() => { setShowPhone2(false); setPhone2(''); }} className="absolute right-2 top-2 text-gray-500 hover:text-red-400 bg-gray-800/80 p-1 md:p-0 rounded-full md:bg-transparent md:rounded-none">
+                  <X size={20} />
+                </button>
+              </div>
+            )}
+
+            <div className="flex flex-col md:flex-row bg-gray-800/80 rounded border border-gray-600 overflow-hidden mt-4">
+              <span className="w-full md:w-1/3 p-2 text-red-400 font-medium border-b md:border-b-0 md:border-r border-gray-600">Wilaya</span>
+              <select
+                value={wilaya}
+                onChange={(e) => { setWilaya(e.target.value); setCommune(''); setCustomCommune(''); }}
+                className="w-full md:w-2/3 p-2 outline-none bg-gray-800 text-white"
+              >
+                <option value="">Choisissez</option>
+                {wilayas.map(w => (
+                  <option key={w.id} value={w.name}>{w.id} - {w.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex flex-col md:flex-row bg-gray-800/80 rounded border border-gray-600 overflow-hidden mt-4">
+              <span className="w-full md:w-1/3 p-2 text-red-400 font-medium border-b md:border-b-0 md:border-r border-gray-600">Commune</span>
+              <div className="w-full md:w-2/3 flex flex-col">
+                <select
+                  value={commune}
+                  onChange={(e) => setCommune(e.target.value)}
+                  className="w-full p-2 outline-none bg-gray-800 text-white"
+                  disabled={!wilaya}
+                >
+                  <option value="">{wilaya ? 'Choisissez une commune' : "Choisissez d'abord la wilaya"}</option>
+                  {wilaya && communesByWilaya[wilayas.find(w => w.name === wilaya)?.id]?.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                  {wilaya && <option value="Autre" className="text-blue-400 font-bold">Autre (Saisir manuellement)...</option>}
+                </select>
+                {commune === 'Autre' && (
+                  <input
+                    type="text"
+                    value={customCommune}
+                    onChange={(e) => setCustomCommune(e.target.value)}
+                    placeholder="Saisissez le nom de la commune"
+                    className="w-full p-2 bg-gray-900 border-t border-gray-600 text-white outline-none"
+                  />
+                )}
+              </div>
+            </div>
+
+
+
+            <div className="flex flex-col md:flex-row bg-gray-800/80 rounded border border-gray-600 overflow-hidden mt-4">
+              <span className="w-full md:w-1/3 p-2 text-gray-400 border-b md:border-b-0 md:border-r border-gray-600">L'adresse postale</span>
+              <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} className="w-full md:w-2/3 p-2 bg-transparent text-white outline-none" />
+            </div>
           </div>
         </div>
 
-        <div className="border-t border-gray-700 pt-6">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold text-white">Produits</h3>
-            <button
-              onClick={addProduct}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
-            >
-              <Plus size={20} />
-              Ajouter produit
-            </button>
+        {/* Le colis */}
+        <div className="bg-gray-700/50 rounded-lg overflow-hidden border border-gray-600">
+          <div className="p-4 bg-gray-800 border-b border-gray-600">
+            <h3 className="font-bold text-gray-200">Le colis</h3>
           </div>
+          <div className="p-4 space-y-4">
 
-          {products.map((product, idx) => (
-            <div key={idx} className="bg-gray-900 rounded-lg p-4 mb-4">
-              <div className="flex justify-between items-center mb-4">
-                <h4 className="text-lg font-medium text-white">Produit {idx + 1}</h4>
-                {products.length > 1 && (
-                  <button
-                    onClick={() => removeProduct(idx)}
-                    className="text-red-500 hover:text-red-400 transition"
-                  >
-                    <X size={20} />
-                  </button>
-                )}
+            {/* Products Array integration */}
+            {/* Products Array integration */}
+            <div className="border border-gray-600 rounded p-4 mb-4 bg-gray-800/80">
+              <div className="flex justify-between items-center mb-6">
+                <span className="text-gray-300 font-medium">Produit(s) à livrer</span>
+                <button onClick={addProduct} className="text-blue-500 hover:text-blue-400 flex items-center text-sm transition font-medium">
+                  <Plus size={16} className="mr-1" /> Ajouter un produit
+                </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Type
-                  </label>
-                  <select
-                    value={product.type}
-                    onChange={(e) => updateProduct(idx, 'type', e.target.value)}
-                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                  >
-                    {productTypes.map(type => (
-                      <option key={type} value={type}>{type}</option>
-                    ))}
-                  </select>
-                </div>
+              {/* Table Headers for better UX on desktop */}
+              <div className="hidden md:flex gap-4 mb-3 px-1">
+                <div className="w-6/12 text-sm text-gray-400 font-medium">Type de produit</div>
+                <div className="w-2/12 text-sm text-gray-400 font-medium text-center">Quantité</div>
+                <div className="w-2/12 text-sm text-gray-400 font-medium text-center">Prix unitaire</div>
+                <div className="w-2/12 text-sm text-gray-400 font-medium text-center">Total</div>
+                <div className="w-1/12"></div>
+              </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Quantité
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={product.quantity}
-                    onChange={(e) => updateProduct(idx, 'quantity', parseInt(e.target.value) || 1)}
-                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                  />
-                </div>
+              <div className="space-y-4">
+                {products.map((product, idx) => {
+                  const selectedStockItem = stockProducts.find(sp => sp.id === parseInt(product.inventoryItemId, 10));
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Prix Unitaire (DA)
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={product.unitPrice}
-                    onChange={(e) => updateProduct(idx, 'unitPrice', parseFloat(e.target.value) || 0)}
-                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                  />
+                  return (
+                  <div key={idx} className="flex flex-col md:flex-row gap-4 items-start md:items-start bg-gray-900/50 md:bg-transparent p-4 md:p-0 rounded-lg border border-gray-700 md:border-none">
+
+                    {/* Product Selection */}
+                    <div className="w-full md:w-6/12 flex flex-col gap-2">
+                      <span className="md:hidden text-xs text-gray-400 font-medium">Type de produit</span>
+                      
+                      <select
+                        value={product.inventoryItemId || ''}
+                        onChange={(e) => {
+                          const pId = e.target.value;
+                          const sp = stockProducts.find(s => s.id === parseInt(pId, 10));
+                          if (sp) {
+                            let labelParts = [];
+                            if (sp.color) labelParts.push(sp.color);
+                            if (sp.dimension) labelParts.push(sp.dimension);
+                            if (sp.size) labelParts.push(`Taille: ${sp.size}`);
+                            const label = labelParts.length > 0 ? labelParts.join(' - ') : '';
+                            const fullType = label ? `${sp.name} (${label})` : sp.name;
+                            const price = (sp.price !== undefined && sp.price !== null && sp.price !== '') ? Number(sp.price) : 0;
+                            setProductFromStock(idx, pId, fullType, price);
+                          } else {
+                            setProductFromStock(idx, '', '', 0);
+                          }
+                        }}
+                        className="w-full p-2.5 bg-gray-900 border border-gray-600 text-white rounded outline-none focus:border-blue-500 transition"
+                      >
+                        <option value="">Sélectionner un produit...</option>
+                        {stockProducts.map(sp => {
+                          let labelParts = [];
+                          if (sp.color) labelParts.push(sp.color);
+                          if (sp.dimension) labelParts.push(sp.dimension);
+                          if (sp.size) labelParts.push(`Taille: ${sp.size}`);
+                          const label = labelParts.length > 0 ? labelParts.join(' - ') : '';
+                          return (
+                            <option key={sp.id} value={sp.id} disabled={sp.quantity <= 0}>
+                              {sp.name} {label ? `(${label})` : ''} - Stock: {sp.quantity}
+                            </option>
+                          );
+                        })}
+                      </select>
+                    </div>
+
+                    {/* Quantity */}
+                    <div className="w-full md:w-2/12 flex flex-col relative">
+                      <span className="md:hidden text-xs text-gray-400 font-medium mb-1">Quantité</span>
+                      <input
+                        type="number" min="1" max={selectedStockItem?.quantity || undefined} placeholder="Qté"
+                        value={product.quantity || ''}
+                        onChange={(e) => updateProduct(idx, 'quantity', parseInt(e.target.value) || '')}
+                        onWheel={(e) => e.target.blur()}
+                        className={`w-full p-2.5 bg-gray-900 border text-white rounded outline-none transition text-center focus:border-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${product.quantity > selectedStockItem?.quantity ? 'border-red-500' : 'border-gray-600'}`}
+                      />
+                      {product.quantity > selectedStockItem?.quantity && (
+                         <span className="text-red-500 text-xs absolute -bottom-5 left-0 w-full text-center">Stock insuffisant</span>
+                      )}
+                    </div>
+
+                    {/* Unit price */}
+                    <div className="w-full md:w-2/12 flex flex-col">
+                      <span className="md:hidden text-xs text-gray-400 font-medium mb-1">Prix unitaire</span>
+                      <div className="flex items-center">
+                        <input
+                          type="number"
+                          min="0"
+                          step="10"
+                          placeholder="0"
+                          value={product.unitPrice || ''}
+                          onChange={(e) => updateProduct(idx, 'unitPrice', e.target.value)}
+                          onWheel={(e) => e.target.blur()}
+                          className="w-full p-2.5 bg-gray-900 border border-gray-600 text-white rounded-l outline-none transition text-center focus:border-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        />
+                        <span className="px-2 py-2.5 bg-gray-900 border border-l-0 border-gray-600 text-xs text-gray-400 rounded-r">DA</span>
+                      </div>
+                    </div>
+
+                    {/* Line total */}
+                    <div className="w-full md:w-2/12 flex flex-col">
+                      <span className="md:hidden text-xs text-gray-400 font-medium mb-1">Total</span>
+                      <div className="w-full p-2.5 bg-gray-900 border border-gray-600 text-blue-300 rounded text-center font-semibold">
+                        {((Number(product.quantity) || 0) * (Number(product.unitPrice) || 0)).toLocaleString()} DA
+                      </div>
+                    </div>
+
+                    {/* Delete button */}
+                    <div className="w-full md:w-1/12 flex items-start justify-end">
+                      {products.length > 1 && (
+                        <button
+                          onClick={() => removeProduct(idx)}
+                          className="mt-6 md:mt-1 text-red-500 hover:text-white hover:bg-red-600 p-2 rounded transition border border-transparent hover:border-red-500 flex items-center justify-center"
+                          title="Supprimer ce produit"
+                        >
+                          <X size={20} />
+                        </button>
+                      )}
+                    </div>
+
+                  </div>
+                  );
+                })}
+              </div>
+
+              <div className="pt-4 mt-6 border-t border-gray-600 flex justify-between items-center">
+                <span className="text-gray-300 font-bold uppercase text-sm -mt-2">PRIX TOTAL DES PRODUITS</span>
+                <div className="flex flex-col items-end gap-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl text-blue-400 font-bold">
+                      {Number(totalPrice || 0).toLocaleString()} DA
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-          ))}
+
+            <div className="flex flex-col md:flex-row bg-gray-800/80 rounded border border-gray-600 overflow-hidden">
+              <span className="w-full md:w-1/3 p-2 text-gray-400 border-b md:border-b-0 md:border-r border-gray-600">Prix du colis (sous-total)</span>
+              <div className="w-full md:w-2/3 p-2 bg-transparent text-white font-bold flex items-center">
+                {Number(totalPrice || 0).toLocaleString()} DA
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row bg-gray-800/80 rounded border border-gray-600 overflow-hidden mt-4">
+              <span className="w-full md:w-1/3 p-2 text-gray-400 border-b md:border-b-0 md:border-r border-gray-600">Frais de livraison</span>
+              <div className="w-full md:w-2/3 p-2 flex items-center gap-2">
+                <input
+                  type="number"
+                  min="0"
+                  step="100"
+                  value={isFreeDelivery ? 0 : (deliveryFee || '')}
+                  onChange={(e) => setDeliveryFee(isFreeDelivery ? 0 : (parseFloat(e.target.value) || 0))}
+                  onWheel={(e) => e.target.blur()}
+                  disabled={isFreeDelivery}
+                  className="w-32 p-2 bg-gray-900 border border-gray-600 text-white rounded outline-none focus:border-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none disabled:opacity-60"
+                />
+                <span className="text-gray-400 text-sm">DA</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row bg-gray-800/80 rounded border border-blue-600/50 overflow-hidden mt-4">
+              <span className="w-full md:w-1/3 p-2 text-blue-300 font-medium border-b md:border-b-0 md:border-r border-gray-600">Total (produits + livraison)</span>
+              <div className="w-full md:w-2/3 p-2 bg-transparent text-blue-400 font-bold flex items-center">
+                {((Number(totalPrice) || 0) + (isFreeDelivery ? 0 : (Number(deliveryFee) || 0))).toLocaleString()} DA
+              </div>
+            </div>
+
+            <label className="flex items-center gap-2 cursor-pointer text-gray-300 mt-4">
+              <input
+                type="checkbox"
+                checked={isFreeDelivery}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  setIsFreeDelivery(checked);
+                  if (checked) setDeliveryFee(0);
+                }}
+                className="w-4 h-4 rounded text-blue-600 border-gray-600 bg-gray-900 focus:ring-blue-500"
+              />
+              Livraison gratuite?
+            </label>
+
+            <label className="flex items-start gap-2 cursor-pointer text-gray-300 mt-2">
+              <input
+                type="checkbox"
+                checked={hasExchange}
+                onChange={(e) => setHasExchange(e.target.checked)}
+                className="w-4 h-4 mt-1 rounded text-blue-600 border-gray-600 bg-gray-900 focus:ring-blue-500"
+              />
+              <span className="flex-1 text-sm">
+                Demander un échange après livraison (ceci va créer un second bordereau pour le retour de l'objet à échanger)
+              </span>
+            </label>
+          </div>
         </div>
 
-        <div className="flex justify-end pt-6 border-t border-gray-700">
+        {/* Assurance du colis */}
+        <div className="bg-gray-700/50 rounded-lg overflow-hidden border border-gray-600">
+          <div className="p-4 bg-gray-800 border-b border-gray-600 flex items-center gap-2">
+            <h3 className="font-bold text-gray-200">Assurance du colis</h3>
+            <span className="bg-blue-600/30 text-blue-300 text-xs px-2 py-1 rounded">En savoir plus</span>
+          </div>
+          <div className="p-4 space-y-4">
+            <p className="text-gray-300 font-medium mb-2">Voulez vous souscrire à l'assurance?</p>
+
+            <div className="space-y-2">
+              <label className="flex items-start gap-2 cursor-pointer text-gray-300 text-sm">
+                <input
+                  type="radio"
+                  name="insurance"
+                  value="no"
+                  checked={!hasInsurance}
+                  onChange={() => { setHasInsurance(false); setDeclaredValue(''); }}
+                  className="w-4 h-4 mt-1 text-blue-500 bg-gray-900 border-gray-600 focus:ring-blue-500"
+                />
+                Non (aucun frais, remboursement maximum de 5000da)
+              </label>
+              <label className="flex items-start gap-2 cursor-pointer text-gray-300 text-sm">
+                <input
+                  type="radio"
+                  name="insurance"
+                  value="yes"
+                  checked={hasInsurance}
+                  onChange={() => setHasInsurance(true)}
+                  className="w-4 h-4 mt-1 text-blue-500 bg-gray-900 border-gray-600 focus:ring-blue-500"
+                />
+                Oui (frais 0% de la valeur déclarée, remboursement intégral de la valeur déclarée)
+              </label>
+            </div>
+
+            {hasInsurance && (
+              <div className="mt-4">
+                <div className="flex flex-col md:flex-row bg-gray-800/80 rounded border border-gray-600 overflow-hidden mb-4">
+                  <span className="w-full md:w-1/3 p-2 text-gray-400 border-b md:border-b-0 md:border-r border-gray-600">Valeur déclarée</span>
+                  <input
+                    type="number"
+                    value={declaredValue}
+                    onChange={(e) => setDeclaredValue(e.target.value)}
+                    onWheel={(e) => e.target.blur()}
+                    className="w-full md:w-2/3 p-2 bg-transparent text-white outline-none"
+                    placeholder="La valeur du contenu du colis"
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="bg-gray-800/50 rounded border border-gray-600 p-4 space-y-2">
+              <div className="flex justify-between items-center text-sm font-medium">
+                <span className="text-gray-400">Frais remboursement</span>
+                <span className="text-red-400">- DZD</span>
+              </div>
+              <div className="flex justify-between items-center text-sm font-medium border-t border-gray-600 pt-2">
+                <span className="text-gray-400">Type de remboursement</span>
+                <span className="text-gray-200">-</span>
+              </div>
+              <div className="flex justify-between items-center text-sm font-bold border-t border-gray-600 pt-2">
+                <span className="text-gray-200">Montant remboursable</span>
+                <span className="text-green-400">- DZD</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Photos (Custom extension for backend logic) */}
+        <div className="bg-gray-700/50 rounded-lg overflow-hidden border border-gray-600">
+          <div className="p-4 bg-gray-800 border-b border-gray-600">
+            <h3 className="font-bold text-gray-200">Photos jointes (Optionnel)</h3>
+          </div>
+          <div className="p-4">
+            <input
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={(e) => setPhotos(Array.from(e.target.files))}
+              className="w-full text-gray-300 bg-gray-900 p-2 rounded border border-gray-600 outline-none"
+            />
+            {photos.length > 0 && (
+              <p className="mt-2 text-sm text-gray-400">{photos.length} photo(s) sélectionnée(s)</p>
+            )}
+          </div>
+        </div>
+
+        <div className="flex justify-center pt-6 pb-20">
           <button
             onClick={handleSubmit}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-medium"
+            className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded font-medium shadow-lg w-full md:w-auto md:min-w-[300px]"
           >
-            Créer la commande
+            Créer le colis
           </button>
         </div>
+
       </div>
     </div>
   );
