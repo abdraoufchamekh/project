@@ -52,66 +52,120 @@ class Order {
     return result.rows[0];
   }
 
-  static async getAll(filters = {}, limit = null, offset = null) {
-    let query = `
-      SELECT o.*, u.name as designer_name
-      FROM orders o
-      LEFT JOIN users u ON o.assigned_designer = u.id
-      WHERE 1=1
-    `;
-    const values = [];
-    let paramIndex = 1;
+  /**
+   * Shared WHERE fragment for orders list filters (alias o).
+   * @returns {{ sql: string, values: unknown[], nextParam: number }}
+   */
+  static _pushOrderFilters(filters, values, paramIndex) {
+    let sql = '';
+    let i = paramIndex;
 
     if (filters.search) {
-      query += ` AND (
-        o.client_name ILIKE $${paramIndex} OR 
-        o.phone ILIKE $${paramIndex} OR 
-        o.first_name ILIKE $${paramIndex} OR 
-        o.last_name ILIKE $${paramIndex}
+      sql += ` AND (
+        o.client_name ILIKE $${i} OR
+        o.phone ILIKE $${i} OR
+        o.first_name ILIKE $${i} OR
+        o.last_name ILIKE $${i}
       )`;
       values.push(`%${filters.search}%`);
-      paramIndex++;
+      i++;
     }
 
     if (filters.status) {
       if (filters.status.includes(',')) {
         const statuses = filters.status.split(',');
-        query += ` AND o.status = ANY($${paramIndex}::text[])`;
+        sql += ` AND o.status = ANY($${i}::text[])`;
         values.push(statuses);
       } else {
-        query += ` AND o.status = $${paramIndex}`;
+        sql += ` AND o.status = $${i}`;
         values.push(filters.status);
       }
-      paramIndex++;
+      i++;
     }
 
     if (filters.excludeStatus) {
       const excluded = filters.excludeStatus.split(',');
-      query += ` AND o.status != ALL($${paramIndex}::text[])`;
+      sql += ` AND o.status != ALL($${i}::text[])`;
       values.push(excluded);
-      paramIndex++;
+      i++;
     }
 
     if (filters.wilaya) {
-      query += ` AND TRIM(o.wilaya) ILIKE TRIM($${paramIndex})`;
+      sql += ` AND TRIM(o.wilaya) ILIKE TRIM($${i})`;
       values.push(`%${filters.wilaya}%`);
-      paramIndex++;
+      i++;
     }
 
     if (filters.date) {
-      query += ` AND DATE(o.created_at) = $${paramIndex}`;
+      sql += ` AND DATE(o.created_at) = $${i}`;
       values.push(filters.date);
-      paramIndex++;
+      i++;
     }
 
     if (filters.source) {
-      query += ` AND o.source = $${paramIndex}`;
+      sql += ` AND o.source = $${i}`;
       values.push(filters.source);
-      paramIndex++;
+      i++;
     }
 
+    return { sql, values, nextParam: i };
+  }
+
+  /**
+   * One round-trip: page of orders + total count + product/photo counts (no N+1, minimal payload vs loading all rows).
+   */
+  static async getSummaryPage(filters = {}, limit = 50, offset = 0) {
+    const values = [];
+    const { sql: filterSql, nextParam } = Order._pushOrderFilters(filters, values, 1);
+
+    const query = `
+      WITH filtered_orders AS (
+        SELECT o.id
+        FROM orders o
+        WHERE 1=1
+        ${filterSql}
+      ),
+      total_count AS (
+        SELECT COUNT(*) AS total FROM filtered_orders
+      ),
+      paginated_ids AS (
+        SELECT id FROM filtered_orders
+        ORDER BY id DESC
+        LIMIT $${nextParam} OFFSET $${nextParam + 1}
+      )
+      SELECT
+        o.*,
+        u.name AS designer_name,
+        (SELECT total FROM total_count) AS __total,
+        (SELECT COUNT(*)::int FROM products p WHERE p.order_id = o.id) AS product_count,
+        (SELECT COALESCE(SUM(p.quantity * p.unit_price), 0) FROM products p WHERE p.order_id = o.id) AS products_subtotal,
+        (SELECT COUNT(*)::int FROM photos ph WHERE ph.order_id = o.id AND ph.type = 'client') AS client_photos_count,
+        (SELECT COUNT(*)::int FROM photos ph WHERE ph.order_id = o.id AND ph.type = 'designer') AS designer_photos_count
+      FROM orders o
+      INNER JOIN paginated_ids pid ON o.id = pid.id
+      LEFT JOIN users u ON o.assigned_designer = u.id
+      ORDER BY o.id DESC
+    `;
+    values.push(limit, offset);
+
+    const result = await pool.query(query, values);
+    return result.rows;
+  }
+
+  static async getAll(filters = {}, limit = null, offset = null) {
+    const values = [];
+    const { sql: filterSql, nextParam } = Order._pushOrderFilters(filters, values, 1);
+    let query = `
+      SELECT o.*, u.name as designer_name
+      FROM orders o
+      LEFT JOIN users u ON o.assigned_designer = u.id
+      WHERE 1=1
+      ${filterSql}
+    `;
+    let paramIndex = nextParam;
+
     query += ` ORDER BY o.id DESC`;
-    
+
     if (limit) {
       query += ` LIMIT $${paramIndex}`;
       values.push(limit);
@@ -128,62 +182,14 @@ class Order {
   }
 
   static async countAll(filters = {}) {
-    let query = `
+    const values = [];
+    const { sql: filterSql } = Order._pushOrderFilters(filters, values, 1);
+    const query = `
       SELECT COUNT(*) as total
       FROM orders o
       WHERE 1=1
+      ${filterSql}
     `;
-    const values = [];
-    let paramIndex = 1;
-
-    if (filters.search) {
-      query += ` AND (
-        o.client_name ILIKE $${paramIndex} OR 
-        o.phone ILIKE $${paramIndex} OR 
-        o.first_name ILIKE $${paramIndex} OR 
-        o.last_name ILIKE $${paramIndex}
-      )`;
-      values.push(`%${filters.search}%`);
-      paramIndex++;
-    }
-
-    if (filters.status) {
-      if (filters.status.includes(',')) {
-        const statuses = filters.status.split(',');
-        query += ` AND o.status = ANY($${paramIndex}::text[])`;
-        values.push(statuses);
-      } else {
-        query += ` AND o.status = $${paramIndex}`;
-        values.push(filters.status);
-      }
-      paramIndex++;
-    }
-
-    if (filters.excludeStatus) {
-      const excluded = filters.excludeStatus.split(',');
-      query += ` AND o.status != ALL($${paramIndex}::text[])`;
-      values.push(excluded);
-      paramIndex++;
-    }
-
-    if (filters.wilaya) {
-      query += ` AND TRIM(o.wilaya) ILIKE TRIM($${paramIndex})`;
-      values.push(`%${filters.wilaya}%`);
-      paramIndex++;
-    }
-
-    if (filters.date) {
-      query += ` AND DATE(o.created_at) = $${paramIndex}`;
-      values.push(filters.date);
-      paramIndex++;
-    }
-
-    if (filters.source) {
-      query += ` AND o.source = $${paramIndex}`;
-      values.push(filters.source);
-      paramIndex++;
-    }
-
     const result = await pool.query(query, values);
     return parseInt(result.rows[0].total, 10);
   }

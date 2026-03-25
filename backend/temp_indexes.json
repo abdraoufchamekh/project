@@ -1,0 +1,82 @@
+[
+  {
+    "tablename": "orders",
+    "indexname": "idx_orders_client_name_trgm",
+    "indexdef": "CREATE INDEX idx_orders_client_name_trgm ON public.orders USING gin (client_name gin_trgm_ops)"
+  },
+  {
+    "tablename": "orders",
+    "indexname": "idx_orders_created",
+    "indexdef": "CREATE INDEX idx_orders_created ON public.orders USING btree (created_at DESC)"
+  },
+  {
+    "tablename": "orders",
+    "indexname": "idx_orders_created_at",
+    "indexdef": "CREATE INDEX idx_orders_created_at ON public.orders USING btree (created_at DESC)"
+  },
+  {
+    "tablename": "orders",
+    "indexname": "idx_orders_designer",
+    "indexdef": "CREATE INDEX idx_orders_designer ON public.orders USING btree (assigned_designer)"
+  },
+  {
+    "tablename": "orders",
+    "indexname": "idx_orders_first_name_trgm",
+    "indexdef": "CREATE INDEX idx_orders_first_name_trgm ON public.orders USING gin (first_name gin_trgm_ops)"
+  },
+  {
+    "tablename": "orders",
+    "indexname": "idx_orders_last_name_trgm",
+    "indexdef": "CREATE INDEX idx_orders_last_name_trgm ON public.orders USING gin (last_name gin_trgm_ops)"
+  },
+  {
+    "tablename": "orders",
+    "indexname": "idx_orders_phone_trgm",
+    "indexdef": "CREATE INDEX idx_orders_phone_trgm ON public.orders USING gin (phone gin_trgm_ops)"
+  },
+  {
+    "tablename": "orders",
+    "indexname": "idx_orders_source",
+    "indexdef": "CREATE INDEX idx_orders_source ON public.orders USING btree (source)"
+  },
+  {
+    "tablename": "orders",
+    "indexname": "idx_orders_status",
+    "indexdef": "CREATE INDEX idx_orders_status ON public.orders USING btree (status)"
+  },
+  {
+    "tablename": "orders",
+    "indexname": "orders_pkey",
+    "indexdef": "CREATE UNIQUE INDEX orders_pkey ON public.orders USING btree (id)"
+  },
+  {
+    "tablename": "photos",
+    "indexname": "idx_photos_order",
+    "indexdef": "CREATE INDEX idx_photos_order ON public.photos USING btree (order_id)"
+  },
+  {
+    "tablename": "photos",
+    "indexname": "idx_photos_order_id",
+    "indexdef": "CREATE INDEX idx_photos_order_id ON public.photos USING btree (order_id)"
+  },
+  {
+    "tablename": "photos",
+    "indexname": "photos_pkey",
+    "indexdef": "CREATE UNIQUE INDEX photos_pkey ON public.photos USING btree (id)"
+  },
+  {
+    "tablename": "products",
+    "indexname": "idx_products_order",
+    "indexdef": "CREATE INDEX idx_products_order ON public.products USING btree (order_id)"
+  },
+  {
+    "tablename": "products",
+    "indexname": "idx_products_order_id",
+    "indexdef": "CREATE INDEX idx_products_order_id ON public.products USING btree (order_id)"
+  },
+  {
+    "tablename": "products",
+    "indexname": "products_pkey",
+    "indexdef": "CREATE UNIQUE INDEX products_pkey ON public.products USING btree (id)"
+  }
+]

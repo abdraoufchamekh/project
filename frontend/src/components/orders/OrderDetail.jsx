@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Edit2, Save, ChevronDown, ChevronRight, X, Upload, Check, Trash2, FileText } from 'lucide-react';
 import axios from 'axios';
 import { API_BASE_URL } from '../../utils/constants';
+import { getPhotoUrl, getPhotoUrlOriginal } from '../../utils/images';
 import InvoicePreviewModal from './InvoicePreviewModal';
 
 export default function OrderDetail({ order, onBack, onUpdate, userRole, onDeleteOrder }) {
@@ -112,17 +113,12 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
     setEditMode(false);
   };
 
-  const getPhotoUrl = (filename) => {
-    if (filename && filename.startsWith('http')) {
-      return filename;
-    }
-    return `${API_BASE_URL.replace('/api', '')}/uploads/${filename}`;
-  };
-
-  const productsSubtotal = (localOrder.products || []).reduce(
-    (sum, p) => sum + (Number(p.quantity) || 1) * (Number(p.unit_price ?? p.unitPrice) || 0),
-    0
-  );
+  const productsSubtotal = (localOrder.products && localOrder.products.length > 0)
+    ? localOrder.products.reduce(
+        (sum, p) => sum + (Number(p.quantity) || 1) * (Number(p.unit_price ?? p.unitPrice) || 0),
+        0
+      )
+    : Number(localOrder.products_subtotal || 0);
   const deliveryFeeAmount = Number(localOrder.delivery_fee ?? localOrder.deliveryFee ?? 0) || 0;
   const discountAmount = Number(localOrder.discount ?? 0) || 0;
   const versementAmount = Number(localOrder.versement ?? 0) || 0;
@@ -238,15 +234,12 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
 
         <div className="bg-gray-800 rounded-lg p-4 md:p-6">
           <h3 className="text-lg font-semibold text-white mb-3 md:mb-4">Détails Commande</h3>
-          {loadingDetail ? (
-            <p className="text-gray-400">Chargement...</p>
-          ) : (
           <div className="space-y-2">
             <p className="text-gray-400">
               Date: <span className="text-white">{localOrder.createdAt || localOrder.created_at}</span>
             </p>
             <p className="text-gray-400">
-              Produits: <span className="text-white">{localOrder.products?.length ?? 0}</span>
+              Produits: <span className="text-white">{localOrder.product_count || localOrder.products?.length || 0}</span>
             </p>
             {(localOrder.isFreeDelivery || localOrder.is_free_delivery) && (
               <span className="inline-block px-2 py-1 bg-green-900/50 text-green-400 text-xs rounded-full border border-green-800">
@@ -304,7 +297,6 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
               </p>
             </div>
           </div>
-          )}
         </div>
 
 
@@ -354,13 +346,15 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
               <div key={photo.id} className="bg-gray-900 rounded-lg overflow-hidden border border-gray-700 group">
                 <div className="h-64 overflow-hidden relative">
                   <img
-                    src={getPhotoUrl(photo.filename)}
-                    alt={photo.filename}
+                    src={getPhotoUrl(photo.filename, { width: 600 })}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <a
-                      href={getPhotoUrl(photo.filename)}
+                      href={getPhotoUrlOriginal(photo.filename)}
                       target="_blank"
                       rel="noreferrer"
                       className="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-md rounded-lg text-white font-medium flex items-center gap-2"
@@ -374,7 +368,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
                     {photo.filename}
                   </span>
                   <a
-                    href={getPhotoUrl(photo.filename)}
+                    href={getPhotoUrlOriginal(photo.filename)}
                     download
                     target="_blank"
                     rel="noreferrer"
@@ -396,7 +390,10 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
       <div className="bg-gray-800 rounded-lg p-4 md:p-6">
         <h3 className="text-xl font-semibold text-white mb-4">Produits de la commande</h3>
 
-        {localOrder.products.map(product => (
+        {loadingDetail && (!localOrder.products || localOrder.products.length === 0) ? (
+          <p className="text-gray-400 italic">Chargement des articles...</p>
+        ) : (
+          localOrder.products.map(product => (
           <div key={product.id} className="bg-gray-900 rounded-lg mb-4 overflow-hidden">
             <div
               className="p-4 cursor-pointer hover:bg-gray-850 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition"
@@ -453,12 +450,14 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
                       {product.image_url ? (
                         <div className="h-40 w-40 md:h-48 md:w-48 rounded-lg overflow-hidden border border-gray-700 bg-gray-900 group relative">
                           <img
-                            src={getPhotoUrl(product.image_url)}
-                            alt={product.type}
+                            src={getPhotoUrl(product.image_url, { width: 400 })}
+                            alt=""
+                            loading="lazy"
+                            decoding="async"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                           <a 
-                            href={getPhotoUrl(product.image_url)} 
+                            href={getPhotoUrlOriginal(product.image_url)} 
                             target="_blank" 
                             rel="noreferrer"
                             className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer text-white text-sm font-semibold backdrop-blur-sm"
@@ -493,7 +492,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
               </div>
             )}
           </div>
-        ))}
+        )))}
       </div>
       {/* Invoice Modal */}
       <InvoicePreviewModal 

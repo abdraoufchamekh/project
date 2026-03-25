@@ -1,16 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Package, Search, Filter, X, ArrowLeft } from 'lucide-react';
 import { getStatusColor } from '../../utils/constants';
+import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 
-export default function StatusOrdersPage({ config, orders, onSelectOrder, fetchOrders, pagination }) {
+function StatusOrdersPage({ config, orders, onSelectOrder, fetchOrders, pagination }) {
     const [filters, setFilters] = useState({
         search: '',
         status: config?.status || '',
         wilaya: '',
         date: ''
     });
+    const debouncedSearch = useDebouncedValue(filters.search, 400);
+    const skipSearchEffect = useRef(true);
 
-    // When config changes, reset filters
+    useEffect(() => {
+        if (skipSearchEffect.current) {
+            skipSearchEffect.current = false;
+            return;
+        }
+        if (fetchOrders && config) fetchOrders({ ...config, ...filters, search: debouncedSearch, page: 1 });
+    }, [debouncedSearch]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // When config changes, reset filters (list fetch is driven by App + React Query)
     useEffect(() => {
         if (config) {
             setFilters(prev => ({
@@ -20,11 +31,8 @@ export default function StatusOrdersPage({ config, orders, onSelectOrder, fetchO
                 wilaya: '',
                 date: ''
             }));
-            if (fetchOrders) {
-                fetchOrders({ ...config, status: config.status || '', page: 1 });
-            }
         }
-    }, [config, fetchOrders]);
+    }, [config]);
 
     const handleFilterChange = (e) => {
         setFilters({ ...filters, [e.target.name]: e.target.value });
@@ -176,13 +184,15 @@ export default function StatusOrdersPage({ config, orders, onSelectOrder, fetchO
                                     <td className="px-6 py-4 text-white font-medium">#{order.id}</td>
                                     <td className="px-6 py-4 text-white">{order.clientName || order.client_name || `${order.first_name || ''} ${order.last_name || ''}`.trim() || 'Inconnu'}</td>
                                     <td className="px-6 py-4 text-gray-400">{order.phone}</td>
-                                    <td className="px-6 py-4 text-gray-400">{order.products?.length || 0}</td>
+                                    <td className="px-6 py-4 text-gray-400">{order.product_count ?? order.products?.length ?? 0}</td>
                                     <td className="px-6 py-4">
                                         <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status || 'Nouvelle commande')}`}>
                                             {order.status || 'Nouvelle commande'}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-gray-400">{order.createdAt}</td>
+                                    <td className="px-6 py-4 text-gray-400">
+                                        {order.created_at ? String(order.created_at).slice(0, 10) : order.createdAt || '—'}
+                                    </td>
                                     <td className="px-6 py-4">
                                         <div className="flex gap-4 items-center">
                                             <button
@@ -226,3 +236,5 @@ export default function StatusOrdersPage({ config, orders, onSelectOrder, fetchO
         </div>
     );
 }
+
+export default React.memo(StatusOrdersPage);

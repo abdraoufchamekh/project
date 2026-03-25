@@ -15,8 +15,9 @@ const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: 'aurea-deco-uploads',
-    allowed_formats: ['jpeg', 'jpg', 'png', 'gif', 'pdf'],
-    resource_type: 'auto'
+    allowed_formats: ['jpeg', 'jpg', 'png', 'gif', 'webp', 'pdf'],
+    resource_type: 'auto',
+    transformation: [{ width: 2000, height: 2000, crop: 'limit', fetch_format: 'auto', quality: 'auto:good' }]
   }
 });
 

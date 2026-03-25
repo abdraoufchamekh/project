@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Package, Search, Filter, X } from 'lucide-react';
 import { getStatusColor } from '../../utils/constants';
+import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 
 const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fetchOrders, pagination, globalStats = {}, onNavigateToStatus, isFetchingOrders }) => {
   const [filters, setFilters] = useState({
@@ -10,6 +11,16 @@ const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fet
     date: '',
     source: ''
   });
+  const debouncedSearch = useDebouncedValue(filters.search, 400);
+  const skipSearchEffect = useRef(true);
+
+  useEffect(() => {
+    if (skipSearchEffect.current) {
+      skipSearchEffect.current = false;
+      return;
+    }
+    if (fetchOrders) fetchOrders({ ...filters, search: debouncedSearch, page: 1 });
+  }, [debouncedSearch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFilterChange = (e) => {
     setFilters({ ...filters, [e.target.name]: e.target.value });
@@ -200,7 +211,7 @@ const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fet
         </div>
       </div>
 
-      {isFetchingOrders ? (
+      {isFetchingOrders && filteredOrders.length === 0 ? (
         <div className="bg-gray-800 rounded-lg p-12 text-center animate-pulse">
            <div className="h-8 bg-gray-700 rounded w-1/4 mx-auto mb-6"></div>
            <div className="space-y-4">
@@ -215,7 +226,10 @@ const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fet
           <p className="text-gray-400">Aucune commande trouvée</p>
         </div>
       ) : (
-        <div className="bg-gray-800 rounded-lg overflow-hidden">
+        <div className={`bg-gray-800 rounded-lg overflow-hidden relative ${isFetchingOrders ? 'ring-1 ring-blue-500/30' : ''}`}>
+          {isFetchingOrders && (
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-blue-500/80 animate-pulse z-10" aria-hidden />
+          )}
           <div className="overflow-x-auto">
             <table className="w-full min-w-[800px]">
             <thead className="bg-gray-900 border-b border-gray-700">
@@ -235,13 +249,19 @@ const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fet
                   <td className="px-6 py-4 text-white font-medium">#{order.id}</td>
                   <td className="px-6 py-4 text-white">{order.clientName || order.client_name || `${order.first_name || ''} ${order.last_name || ''}`.trim() || 'Inconnu'}</td>
                   <td className="px-6 py-4 text-gray-400">{order.phone}</td>
-                  <td className="px-6 py-4 text-gray-400">{order.products.length}</td>
+                  <td className="px-6 py-4 text-gray-400">
+                    {order.product_count ?? order.products?.length ?? 0}
+                  </td>
                   <td className="px-6 py-4">
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status || 'Nouvelle commande')}`}>
                       {order.status || 'Nouvelle commande'}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-gray-400">{order.createdAt}</td>
+                  <td className="px-6 py-4 text-gray-400">
+                    {order.created_at
+                      ? String(order.created_at).slice(0, 10)
+                      : order.createdAt || '—'}
+                  </td>
                   <td className="px-6 py-4">
                     <div className="flex gap-4 items-center">
                       <button

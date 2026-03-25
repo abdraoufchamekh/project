@@ -9,6 +9,10 @@ const runIndexes = async () => {
     
     // B-tree index on source
     await pool.query('CREATE INDEX IF NOT EXISTS idx_orders_source ON orders (source);');
+    await pool.query('CREATE INDEX IF NOT EXISTS idx_orders_status ON orders (status);');
+    await pool.query('CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders (created_at DESC);');
+    await pool.query('CREATE INDEX IF NOT EXISTS idx_products_order_id ON products (order_id);');
+    await pool.query('CREATE INDEX IF NOT EXISTS idx_photos_order_id ON photos (order_id);');
     
     // GIN indexes for text search (client_name, phone, first_name, last_name)
     // ILIKE uses gin_trgm_ops

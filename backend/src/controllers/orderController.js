@@ -6,6 +6,27 @@ const fs = require('fs').promises;
 const path = require('path');
 const cloudinary = require('cloudinary').v2;
 const pool = require('../config/database');
+const { getCachedStats, setCachedStats, invalidateStatsCache } = require('../utils/statsCache');
+
+function mapSummaryOrderRow(row) {
+  const {
+    __total,
+    product_count,
+    products_subtotal,
+    client_photos_count,
+    designer_photos_count,
+    ...rest
+  } = row;
+  return {
+    ...rest,
+    products: [],
+    photos: [],
+    product_count,
+    products_subtotal: Number(products_subtotal) || 0,
+    clientPhotosCount: client_photos_count,
+    designerPhotosCount: designer_photos_count
+  };
+}
 
 // Configure Cloudinary (it will use the env vars implicitly if not configured here, but it's safe to require it)
 cloudinary.config({
@@ -103,6 +124,7 @@ exports.createOrder = async (req, res) => {
 
     await client.query('COMMIT');
     client.release();
+    invalidateStatsCache();
 
     res.status(201).json({
       message: 'Order created successfully',
@@ -121,7 +143,14 @@ exports.createOrder = async (req, res) => {
 
 exports.getOrderStats = async (req, res) => {
   try {
+    const cached = getCachedStats();
+    if (cached) {
+      res.set('Cache-Control', 'private, max-age=25');
+      return res.json(cached);
+    }
     const stats = await Order.getStats();
+    setCachedStats(stats);
+    res.set('Cache-Control', 'private, max-age=25');
     res.json(stats);
   } catch (error) {
     console.error('Get order stats error:', error);
@@ -131,8 +160,6 @@ exports.getOrderStats = async (req, res) => {
 
 exports.getOrders = async (req, res) => {
   try {
-    const { role, id } = req.user;
-
     const filters = {
       search: req.query.search,
       status: req.query.status,
@@ -142,53 +169,21 @@ exports.getOrders = async (req, res) => {
       source: req.query.source
     };
 
-    // Pagination setup
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 50;
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = Math.min(parseInt(req.query.limit, 10) || 50, 100);
     const offset = (page - 1) * limit;
 
-    // Both admin and designers can see all orders now
-    let orders = await Order.getAll(filters, limit, offset);
-    let totalOrders = await Order.countAll(filters);
+    const rows = await Order.getSummaryPage(filters, limit, offset);
 
-    if (orders.length === 0) {
+    if (rows.length === 0) {
+      res.set('Cache-Control', 'private, max-age=5');
       return res.json({ orders: [], totalOrders: 0, totalPages: 0, currentPage: page });
     }
 
-    const orderIds = orders.map(o => o.id);
+    const totalOrders = parseInt(rows[0].__total, 10);
+    const ordersWithDetails = rows.map(mapSummaryOrderRow);
 
-    // Get all products and photos in bulk to avoid N+1 query performance crashes
-    const allProducts = await Product.findByOrderIds(orderIds);
-    const allPhotos = await Photo.findByOrderIds(orderIds);
-
-    const productsByOrderId = {};
-    allProducts.forEach(p => {
-      if (!productsByOrderId[p.order_id]) productsByOrderId[p.order_id] = [];
-      productsByOrderId[p.order_id].push(p);
-    });
-
-    const photosByOrderId = {};
-    allPhotos.forEach(photo => {
-      if (!photosByOrderId[photo.order_id]) photosByOrderId[photo.order_id] = [];
-      photosByOrderId[photo.order_id].push(photo);
-    });
-
-    const ordersWithDetails = orders.map((order) => {
-      const products = productsByOrderId[order.id] || [];
-      const photos = photosByOrderId[order.id] || [];
-
-      const clientPhotos = photos.filter(img => img.type === 'client');
-      const designerPhotos = photos.filter(img => img.type === 'designer');
-
-      return {
-        ...order,
-        products,
-        photos,
-        clientPhotosCount: clientPhotos.length,
-        designerPhotosCount: designerPhotos.length
-      };
-    });
-
+    res.set('Cache-Control', 'private, max-age=5');
     res.json({
       orders: ordersWithDetails,
       totalOrders,
@@ -285,6 +280,7 @@ exports.updateOrder = async (req, res) => {
       versement: versement !== undefined ? versement : order.versement
     });
 
+    invalidateStatsCache();
     res.json({ message: 'Order updated successfully', order: updatedOrder });
   } catch (error) {
     console.error('Update order error:', error);
@@ -324,6 +320,7 @@ exports.deleteOrder = async (req, res) => {
     }
 
     await Order.delete(id);
+    invalidateStatsCache();
     res.json({ message: 'Order deleted successfully' });
   } catch (error) {
     console.error('Delete order error:', error);

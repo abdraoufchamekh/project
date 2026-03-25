@@ -1,14 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import { Archive, Search, Filter, X } from 'lucide-react';
 import { getStatusColor } from '../../utils/constants';
+import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 
-export default function ArchivedOrders({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fetchOrders, pagination, globalStats = {} }) {
+function ArchivedOrders({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fetchOrders, pagination, globalStats = {} }) {
     const [filters, setFilters] = useState({
         search: '',
         status: '',
         wilaya: '',
         date: ''
     });
+    const debouncedSearch = useDebouncedValue(filters.search, 400);
+    const skipSearchEffect = useRef(true);
+
+    useEffect(() => {
+        if (skipSearchEffect.current) {
+            skipSearchEffect.current = false;
+            return;
+        }
+        if (fetchOrders) fetchOrders({ ...filters, search: debouncedSearch, page: 1, status: filters.status || 'Livré,Retourné' });
+    }, [debouncedSearch]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleFilterChange = (e) => {
         setFilters({ ...filters, [e.target.name]: e.target.value });
@@ -172,13 +183,15 @@ export default function ArchivedOrders({ orders, userRole, userId, onSelectOrder
                                     <td className="px-6 py-4 text-white font-medium">#{order.id}</td>
                                     <td className="px-6 py-4 text-gray-300">{order.clientName || order.client_name || `${order.first_name || ''} ${order.last_name || ''}`.trim() || 'Inconnu'}</td>
                                     <td className="px-6 py-4 text-gray-500">{order.phone}</td>
-                                    <td className="px-6 py-4 text-gray-500">{order.products.length}</td>
+                                    <td className="px-6 py-4 text-gray-500">{order.product_count ?? order.products?.length ?? 0}</td>
                                     <td className="px-6 py-4">
                                         <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status || 'Nouvelle commande')}`}>
                                             {order.status || 'Nouvelle commande'}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-gray-500">{order.createdAt}</td>
+                                    <td className="px-6 py-4 text-gray-500">
+                                        {order.created_at ? String(order.created_at).slice(0, 10) : order.createdAt || '—'}
+                                    </td>
                                     <td className="px-6 py-4">
                                         <div className="flex gap-4 items-center">
                                             <button
@@ -223,3 +236,5 @@ export default function ArchivedOrders({ orders, userRole, userId, onSelectOrder
         </div>
     );
 }
+
+export default memo(ArchivedOrders);
