@@ -17,6 +17,7 @@ export default function CreateOrder({ onSave }) {
   const [address, setAddress] = useState('');
 
   // Livraison
+  const [deliveryType, setDeliveryType] = useState('domicile');
   const [isFreeDelivery, setIsFreeDelivery] = useState(false);
   const [deliveryFee, setDeliveryFee] = useState(0);
   const [hasExchange, setHasExchange] = useState(false);
@@ -92,9 +93,9 @@ export default function CreateOrder({ onSave }) {
       phone,
       phone2: showPhone2 ? phone2 : null,
       wilaya,
-      commune: commune === 'Autre' ? customCommune : commune,
-      address,
-      deliveryType: 'domicile',
+      commune: deliveryType === 'bureau' ? null : (commune === 'Autre' ? customCommune : commune),
+      address: deliveryType === 'bureau' ? null : address,
+      deliveryType,
       isFreeDelivery,
       hasExchange,
       hasInsurance,
@@ -127,6 +128,7 @@ export default function CreateOrder({ onSave }) {
     setCommune('');
     setCustomCommune('');
     setAddress('');
+    setDeliveryType('domicile');
     setIsFreeDelivery(false);
     setDeliveryFee(0);
     setHasExchange(false);
@@ -187,6 +189,20 @@ export default function CreateOrder({ onSave }) {
             )}
 
             <div className="flex flex-col md:flex-row bg-gray-800/80 rounded border border-gray-600 overflow-hidden mt-4">
+              <span className="w-full md:w-1/3 p-2 text-gray-400 font-medium border-b md:border-b-0 md:border-r border-gray-600">Type de livraison</span>
+              <div className="w-full md:w-2/3 flex p-2 gap-4">
+                <label className="flex items-center gap-2 cursor-pointer text-white">
+                  <input type="radio" value="domicile" checked={deliveryType === 'domicile'} onChange={(e) => setDeliveryType(e.target.value)} className="w-4 h-4 text-blue-500 bg-gray-900 border-gray-600 focus:ring-blue-500" />
+                  À domicile
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer text-white">
+                  <input type="radio" value="bureau" checked={deliveryType === 'bureau'} onChange={(e) => setDeliveryType(e.target.value)} className="w-4 h-4 text-blue-500 bg-gray-900 border-gray-600 focus:ring-blue-500" />
+                  Au bureau / Stop Desk
+                </label>
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row bg-gray-800/80 rounded border border-gray-600 overflow-hidden mt-4">
               <span className="w-full md:w-1/3 p-2 text-red-400 font-medium border-b md:border-b-0 md:border-r border-gray-600">Wilaya</span>
               <select
                 value={wilaya}
@@ -200,39 +216,41 @@ export default function CreateOrder({ onSave }) {
               </select>
             </div>
 
-            <div className="flex flex-col md:flex-row bg-gray-800/80 rounded border border-gray-600 overflow-hidden mt-4">
-              <span className="w-full md:w-1/3 p-2 text-red-400 font-medium border-b md:border-b-0 md:border-r border-gray-600">Commune</span>
-              <div className="w-full md:w-2/3 flex flex-col">
-                <select
-                  value={commune}
-                  onChange={(e) => setCommune(e.target.value)}
-                  className="w-full p-2 outline-none bg-gray-800 text-white"
-                  disabled={!wilaya}
-                >
-                  <option value="">{wilaya ? 'Choisissez une commune' : "Choisissez d'abord la wilaya"}</option>
-                  {wilaya && communesByWilaya[wilayas.find(w => w.name === wilaya)?.id]?.map(c => (
-                    <option key={c} value={c}>{c}</option>
-                  ))}
-                  {wilaya && <option value="Autre" className="text-blue-400 font-bold">Autre (Saisir manuellement)...</option>}
-                </select>
-                {commune === 'Autre' && (
-                  <input
-                    type="text"
-                    value={customCommune}
-                    onChange={(e) => setCustomCommune(e.target.value)}
-                    placeholder="Saisissez le nom de la commune"
-                    className="w-full p-2 bg-gray-900 border-t border-gray-600 text-white outline-none"
-                  />
-                )}
-              </div>
-            </div>
+            {deliveryType === 'domicile' && (
+              <>
+                <div className="flex flex-col md:flex-row bg-gray-800/80 rounded border border-gray-600 overflow-hidden mt-4">
+                  <span className="w-full md:w-1/3 p-2 text-red-400 font-medium border-b md:border-b-0 md:border-r border-gray-600">Commune</span>
+                  <div className="w-full md:w-2/3 flex flex-col">
+                    <select
+                      value={commune}
+                      onChange={(e) => setCommune(e.target.value)}
+                      className="w-full p-2 outline-none bg-gray-800 text-white"
+                      disabled={!wilaya}
+                    >
+                      <option value="">{wilaya ? 'Choisissez une commune' : "Choisissez d'abord la wilaya"}</option>
+                      {wilaya && communesByWilaya[wilayas.find(w => w.name === wilaya)?.id]?.map(c => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                      {wilaya && <option value="Autre" className="text-blue-400 font-bold">Autre (Saisir manuellement)...</option>}
+                    </select>
+                    {commune === 'Autre' && (
+                      <input
+                        type="text"
+                        value={customCommune}
+                        onChange={(e) => setCustomCommune(e.target.value)}
+                        placeholder="Saisissez le nom de la commune"
+                        className="w-full p-2 bg-gray-900 border-t border-gray-600 text-white outline-none"
+                      />
+                    )}
+                  </div>
+                </div>
 
-
-
-            <div className="flex flex-col md:flex-row bg-gray-800/80 rounded border border-gray-600 overflow-hidden mt-4">
-              <span className="w-full md:w-1/3 p-2 text-gray-400 border-b md:border-b-0 md:border-r border-gray-600">L'adresse postale</span>
-              <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} className="w-full md:w-2/3 p-2 bg-transparent text-white outline-none" />
-            </div>
+                <div className="flex flex-col md:flex-row bg-gray-800/80 rounded border border-gray-600 overflow-hidden mt-4">
+                  <span className="w-full md:w-1/3 p-2 text-gray-400 border-b md:border-b-0 md:border-r border-gray-600">L'adresse postale</span>
+                  <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} className="w-full md:w-2/3 p-2 bg-transparent text-white outline-none" />
+                </div>
+              </>
+            )}
           </div>
         </div>
 
