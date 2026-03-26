@@ -93,8 +93,8 @@ export default function CreateOrder({ onSave }) {
       phone,
       phone2: showPhone2 ? phone2 : null,
       wilaya,
-      commune: deliveryType === 'bureau' ? null : (commune === 'Autre' ? customCommune : commune),
-      address: deliveryType === 'bureau' ? null : address,
+      commune: deliveryType === 'stop_desk' ? null : (commune === 'Autre' ? customCommune : commune),
+      address: deliveryType === 'stop_desk' ? null : address,
       deliveryType,
       isFreeDelivery,
       hasExchange,
@@ -196,7 +196,7 @@ export default function CreateOrder({ onSave }) {
                   À domicile
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer text-white">
-                  <input type="radio" value="bureau" checked={deliveryType === 'bureau'} onChange={(e) => setDeliveryType(e.target.value)} className="w-4 h-4 text-blue-500 bg-gray-900 border-gray-600 focus:ring-blue-500" />
+                  <input type="radio" value="stop_desk" checked={deliveryType === 'stop_desk'} onChange={(e) => setDeliveryType(e.target.value)} className="w-4 h-4 text-blue-500 bg-gray-900 border-gray-600 focus:ring-blue-500" />
                   Au bureau / Stop Desk
                 </label>
               </div>

@@ -222,12 +222,12 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
               📞 {localOrder.phone} {localOrder.phone2 || localOrder.phone2 ? `/ ${localOrder.phone2 || localOrder.phone2}` : ''}
             </p>
             <p className="text-gray-400 text-sm mt-2 border-t border-gray-700 pt-2">
-              <span className="block text-gray-300 mb-1">Livraison: {localOrder.deliveryType === 'stop_desk' || localOrder.delivery_type === 'stop_desk' ? 'Point relais (Stop Desk)' : 'À domicile'}</span>
-              <span className="block">📍 {localOrder.wilaya || localOrder.wilaya ? `${localOrder.wilaya || localOrder.wilaya} - ${localOrder.commune || localOrder.commune}` : ''}</span>
-              {(localOrder.deliveryType === 'stop_desk' || localOrder.delivery_type === 'stop_desk') && (
-                <span className="block text-blue-300">🏢 {localOrder.stopDeskAgency || localOrder.stop_desk_agency}</span>
+              <span className="block text-gray-300 mb-1">Livraison: {localOrder.deliveryType === 'stop_desk' || localOrder.delivery_type === 'stop_desk' || localOrder.deliveryType === 'bureau' || localOrder.delivery_type === 'bureau' ? 'Point relais / Au bureau (Stop Desk)' : 'À domicile'}</span>
+              <span className="block">📍 {localOrder.wilaya || localOrder.wilaya ? `${localOrder.wilaya || localOrder.wilaya}${localOrder.commune ? ` - ${localOrder.commune}` : ''}` : ''}</span>
+              {(localOrder.deliveryType === 'stop_desk' || localOrder.delivery_type === 'stop_desk' || localOrder.deliveryType === 'bureau' || localOrder.delivery_type === 'bureau') && (
+                <span className="block text-blue-300">🏢 {localOrder.stopDeskAgency || localOrder.stop_desk_agency || 'Au bureau'}</span>
               )}
-              <span className="block mt-1">🏠 Adresse: {localOrder.address || 'Non spécifiée'}</span>
+              <span className="block mt-1">🏠 Adresse: {localOrder.address ? localOrder.address : 'Non spécifiée'}</span>
             </p>
           </div>
         </div>
