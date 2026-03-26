@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Package, Search, Filter, X } from 'lucide-react';
-import { getStatusColor } from '../../utils/constants';
+import { Package, Search, Filter, X, AlertTriangle } from 'lucide-react';
+import axios from 'axios';
+import { getStatusColor, API_BASE_URL } from '../../utils/constants';
 import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 
 const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fetchOrders, pagination, globalStats = {}, onNavigateToStatus, isFetchingOrders }) => {
@@ -11,8 +12,27 @@ const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fet
     date: '',
     source: ''
   });
+  const [outOfStockItems, setOutOfStockItems] = useState([]);
   const debouncedSearch = useDebouncedValue(filters.search, 400);
   const skipSearchEffect = useRef(true);
+
+  useEffect(() => {
+    // Fetch out of stock items
+    const fetchStock = async () => {
+      try {
+        const { data } = await axios.get(`${API_BASE_URL}/stock`, {
+            headers: { Authorization: `Bearer ${sessionStorage.getItem('aurea_token')}` }
+        });
+        if (data.products) {
+           const outOfStock = data.products.filter(p => Number(p.quantity) <= 0);
+           setOutOfStockItems(outOfStock);
+        }
+      } catch (error) {
+         console.error('Error fetching stock for notifications:', error);
+      }
+    };
+    fetchStock();
+  }, []);
 
   useEffect(() => {
     if (skipSearchEffect.current) {
@@ -80,6 +100,27 @@ const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fet
           </p>
         </div>
       </div>
+
+      {outOfStockItems.length > 0 && (
+        <div className="bg-red-900/40 border border-red-500/50 rounded-lg p-4 mb-8 flex items-start gap-4">
+          <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={24} />
+          <div>
+            <h3 className="text-red-400 font-bold mb-1">Alerte Stock</h3>
+            <ul className="text-sm border-l-2 border-red-500/30 pl-3 ml-1 text-red-300 space-y-1 mt-2">
+              {outOfStockItems.map(item => {
+                let labelParts = [];
+                if (item.color) labelParts.push(item.color);
+                if (item.dimension) labelParts.push(item.dimension);
+                if (item.size) labelParts.push(`Taille: ${item.size}`);
+                const label = labelParts.length > 0 ? `(${labelParts.join(' - ')})` : '';
+                return (
+                  <li key={item.id}>L'article <strong>{item.name} {label}</strong> est demandé et la quantité est à {item.quantity}.</li>
+                );
+              })}
+            </ul>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         {userRole === 'designer' ? (

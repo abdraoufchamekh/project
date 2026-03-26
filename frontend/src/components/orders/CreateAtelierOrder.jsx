@@ -197,7 +197,7 @@ export default function CreateAtelierOrder({ onSave }) {
                           if (sp.size) labelParts.push(`Taille: ${sp.size}`);
                           const label = labelParts.length > 0 ? labelParts.join(' - ') : '';
                           return (
-                            <option key={sp.id} value={sp.id} disabled={sp.quantity <= 0}>
+                            <option key={sp.id} value={sp.id}>
                               {sp.name} {label ? `(${label})` : ''} - Stock: {sp.quantity}
                             </option>
                           );
@@ -209,15 +209,12 @@ export default function CreateAtelierOrder({ onSave }) {
                     <div className="w-full md:w-2/12 flex flex-col relative">
                       <span className="md:hidden text-xs text-gray-400 font-medium mb-1">Quantité</span>
                       <input
-                        type="number" min="1" max={selectedStockItem?.quantity || undefined} placeholder="Qté"
+                        type="number" min="1" placeholder="Qté"
                         value={product.quantity || ''}
                         onChange={(e) => updateProduct(idx, 'quantity', parseInt(e.target.value) || '')}
                         onWheel={(e) => e.target.blur()}
-                        className={`w-full p-2.5 bg-gray-900 border text-white rounded outline-none transition text-center focus:border-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${product.quantity > selectedStockItem?.quantity ? 'border-red-500' : 'border-gray-600'}`}
+                        className="w-full p-2.5 bg-gray-900 border border-gray-600 text-white rounded outline-none transition text-center focus:border-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
-                      {product.quantity > selectedStockItem?.quantity && (
-                         <span className="text-red-500 text-xs absolute -bottom-5 left-0 w-full text-center">Stock insuffisant</span>
-                      )}
                     </div>
 
                     {/* Unit price */}

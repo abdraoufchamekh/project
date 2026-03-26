@@ -63,12 +63,9 @@ exports.createOrder = async (req, res) => {
            client.release();
            return res.status(404).json({ error: `Article de stock introuvable pour ${productData.type}` });
         }
-        if (item.quantity < productData.quantity) {
-           await client.query('ROLLBACK');
-           client.release();
-           return res.status(400).json({ error: `Stock insuffisant pour l'article: ${productData.type} (Restant: ${item.quantity})` });
+        if (item) {
+          productData.imageUrl = item.image_url;
         }
-        productData.imageUrl = item.image_url;
       }
     }
 
