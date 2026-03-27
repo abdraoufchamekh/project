@@ -52,7 +52,18 @@ class Stock {
       values = [name, color || null, dimension || null, size || null, quantity, price != null ? Number(price) : null, id];
     }
     const result = await pool.query(query, values);
-    return result.rows[0];
+    const item = result.rows[0];
+    
+    if (item) {
+      const Notification = require('./Notification');
+      if (item.quantity < 0) {
+        await Notification.createOrUpdate(item.id, Math.abs(item.quantity), pool);
+      } else {
+        await Notification.resolve(item.id, pool);
+      }
+    }
+    
+    return item;
   }
 
   static async updateItemQuantity(id, quantityDiff, client = pool) {
@@ -63,7 +74,18 @@ class Stock {
       RETURNING *
     `;
     const result = await client.query(query, [quantityDiff, id]);
-    return result.rows[0];
+    const item = result.rows[0];
+    
+    if (item) {
+      const Notification = require('./Notification');
+      if (item.quantity < 0) {
+        await Notification.createOrUpdate(item.id, Math.abs(item.quantity), client);
+      } else {
+        await Notification.resolve(item.id, client);
+      }
+    }
+    
+    return item;
   }
 
   static async deleteItem(id) {

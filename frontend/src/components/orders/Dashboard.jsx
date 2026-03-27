@@ -17,21 +17,20 @@ const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fet
   const skipSearchEffect = useRef(true);
 
   useEffect(() => {
-    // Fetch out of stock items
-    const fetchStock = async () => {
+    // Fetch out of stock notifications
+    const fetchNotifications = async () => {
       try {
-        const { data } = await axios.get(`${API_BASE_URL}/stock`, {
+        const { data } = await axios.get(`${API_BASE_URL}/notifications`, {
             headers: { Authorization: `Bearer ${sessionStorage.getItem('aurea_token')}` }
         });
-        if (data.products) {
-           const outOfStock = data.products.filter(p => Number(p.quantity) <= 0);
-           setOutOfStockItems(outOfStock);
+        if (data.notifications) {
+           setOutOfStockItems(data.notifications);
         }
       } catch (error) {
-         console.error('Error fetching stock for notifications:', error);
+         console.error('Error fetching stock notifications:', error);
       }
     };
-    fetchStock();
+    fetchNotifications();
   }, []);
 
   useEffect(() => {
@@ -114,7 +113,9 @@ const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fet
                 if (item.size) labelParts.push(`Taille: ${item.size}`);
                 const label = labelParts.length > 0 ? `(${labelParts.join(' - ')})` : '';
                 return (
-                  <li key={item.id}>L'article <strong>{item.name} {label}</strong> est demandé et la quantité est à {item.quantity}.</li>
+                  <li key={item.id}>
+                    L'article <strong>{item.product_name || item.name} {label}</strong> est en rupture. Déficit actuel : <strong>{item.deficit}</strong> unités.
+                  </li>
                 );
               })}
             </ul>
