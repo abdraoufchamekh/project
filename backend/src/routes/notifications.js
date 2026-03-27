@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const notificationController = require('../controllers/notificationController');
-const { verifyToken, isAdminOrDesigner } = require('../middleware/auth');
+const { authMiddleware, adminOrAtelier } = require('../middleware/auth');
 
-router.get('/', verifyToken, isAdminOrDesigner, notificationController.getActiveNotifications);
+router.get('/', authMiddleware, adminOrAtelier, notificationController.getActiveNotifications);
 
 module.exports = router;

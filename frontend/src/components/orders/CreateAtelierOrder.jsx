@@ -161,8 +161,6 @@ export default function CreateAtelierOrder({ onSave }) {
 
               <div className="space-y-4">
                 {products.map((product, idx) => {
-                  const selectedStockItem = stockProducts.find(sp => sp.id === parseInt(product.inventoryItemId, 10));
-
                   return (
                   <div key={idx} className="flex flex-col md:flex-row gap-4 items-start md:items-start bg-gray-900/50 md:bg-transparent p-4 md:p-0 rounded-lg border border-gray-700 md:border-none">
                     
