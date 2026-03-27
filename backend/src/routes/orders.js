@@ -19,9 +19,11 @@ router.get('/:id/invoice', require('../controllers/invoiceController').generateI
 // Product routes
 router.patch('/products/:productId/status', orderController.updateProductStatus);
 router.put('/products/:productId/image', upload.single('image'), orderController.updateProductImage);
+router.delete('/products/:productId/image', orderController.deleteProductImage);
 
 // Photo routes
 router.post('/:orderId/photos', upload.array('photos', 10), orderController.uploadPhotos);
 router.delete('/photos/:photoId', orderController.deletePhoto);
+router.put('/photos/:photoId', upload.single('photo'), orderController.replacePhoto);
 
 module.exports = router;

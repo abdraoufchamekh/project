@@ -73,8 +73,8 @@ export default function ProductFormModal({ isOpen, onClose, editingProduct }) {
 
   return (
     <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-      <div className="bg-gray-800 rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto border border-gray-700 shadow-2xl">
-        <div className="flex justify-between items-center p-6 border-b border-gray-700 sticky top-0 bg-gray-800 z-10">
+      <div className="bg-[#112C70] rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto border border-gray-700 shadow-2xl">
+        <div className="flex justify-between items-center p-6 border-b border-gray-700 sticky top-0 bg-[#112C70] z-10">
           <h2 className="text-xl font-bold text-white">
             {editingProduct ? 'Modifier l\'article' : 'Ajouter un article'}
           </h2>
@@ -91,7 +91,7 @@ export default function ProductFormModal({ isOpen, onClose, editingProduct }) {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full p-2.5 bg-gray-900 border border-gray-700 rounded text-white outline-none focus:border-blue-500 transition"
+                className="w-full p-2.5 bg-[#0A2353] border border-gray-700 rounded text-white outline-none focus:border-[#03ccff] transition"
                 required
                 placeholder="Ex: Couvre lit"
               />
@@ -104,7 +104,7 @@ export default function ProductFormModal({ isOpen, onClose, editingProduct }) {
                   type="text"
                   value={color}
                   onChange={(e) => setColor(e.target.value)}
-                  className="w-full p-2.5 bg-gray-900 border border-gray-700 rounded text-white outline-none focus:border-blue-500 transition"
+                  className="w-full p-2.5 bg-[#0A2353] border border-gray-700 rounded text-white outline-none focus:border-[#03ccff] transition"
                   placeholder="Ex: Blanc"
                 />
               </div>
@@ -115,7 +115,7 @@ export default function ProductFormModal({ isOpen, onClose, editingProduct }) {
                   type="text"
                   value={dimension}
                   onChange={(e) => setDimension(e.target.value)}
-                  className="w-full p-2.5 bg-gray-900 border border-gray-700 rounded text-white outline-none focus:border-blue-500 transition"
+                  className="w-full p-2.5 bg-[#0A2353] border border-gray-700 rounded text-white outline-none focus:border-[#03ccff] transition"
                   placeholder="Ex: 30x40"
                 />
               </div>
@@ -128,7 +128,7 @@ export default function ProductFormModal({ isOpen, onClose, editingProduct }) {
                   type="text"
                   value={size}
                   onChange={(e) => setSize(e.target.value)}
-                  className="w-full p-2.5 bg-gray-900 border border-gray-700 rounded text-white outline-none focus:border-blue-500 transition"
+                  className="w-full p-2.5 bg-[#0A2353] border border-gray-700 rounded text-white outline-none focus:border-[#03ccff] transition"
                   placeholder="Ex: XXL"
                 />
               </div>
@@ -141,7 +141,7 @@ export default function ProductFormModal({ isOpen, onClose, editingProduct }) {
                   required
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
-                  className="w-full p-2.5 bg-gray-900 border border-gray-700 rounded text-white outline-none focus:border-blue-500 transition font-bold"
+                  className="w-full p-2.5 bg-[#0A2353] border border-gray-700 rounded text-white outline-none focus:border-[#03ccff] transition font-bold"
                 />
               </div>
             </div>
@@ -152,10 +152,10 @@ export default function ProductFormModal({ isOpen, onClose, editingProduct }) {
                 type="file"
                 accept="image/*"
                 onChange={(e) => setImage(e.target.files[0])}
-                className="w-full p-2.5 bg-gray-900 border border-gray-700 rounded text-gray-300 outline-none focus:border-blue-500 transition"
+                className="w-full p-2.5 bg-[#0A2353] border border-gray-700 rounded text-gray-300 outline-none focus:border-[#03ccff] transition"
               />
               {editingProduct?.image_url && !image && (
-                <p className="text-xs text-blue-400 mt-1">L'article a déjà une photo. Téléchargez pour la remplacer.</p>
+                <p className="text-xs text-[#03ccff] mt-1">L'article a déjà une photo. Téléchargez pour la remplacer.</p>
               )}
             </div>
           </div>
@@ -170,7 +170,7 @@ export default function ProductFormModal({ isOpen, onClose, editingProduct }) {
             </button>
             <button
               type="submit"
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition shadow"
+              className="px-6 py-2 bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)] hover:opacity-90 text-white rounded transition shadow"
             >
               Enregistrer
             </button>

@@ -235,8 +235,8 @@ function MainApp() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="min-h-screen bg-[#0A2353] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#03ccff]"></div>
       </div>
     );
   }
@@ -246,7 +246,7 @@ function MainApp() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-900 overflow-hidden">
+    <div className="flex h-screen bg-[#0A2353] overflow-hidden">
       <Sidebar
         active={activePage}
         setActive={(page) => {
@@ -258,8 +258,8 @@ function MainApp() {
       />
 
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
-        <div className="md:hidden bg-gray-900 border-b border-gray-800 p-4 flex items-center justify-between z-20">
-          <h1 className="text-xl font-bold text-blue-500">Auréa Déco</h1>
+        <div className="md:hidden bg-[#0A2353] border-b border-gray-800 p-4 flex items-center justify-between z-20">
+          <h1 className="text-xl font-bold text-[#03ccff]">Auréa Déco</h1>
           <button onClick={() => setIsSidebarOpen(true)} className="text-gray-400 hover:text-white transition p-1">
             <Menu size={24} />
           </button>

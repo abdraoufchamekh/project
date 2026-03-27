@@ -127,18 +127,18 @@ const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fet
         {userRole === 'designer' ? (
           [
             { label: 'En ligne', value: atelierStatsObj.totalLigne, color: 'text-purple-400', targetKey: 'en-ligne' },
-            { label: 'En atelier', value: atelierStatsObj.totalAtelier, color: 'text-blue-400', targetKey: 'en-atelier' },
+            { label: 'En atelier', value: atelierStatsObj.totalAtelier, color: 'text-[#03ccff]', targetKey: 'en-atelier' },
             { label: 'Réalisée', value: atelierStatsObj.realisee, color: 'text-yellow-500', targetKey: 'atelier-realisee' },
             { label: 'Récupérée', value: atelierStatsObj.recuperee, color: 'text-green-500', targetKey: 'atelier-recuperee' }
           ].map((stat, idx) => (
-            <div key={idx} className="bg-gray-800 rounded-lg p-6 flex flex-col justify-between">
+            <div key={idx} className="bg-[#112C70] rounded-lg p-6 flex flex-col justify-between">
               <div>
                 <h3 className="text-gray-400 text-sm font-medium">{stat.label}</h3>
                 <p className={`text-3xl font-bold mt-2 ${stat.color}`}>{stat.value}</p>
               </div>
               <button
                 onClick={() => onNavigateToStatus && onNavigateToStatus(stat.targetKey)}
-                className="mt-4 text-sm text-blue-400 hover:text-blue-300 underline text-left transition"
+                className="mt-4 text-sm text-[#03ccff] hover:text-[#03ccff] underline text-left transition"
               >
                 Voir plus
               </button>
@@ -147,18 +147,18 @@ const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fet
         ) : (
           [
             { label: 'En ligne', value: stats.inProgress, color: 'text-yellow-500', targetKey: 'en-ligne' },
-            { label: 'En atelier', value: stats.enAtelier, color: 'text-blue-500', targetKey: 'en-atelier' },
+            { label: 'En atelier', value: stats.enAtelier, color: 'text-[#03ccff]', targetKey: 'en-atelier' },
             { label: 'Livrées', value: stats.delivered, color: 'text-green-500', targetKey: 'livrees' },
             { label: 'Retournées', value: stats.returned, color: 'text-red-500', targetKey: 'retournees' }
           ].map((stat, idx) => (
-            <div key={idx} className="bg-gray-800 rounded-lg p-6 flex flex-col justify-between">
+            <div key={idx} className="bg-[#112C70] rounded-lg p-6 flex flex-col justify-between">
               <div>
                 <h3 className="text-gray-400 text-sm font-medium">{stat.label}</h3>
                 <p className={`text-3xl font-bold mt-2 ${stat.color}`}>{stat.value}</p>
               </div>
               <button
                 onClick={() => onNavigateToStatus && onNavigateToStatus(stat.targetKey)}
-                className="mt-4 text-sm text-blue-400 hover:text-blue-300 underline text-left transition"
+                className="mt-4 text-sm text-[#03ccff] hover:text-[#03ccff] underline text-left transition"
               >
                 Voir plus
               </button>
@@ -167,7 +167,7 @@ const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fet
         )}
       </div>
 
-      <div className="bg-gray-800 rounded-lg p-4 mb-8">
+      <div className="bg-[#112C70] rounded-lg p-4 mb-8">
         <div className="flex flex-col md:flex-row gap-4 items-end">
           <div className="flex-1 w-full relative">
             <label className="block text-xs font-medium text-gray-400 mb-1">Recherche</label>
@@ -180,7 +180,7 @@ const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fet
                 onChange={handleFilterChange}
                 onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
                 placeholder="Nom ou tel..."
-                className="w-full bg-gray-700 text-white text-sm rounded px-3 py-2 pl-9 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full bg-gray-700 text-white text-sm rounded px-3 py-2 pl-9 focus:outline-none focus:ring-1 focus:ring-[#03ccff]"
               />
             </div>
           </div>
@@ -190,7 +190,7 @@ const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fet
               name="status"
               value={filters.status}
               onChange={handleFilterChange}
-              className="w-full bg-gray-700 text-white text-sm rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full bg-gray-700 text-white text-sm rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#03ccff]"
             >
               <option value="">Tous</option>
               <option value="Nouvelle commande">Nouvelle</option>
@@ -206,7 +206,7 @@ const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fet
               name="source"
               value={filters.source}
               onChange={handleFilterChange}
-              className="w-full bg-gray-700 text-white text-sm rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full bg-gray-700 text-white text-sm rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#03ccff]"
             >
               <option value="">Toutes</option>
               <option value="admin">En ligne</option>
@@ -222,7 +222,7 @@ const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fet
               onChange={handleFilterChange}
               onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
               placeholder="Ex: Alger"
-              className="w-full bg-gray-700 text-white text-sm rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full bg-gray-700 text-white text-sm rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#03ccff]"
             />
           </div>
           <div className="flex-1 w-full">
@@ -232,7 +232,7 @@ const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fet
               name="date"
               value={filters.date}
               onChange={handleFilterChange}
-              className="w-full bg-gray-700 text-white text-sm rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full bg-gray-700 text-white text-sm rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#03ccff]"
             />
           </div>
           <div className="flex gap-2 w-full md:w-auto pt-4 md:pt-0">
@@ -245,7 +245,7 @@ const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fet
             </button>
             <button
               onClick={applyFilters}
-              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition flex items-center justify-center gap-2 flex-1 md:flex-none whitespace-nowrap"
+              className="px-4 py-2 bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)] text-white text-sm font-medium rounded hover:bg-blue-700 transition flex items-center justify-center gap-2 flex-1 md:flex-none whitespace-nowrap"
             >
               <Filter size={16} /> Appliquer
             </button>
@@ -254,7 +254,7 @@ const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fet
       </div>
 
       {isFetchingOrders && filteredOrders.length === 0 ? (
-        <div className="bg-gray-800 rounded-lg p-12 text-center animate-pulse">
+        <div className="bg-[#112C70] rounded-lg p-12 text-center animate-pulse">
            <div className="h-8 bg-gray-700 rounded w-1/4 mx-auto mb-6"></div>
            <div className="space-y-4">
              <div className="h-10 bg-gray-700 rounded w-full"></div>
@@ -263,18 +263,18 @@ const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fet
            </div>
         </div>
       ) : filteredOrders.length === 0 ? (
-        <div className="bg-gray-800 rounded-lg p-12 text-center">
+        <div className="bg-[#112C70] rounded-lg p-12 text-center">
           <Package size={48} className="mx-auto text-gray-600 mb-4" />
           <p className="text-gray-400">Aucune commande trouvée</p>
         </div>
       ) : (
-        <div className={`bg-gray-800 rounded-lg overflow-hidden relative ${isFetchingOrders ? 'ring-1 ring-blue-500/30' : ''}`}>
+        <div className={`bg-[#112C70] rounded-lg overflow-hidden relative ${isFetchingOrders ? 'ring-1 ring-[#03ccff]/30' : ''}`}>
           {isFetchingOrders && (
-            <div className="absolute top-0 left-0 right-0 h-0.5 bg-blue-500/80 animate-pulse z-10" aria-hidden />
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)]/80 animate-pulse z-10" aria-hidden />
           )}
           <div className="overflow-x-auto">
             <table className="w-full min-w-[800px]">
-            <thead className="bg-gray-900 border-b border-gray-700">
+            <thead className="bg-[#0A2353] border-b border-gray-700">
               <tr>
                 <th className="px-6 py-4 text-left text-sm font-medium text-gray-400">ID</th>
                 <th className="px-6 py-4 text-left text-sm font-medium text-gray-400">Client</th>
@@ -308,7 +308,7 @@ const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fet
                     <div className="flex gap-4 items-center">
                       <button
                         onClick={() => onSelectOrder(order)}
-                        className="text-blue-500 hover:text-blue-400 transition font-medium"
+                        className="text-[#03ccff] hover:text-[#03ccff] transition font-medium"
                       >
                         Voir détails
                       </button>

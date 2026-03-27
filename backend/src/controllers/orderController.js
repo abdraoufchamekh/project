@@ -362,11 +362,59 @@ exports.updateProductImage = async (req, res) => {
       return res.status(404).json({ error: 'Product not found' });
     }
 
+    // Delete existing old image from Cloudinary/local
+    if (product.image_url) {
+      try {
+        if (product.image_url.startsWith('http')) {
+          const parts = product.image_url.split('/');
+          const fileWithExt = parts[parts.length - 1];
+          const publicId = `aurea-deco-uploads/${fileWithExt.split('.')[0]}`;
+          await cloudinary.uploader.destroy(publicId);
+        } else {
+          await fs.unlink(path.join(process.env.UPLOAD_PATH || './uploads', product.image_url));
+        }
+      } catch (err) {
+        console.error('Error deleting old product image:', err);
+      }
+    }
+
     const updatedProduct = await Product.updateImage(productId, imageUrl);
     res.json({ message: 'Product image updated successfully', product: updatedProduct });
   } catch (error) {
     console.error('Update product image error:', error);
     res.status(500).json({ error: 'Server error updating product image' });
+  }
+};
+
+exports.deleteProductImage = async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    if (product.image_url) {
+      try {
+        if (product.image_url.startsWith('http')) {
+          const parts = product.image_url.split('/');
+          const fileWithExt = parts[parts.length - 1];
+          const publicId = `aurea-deco-uploads/${fileWithExt.split('.')[0]}`;
+          await cloudinary.uploader.destroy(publicId);
+        } else {
+          await fs.unlink(path.join(process.env.UPLOAD_PATH || './uploads', product.image_url));
+        }
+      } catch (err) {
+        console.error('Error deleting product image file:', err);
+      }
+    }
+
+    const updatedProduct = await Product.updateImage(productId, null);
+    res.json({ message: 'Product image deleted successfully', product: updatedProduct });
+  } catch (error) {
+    console.error('Delete product image error:', error);
+    res.status(500).json({ error: 'Server error deleting product image' });
   }
 };
 
@@ -434,5 +482,46 @@ exports.deletePhoto = async (req, res) => {
   } catch (error) {
     console.error('Delete photo error:', error);
     res.status(500).json({ error: 'Server error' });
+  }
+};
+
+exports.replacePhoto = async (req, res) => {
+  try {
+    const { photoId } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({ error: 'No photo file provided' });
+    }
+
+    // First retrieve the existing photo
+    const query = 'SELECT * FROM photos WHERE id = $1';
+    const result = await pool.query(query, [photoId]);
+    const photo = result.rows[0];
+
+    if (!photo) {
+      return res.status(404).json({ error: 'Photo not found' });
+    }
+
+    // Delete existing old photo
+    try {
+      if (photo.filename && photo.filename.startsWith('http')) {
+        const parts = photo.filename.split('/');
+        const fileWithExt = parts[parts.length - 1];
+        const publicId = `aurea-deco-uploads/${fileWithExt.split('.')[0]}`;
+        await cloudinary.uploader.destroy(publicId);
+      } else {
+        await fs.unlink(path.join(process.env.UPLOAD_PATH || './uploads', photo.filename));
+      }
+    } catch (err) {
+      console.error('Error deleting old photo:', err);
+    }
+
+    const newFilename = req.file.path || req.file.filename;
+
+    const updatedPhoto = await Photo.updateFilename(photoId, newFilename);
+    res.json({ message: 'Photo replaced successfully', photo: updatedPhoto });
+  } catch (error) {
+    console.error('Replace photo error:', error);
+    res.status(500).json({ error: 'Server error replacing photo' });
   }
 };

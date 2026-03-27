@@ -69,7 +69,7 @@ export default function DesignersPage() {
         </div>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
+          className="flex items-center gap-2 px-4 py-2 bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)] hover:opacity-90 text-white rounded-lg transition"
         >
           <Plus size={20} />
           Ajouter Membre
@@ -77,7 +77,7 @@ export default function DesignersPage() {
       </div>
 
       {showAddForm && (
-        <div className="bg-gray-800 rounded-lg p-6 mb-6 border border-blue-500">
+        <div className="bg-[#112C70] rounded-lg p-6 mb-6 border border-[#03ccff]">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-xl font-semibold text-white">Nouveau Membre de l'Atelier</h3>
             <button
@@ -98,7 +98,7 @@ export default function DesignersPage() {
                   type="text"
                   value={newDesigner.name}
                   onChange={(e) => setNewDesigner({ ...newDesigner, name: e.target.value })}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-[#03ccff]"
                   placeholder="Nom et prénom"
                 />
               </div>
@@ -111,7 +111,7 @@ export default function DesignersPage() {
                   type="email"
                   value={newDesigner.email}
                   onChange={(e) => setNewDesigner({ ...newDesigner, email: e.target.value })}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-[#03ccff]"
                   placeholder="email@example.com"
                 />
               </div>
@@ -124,7 +124,7 @@ export default function DesignersPage() {
                   type="password"
                   value={newDesigner.password}
                   onChange={(e) => setNewDesigner({ ...newDesigner, password: e.target.value })}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-[#03ccff]"
                   placeholder="Min. 6 caractères"
                 />
               </div>
@@ -133,7 +133,7 @@ export default function DesignersPage() {
             <div className="flex gap-4 pt-4">
               <button
                 onClick={handleAddDesigner}
-                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-medium"
+                className="px-6 py-2 bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)] hover:opacity-90 text-white rounded-lg transition font-medium"
               >
                 ✓ Ajouter Membre
               </button>
@@ -153,7 +153,7 @@ export default function DesignersPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {designers.map(designer => (
-          <div key={designer.id} className="bg-gray-800 rounded-lg p-6 hover:shadow-lg transition">
+          <div key={designer.id} className="bg-[#112C70] rounded-lg p-6 hover:shadow-lg transition">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-lg">
                 {designer.name.charAt(0).toUpperCase()}
@@ -167,13 +167,13 @@ export default function DesignersPage() {
               </div>
             </div>
 
-            <div className="space-y-3 mb-4 bg-gray-900 p-4 rounded-lg">
+            <div className="space-y-3 mb-4 bg-[#0A2353] p-4 rounded-lg">
               <div className="flex justify-between items-center">
                 <span className="text-gray-400 text-sm flex items-center gap-2">
                   <Briefcase size={16} />
                   Commandes actives:
                 </span>
-                <span className="text-blue-400 font-bold text-lg">{designer.activeOrders}</span>
+                <span className="text-[#03ccff] font-bold text-lg">{designer.activeOrders}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-400 text-sm">Commandes terminées:</span>
@@ -188,7 +188,7 @@ export default function DesignersPage() {
             </div>
 
             <div className="pt-4 border-t border-gray-700 flex gap-2">
-              <button className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition text-sm font-medium">
+              <button className="flex-1 px-4 py-2 bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)] hover:opacity-90 text-white rounded-lg transition text-sm font-medium">
                 ✏️ Modifier
               </button>
               <button
@@ -203,12 +203,12 @@ export default function DesignersPage() {
       </div>
 
       {designers.length === 0 && (
-        <div className="bg-gray-800 rounded-lg p-12 text-center">
+        <div className="bg-[#112C70] rounded-lg p-12 text-center">
           <Briefcase size={48} className="mx-auto text-gray-600 mb-4" />
           <p className="text-gray-400">Aucun membre pour le moment</p>
           <button
             onClick={() => setShowAddForm(true)}
-            className="mt-4 text-blue-500 hover:text-blue-400"
+            className="mt-4 text-[#03ccff] hover:text-[#03ccff]"
           >
             Ajouter le premier membre
           </button>

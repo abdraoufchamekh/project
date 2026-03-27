@@ -33,6 +33,12 @@ class Photo {
     return result.rows;
   }
 
+  static async updateFilename(id, filename) {
+    const query = 'UPDATE photos SET filename = $1 WHERE id = $2 RETURNING *';
+    const result = await pool.query(query, [filename, id]);
+    return result.rows[0];
+  }
+
   static async delete(id) {
     const query = 'DELETE FROM photos WHERE id = $1 RETURNING filename';
     const result = await pool.query(query, [id]);

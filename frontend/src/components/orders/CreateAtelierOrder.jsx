@@ -112,25 +112,25 @@ export default function CreateAtelierOrder({ onSave }) {
     <div className="p-8 max-w-4xl mx-auto">
       <h2 className="text-3xl font-bold text-white mb-8">Ajouter une commande (Sur place)</h2>
 
-      <div className="bg-gray-800 rounded-lg p-6 space-y-8">
+      <div className="bg-[#112C70] rounded-lg p-6 space-y-8">
 
         {/* Client Info */}
         <div className="bg-gray-700/50 rounded-lg overflow-hidden border border-gray-600">
-          <div className="p-4 bg-gray-800 border-b border-gray-600">
+          <div className="p-4 bg-[#112C70] border-b border-gray-600">
             <h3 className="font-bold text-gray-200">Informations du client</h3>
           </div>
           <div className="p-4 space-y-4">
-            <div className="flex flex-col md:flex-row bg-gray-800/80 rounded border border-gray-600 overflow-hidden">
+            <div className="flex flex-col md:flex-row bg-[#112C70]/80 rounded border border-gray-600 overflow-hidden">
               <span className="w-full md:w-1/3 p-2 text-gray-400 border-b md:border-b-0 md:border-r border-gray-600">Nom du client</span>
               <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} className="w-full md:w-2/3 p-2 bg-transparent text-white outline-none" />
             </div>
 
-            <div className="flex flex-col md:flex-row bg-gray-800/80 rounded border border-gray-600 overflow-hidden mt-4">
+            <div className="flex flex-col md:flex-row bg-[#112C70]/80 rounded border border-gray-600 overflow-hidden mt-4">
               <span className="w-full md:w-1/3 p-2 text-gray-400 border-b md:border-b-0 md:border-r border-gray-600">Prénom</span>
               <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="w-full md:w-2/3 p-2 bg-transparent text-white outline-none" />
             </div>
 
-            <div className="flex flex-col md:flex-row bg-gray-800/80 rounded border border-gray-600 overflow-hidden mt-4">
+            <div className="flex flex-col md:flex-row bg-[#112C70]/80 rounded border border-gray-600 overflow-hidden mt-4">
               <span className="w-full md:w-1/3 p-2 text-gray-400 border-b md:border-b-0 md:border-r border-gray-600">Téléphone (Optionnel)</span>
               <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full md:w-2/3 p-2 bg-transparent text-white outline-none" />
             </div>
@@ -139,14 +139,14 @@ export default function CreateAtelierOrder({ onSave }) {
 
         {/* Le colis */}
         <div className="bg-gray-700/50 rounded-lg overflow-hidden border border-gray-600">
-          <div className="p-4 bg-gray-800 border-b border-gray-600">
+          <div className="p-4 bg-[#112C70] border-b border-gray-600">
             <h3 className="font-bold text-gray-200">Produits</h3>
           </div>
           <div className="p-4 space-y-4">
-            <div className="border border-gray-600 rounded p-4 mb-4 bg-gray-800/80">
+            <div className="border border-gray-600 rounded p-4 mb-4 bg-[#112C70]/80">
               <div className="flex justify-between items-center mb-6">
                 <span className="text-gray-300 font-medium">Produit(s) commandé(s)</span>
-                <button onClick={addProduct} className="text-blue-500 hover:text-blue-400 flex items-center text-sm transition font-medium">
+                <button onClick={addProduct} className="text-[#03ccff] hover:text-[#03ccff] flex items-center text-sm transition font-medium">
                   <Plus size={16} className="mr-1" /> Ajouter un produit
                 </button>
               </div>
@@ -162,7 +162,7 @@ export default function CreateAtelierOrder({ onSave }) {
               <div className="space-y-4">
                 {products.map((product, idx) => {
                   return (
-                  <div key={idx} className="flex flex-col md:flex-row gap-4 items-start md:items-start bg-gray-900/50 md:bg-transparent p-4 md:p-0 rounded-lg border border-gray-700 md:border-none">
+                  <div key={idx} className="flex flex-col md:flex-row gap-4 items-start md:items-start bg-[#0A2353]/50 md:bg-transparent p-4 md:p-0 rounded-lg border border-gray-700 md:border-none">
                     
                     {/* Product Selection */}
                     <div className="w-full md:w-6/12 flex flex-col gap-2">
@@ -185,7 +185,7 @@ export default function CreateAtelierOrder({ onSave }) {
                             setProductFromStock(idx, '', '', 0);
                           }
                         }}
-                        className="w-full p-2.5 bg-gray-900 border border-gray-600 text-white rounded outline-none focus:border-blue-500 transition"
+                        className="w-full p-2.5 bg-[#0A2353] border border-gray-600 text-white rounded outline-none focus:border-[#03ccff] transition"
                       >
                         <option value="">Sélectionner un produit...</option>
                         {stockProducts.map(sp => {
@@ -211,7 +211,7 @@ export default function CreateAtelierOrder({ onSave }) {
                         value={product.quantity || ''}
                         onChange={(e) => updateProduct(idx, 'quantity', parseInt(e.target.value) || '')}
                         onWheel={(e) => e.target.blur()}
-                        className="w-full p-2.5 bg-gray-900 border border-gray-600 text-white rounded outline-none transition text-center focus:border-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className="w-full p-2.5 bg-[#0A2353] border border-gray-600 text-white rounded outline-none transition text-center focus:border-[#03ccff] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                     </div>
 
@@ -227,16 +227,16 @@ export default function CreateAtelierOrder({ onSave }) {
                           value={product.unitPrice || ''}
                           onChange={(e) => updateProduct(idx, 'unitPrice', e.target.value)}
                           onWheel={(e) => e.target.blur()}
-                          className="w-full p-2.5 bg-gray-900 border border-gray-600 text-white rounded-l outline-none transition text-center focus:border-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          className="w-full p-2.5 bg-[#0A2353] border border-gray-600 text-white rounded-l outline-none transition text-center focus:border-[#03ccff] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
-                        <span className="px-2 py-2.5 bg-gray-900 border border-l-0 border-gray-600 text-xs text-gray-400 rounded-r">DA</span>
+                        <span className="px-2 py-2.5 bg-[#0A2353] border border-l-0 border-gray-600 text-xs text-gray-400 rounded-r">DA</span>
                       </div>
                     </div>
 
                     {/* Line total */}
                     <div className="w-full md:w-2/12 flex flex-col">
                       <span className="md:hidden text-xs text-gray-400 font-medium mb-1">Total</span>
-                      <div className="w-full p-2.5 bg-gray-900 border border-gray-600 text-blue-300 rounded text-center font-semibold">
+                      <div className="w-full p-2.5 bg-[#0A2353] border border-gray-600 text-[#03ccff] rounded text-center font-semibold">
                         {((Number(product.quantity) || 0) * (Number(product.unitPrice) || 0)).toLocaleString()} DA
                       </div>
                     </div>
@@ -265,7 +265,7 @@ export default function CreateAtelierOrder({ onSave }) {
                   <span className="text-gray-300">{Number(totalPrice || 0).toLocaleString()} DA</span>
                 </div>
                 
-                <div className="flex justify-between items-center bg-gray-900/50 p-3 rounded-lg border border-gray-700">
+                <div className="flex justify-between items-center bg-[#0A2353]/50 p-3 rounded-lg border border-gray-700">
                   <span className="text-gray-300 font-bold uppercase text-sm">Versement (Acompte)</span>
                   <div className="flex items-center w-32">
                     <input
@@ -275,16 +275,16 @@ export default function CreateAtelierOrder({ onSave }) {
                       value={versement || ''}
                       onChange={(e) => setVersement(Number(e.target.value) || 0)}
                       onWheel={(e) => e.target.blur()}
-                      className="w-full p-2.5 bg-gray-900 border border-gray-600 text-white rounded-l outline-none transition text-center focus:border-blue-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="w-full p-2.5 bg-[#0A2353] border border-gray-600 text-white rounded-l outline-none transition text-center focus:border-[#03ccff] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
-                    <span className="px-2 py-2.5 bg-gray-900 border border-l-0 border-gray-600 text-xs text-gray-400 rounded-r">DA</span>
+                    <span className="px-2 py-2.5 bg-[#0A2353] border border-l-0 border-gray-600 text-xs text-gray-400 rounded-r">DA</span>
                   </div>
                 </div>
 
                 <div className="flex justify-between items-center pt-2">
                   <span className="text-gray-300 font-bold uppercase text-sm">Reste à payer</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-2xl text-blue-400 font-bold">
+                    <span className="text-2xl text-[#03ccff] font-bold">
                       {Math.max(0, totalPrice - versement).toLocaleString()} DA
                     </span>
                   </div>
@@ -296,7 +296,7 @@ export default function CreateAtelierOrder({ onSave }) {
 
         {/* Photos (Custom extension for backend logic) */}
         <div className="bg-gray-700/50 rounded-lg overflow-hidden border border-gray-600">
-          <div className="p-4 bg-gray-800 border-b border-gray-600">
+          <div className="p-4 bg-[#112C70] border-b border-gray-600">
             <h3 className="font-bold text-gray-200">Photo du colis (Optionnel)</h3>
           </div>
           <div className="p-4">
@@ -305,7 +305,7 @@ export default function CreateAtelierOrder({ onSave }) {
               multiple
               accept="image/*"
               onChange={(e) => setPhotos(Array.from(e.target.files))}
-              className="w-full text-gray-300 bg-gray-900 p-2 rounded border border-gray-600 outline-none"
+              className="w-full text-gray-300 bg-[#0A2353] p-2 rounded border border-gray-600 outline-none"
             />
             {photos.length > 0 && (
               <p className="mt-2 text-sm text-gray-400">{photos.length} photo(s) sélectionnée(s)</p>
@@ -316,7 +316,7 @@ export default function CreateAtelierOrder({ onSave }) {
         <div className="flex justify-center pt-6 pb-20">
           <button
             onClick={handleSubmit}
-            className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded font-medium shadow-lg w-full md:w-auto md:min-w-[300px]"
+            className="px-8 py-3 bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)] hover:opacity-90 text-white rounded font-medium shadow-lg w-full md:w-auto md:min-w-[300px]"
           >
             Créer la commande
           </button>

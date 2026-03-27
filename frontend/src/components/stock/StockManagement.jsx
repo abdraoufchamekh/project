@@ -69,18 +69,18 @@ export default function StockManagement() {
         <h2 className="text-3xl font-bold text-white">Gestion de Stock</h2>
         <button
           onClick={handleOpenModal}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition shadow-lg"
+          className="flex items-center gap-2 px-4 py-2 bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)] hover:opacity-90 text-white rounded-lg transition shadow-lg"
         >
           <Plus size={20} />
           <span>Ajouter un article</span>
         </button>
       </div>
 
-      <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden flex-1 flex flex-col shadow-xl">
+      <div className="bg-[#112C70] rounded-xl border border-gray-700 overflow-hidden flex-1 flex flex-col shadow-xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-gray-900/50 border-b border-gray-700">
+              <tr className="bg-[#0A2353]/50 border-b border-gray-700">
                 <th className="p-4 text-gray-300 font-semibold">Article</th>
                 <th className="p-4 text-gray-300 font-semibold">Couleur</th>
                 <th className="p-4 text-gray-300 font-semibold">Dimension</th>
@@ -93,7 +93,7 @@ export default function StockManagement() {
               {isLoading ? (
                 <tr>
                   <td colSpan="6" className="p-8 text-center text-gray-400">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#03ccff] mx-auto mb-4"></div>
                     Chargement du stock...
                   </td>
                 </tr>
@@ -108,13 +108,13 @@ export default function StockManagement() {
                       <div className="font-medium text-white">{product.name}</div>
                     </td>
                     <td className="p-4 align-middle text-gray-400">
-                      {product.color ? <span className="bg-gray-800 border border-gray-600 px-2 py-0.5 rounded text-pink-300 text-sm">{product.color}</span> : <span className="text-gray-600">-</span>}
+                      {product.color ? <span className="bg-[#112C70] border border-gray-600 px-2 py-0.5 rounded text-pink-300 text-sm">{product.color}</span> : <span className="text-gray-600">-</span>}
                     </td>
                     <td className="p-4 align-middle text-gray-400">
-                      {product.dimension ? <span className="bg-gray-800 border border-gray-600 px-2 py-0.5 rounded text-blue-300 text-sm">{product.dimension}</span> : <span className="text-gray-600">-</span>}
+                      {product.dimension ? <span className="bg-[#112C70] border border-gray-600 px-2 py-0.5 rounded text-[#03ccff] text-sm">{product.dimension}</span> : <span className="text-gray-600">-</span>}
                     </td>
                     <td className="p-4 align-middle text-gray-400">
-                      {product.size ? <span className="bg-gray-800 border border-gray-600 px-2 py-0.5 rounded text-green-300 text-sm">{product.size}</span> : <span className="text-gray-600">-</span>}
+                      {product.size ? <span className="bg-[#112C70] border border-gray-600 px-2 py-0.5 rounded text-green-300 text-sm">{product.size}</span> : <span className="text-gray-600">-</span>}
                     </td>
                     <td className="p-4 align-middle text-center">
                       <div className={`text-sm font-bold ${product.quantity > 5 ? 'text-green-500' : product.quantity > 0 ? 'text-orange-500' : 'text-red-500'}`}>
@@ -124,14 +124,14 @@ export default function StockManagement() {
                     <td className="p-4 align-middle text-right space-x-2">
                        <button 
                          onClick={() => handleEditProduct(product)}
-                         className="text-gray-400 hover:text-blue-400 transition p-2 bg-gray-800 rounded opacity-0 group-hover:opacity-100 focus:opacity-100"
+                         className="text-gray-400 hover:text-[#03ccff] transition p-2 bg-[#112C70] rounded opacity-0 group-hover:opacity-100 focus:opacity-100"
                          title="Modifier"
                       >
                         <Edit2 size={16} />
                       </button>
                       <button 
                          onClick={() => handleDeleteProduct(product.id)}
-                         className="text-gray-400 hover:text-red-400 transition p-2 bg-gray-800 rounded opacity-0 group-hover:opacity-100 focus:opacity-100"
+                         className="text-gray-400 hover:text-red-400 transition p-2 bg-[#112C70] rounded opacity-0 group-hover:opacity-100 focus:opacity-100"
                          title="Supprimer"
                       >
                         <Trash2 size={16} />

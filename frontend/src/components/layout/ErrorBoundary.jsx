@@ -21,7 +21,7 @@ class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       // You can render any custom fallback UI
       return (
-        <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center p-4 text-center">
+        <div className="min-h-screen bg-[#0A2353] flex flex-col items-center justify-center p-4 text-center">
           <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mb-6">
             <span className="text-white text-3xl">⚠️</span>
           </div>
@@ -31,7 +31,7 @@ class ErrorBoundary extends React.Component {
           </p>
           <button 
             onClick={() => window.location.reload()}
-            className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+            className="px-6 py-2 bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)] text-white rounded hover:bg-blue-700 transition"
           >
             Refresh Page
           </button>

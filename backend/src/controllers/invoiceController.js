@@ -180,18 +180,18 @@ exports.generateInvoice = async (req, res) => {
         // --- TABLE ---
         const tableTop   = clientBoxY + 140;
         const itemX      = doc.page.margins.left;
-        const unitPriceX = itemX + 260;
-        const qtyX       = itemX + 360;
-        const totalX     = itemX + 440;
         const tableWidth = doc.page.width - itemX - doc.page.margins.right;
+        const unitPriceX = itemX + 240;
+        const qtyX       = itemX + 340;
+        const totalX     = itemX + 415;
 
         // Table header
         doc.rect(itemX, tableTop, tableWidth, 22).fill('#1d4ed8');
         doc.fillColor('#ffffff').fontSize(11)
             .text('Description',  itemX + 8,  tableTop + 6)
-            .text('Prix unitaire', unitPriceX, tableTop + 6, { width: 80, align: 'right' })
+            .text('Prix unitaire', unitPriceX, tableTop + 6, { width: 90, align: 'right' })
             .text('Quantité',      qtyX,       tableTop + 6, { width: 60, align: 'right' })
-            .text('Total',         totalX,     tableTop + 6, { width: 80, align: 'right' });
+            .text('Total',         totalX,     tableTop + 6, { width: 90, align: 'right' });
 
         // Table rows
         let rowY = tableTop + 28;
@@ -207,10 +207,10 @@ exports.generateInvoice = async (req, res) => {
             }
 
             doc.fillColor('#111827')
-                .text(p.description,                              itemX + 8,  rowY, { width: 240 })
-                .text(`${unitPrice.toLocaleString('fr-FR').replace(/\\s|\\u202F/g, ' ')} DA`, unitPriceX, rowY, { width: 80, align: 'right' })
+                .text(p.description,                              itemX + 8,  rowY, { width: 230 })
+                .text(`${unitPrice.toLocaleString('fr-FR').replace(/\\s|\\u202F/g, ' ')} DA`, unitPriceX, rowY, { width: 90, align: 'right' })
                 .text(qty.toString(),                             qtyX,       rowY, { width: 60, align: 'right' })
-                .text(`${lineTotal.toLocaleString('fr-FR').replace(/\\s|\\u202F/g, ' ')} DA`, totalX,     rowY, { width: 80, align: 'right' });
+                .text(`${lineTotal.toLocaleString('fr-FR').replace(/\\s|\\u202F/g, ' ')} DA`, totalX,     rowY, { width: 90, align: 'right' });
 
             rowY += 18;
         });
@@ -221,34 +221,43 @@ exports.generateInvoice = async (req, res) => {
             .strokeColor('#d1d5db').stroke();
 
         // --- TOTALS ---
-        const totalsTop = rowY + 16;
+        let currentTotalsY = rowY + 16;
         const totalsX   = totalX - 120;
 
         doc.fontSize(11).fillColor('#111827')
-            .text('Sous-total :',        totalsX, totalsTop,      { width: 120, align: 'right' })
-            .text(`${subtotal.toLocaleString('fr-FR').replace(/\\s|\\u202F/g, ' ')} DA`,      totalX, totalsTop,      { width: 80, align: 'right' })
+            .text('Sous-total :',        totalsX, currentTotalsY,      { width: 120, align: 'right' })
+            .text(`${subtotal.toLocaleString('fr-FR').replace(/\\s|\\u202F/g, ' ')} DA`,      totalX, currentTotalsY,      { width: 90, align: 'right' });
 
-            .text('Frais de livraison :', totalsX, totalsTop + 16, { width: 120, align: 'right' })
-            .text(`${deliveryFee.toLocaleString('fr-FR').replace(/\\s|\\u202F/g, ' ')} DA`,   totalX, totalsTop + 16, { width: 80, align: 'right' })
+        currentTotalsY += 16;
 
-            .text('Remise :',             totalsX, totalsTop + 32, { width: 120, align: 'right' })
-            .text(`${discount.toLocaleString('fr-FR').replace(/\\s|\\u202F/g, ' ')} DA`,      totalX, totalsTop + 32, { width: 80, align: 'right' });
+        doc.text('Frais de livraison :', totalsX, currentTotalsY, { width: 120, align: 'right' })
+           .text(`${deliveryFee.toLocaleString('fr-FR').replace(/\\s|\\u202F/g, ' ')} DA`,   totalX, currentTotalsY, { width: 90, align: 'right' });
+
+        currentTotalsY += 16;
+
+        if (discount > 0) {
+            doc.text('Remise :',             totalsX, currentTotalsY, { width: 120, align: 'right' })
+               .text(`${discount.toLocaleString('fr-FR').replace(/\\s|\\u202F/g, ' ')} DA`,      totalX, currentTotalsY, { width: 90, align: 'right' });
+            currentTotalsY += 16;
+        }
+
+        currentTotalsY += 4;
 
         doc.fontSize(12).font('Helvetica-Bold')
-            .text('Montant Total :',                              totalsX, totalsTop + 52, { width: 120, align: 'right' })
-            .text(`${finalTotal.toLocaleString('fr-FR').replace(/\\s|\\u202F/g, ' ')} DA`,    totalX,  totalsTop + 52, { width: 80,  align: 'right' });
+            .text('Montant Total :',                              totalsX, currentTotalsY, { width: 120, align: 'right' })
+            .text(`${finalTotal.toLocaleString('fr-FR').replace(/\\s|\\u202F/g, ' ')} DA`,    totalX,  currentTotalsY, { width: 90,  align: 'right' });
         doc.font('Helvetica');
 
         // --- AMOUNT IN WORDS ---
         doc.fontSize(10).fillColor('#111827')
             .text(
                 `Arrêtée la présente facture à la somme de : ${finalTotalWords}.`,
-                itemX, totalsTop + 76, { width: 350 }
+                itemX, currentTotalsY + 24, { width: 350 }
             );
 
         // --- SIGNATURE ---
         doc.fontSize(11).fillColor('#4b5563')
-            .text('Cachet et signature', totalX - 40, totalsTop + 116, { width: 120, align: 'center' });
+            .text('Cachet et signature', totalX - 40, currentTotalsY + 64, { width: 120, align: 'center' });
 
         // --- FOOTER ---
         const footerY = doc.page.height - doc.page.margins.bottom - 20;

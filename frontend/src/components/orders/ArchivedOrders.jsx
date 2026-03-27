@@ -80,14 +80,14 @@ function ArchivedOrders({ orders, userRole, userId, onSelectOrder, onDeleteOrder
                     { label: 'Livrées', value: stats.delivered, color: 'text-green-500' },
                     { label: 'Retournées', value: stats.returned, color: 'text-red-500' },
                 ].map((stat, idx) => (
-                    <div key={idx} className="bg-gray-800 rounded-lg p-6">
+                    <div key={idx} className="bg-[#112C70] rounded-lg p-6">
                         <h3 className="text-gray-400 text-sm font-medium">{stat.label}</h3>
                         <p className={`text-3xl font-bold mt-2 ${stat.color}`}>{stat.value}</p>
                     </div>
                 ))}
             </div>
 
-            <div className="bg-gray-800 rounded-lg p-4 mb-8">
+            <div className="bg-[#112C70] rounded-lg p-4 mb-8">
                 <div className="flex flex-col md:flex-row gap-4 items-end">
                     <div className="flex-1 w-full relative">
                         <label className="block text-xs font-medium text-gray-400 mb-1">Recherche</label>
@@ -100,7 +100,7 @@ function ArchivedOrders({ orders, userRole, userId, onSelectOrder, onDeleteOrder
                                 onChange={handleFilterChange}
                                 onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
                                 placeholder="Nom ou tel..."
-                                className="w-full bg-gray-700 text-white text-sm rounded px-3 py-2 pl-9 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                className="w-full bg-gray-700 text-white text-sm rounded px-3 py-2 pl-9 focus:outline-none focus:ring-1 focus:ring-[#03ccff]"
                             />
                         </div>
                     </div>
@@ -110,7 +110,7 @@ function ArchivedOrders({ orders, userRole, userId, onSelectOrder, onDeleteOrder
                             name="status"
                             value={filters.status}
                             onChange={handleFilterChange}
-                            className="w-full bg-gray-700 text-white text-sm rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            className="w-full bg-gray-700 text-white text-sm rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#03ccff]"
                         >
                             <option value="">Tous les statuts</option>
                             <option value="Livré">Livré</option>
@@ -126,7 +126,7 @@ function ArchivedOrders({ orders, userRole, userId, onSelectOrder, onDeleteOrder
                             onChange={handleFilterChange}
                             onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
                             placeholder="Ex: Alger"
-                            className="w-full bg-gray-700 text-white text-sm rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            className="w-full bg-gray-700 text-white text-sm rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#03ccff]"
                         />
                     </div>
                     <div className="flex-1 w-full">
@@ -136,7 +136,7 @@ function ArchivedOrders({ orders, userRole, userId, onSelectOrder, onDeleteOrder
                             name="date"
                             value={filters.date}
                             onChange={handleFilterChange}
-                            className="w-full bg-gray-700 text-white text-sm rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            className="w-full bg-gray-700 text-white text-sm rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#03ccff]"
                         />
                     </div>
                     <div className="flex gap-2 w-full md:w-auto pt-4 md:pt-0">
@@ -149,7 +149,7 @@ function ArchivedOrders({ orders, userRole, userId, onSelectOrder, onDeleteOrder
                         </button>
                         <button
                             onClick={applyFilters}
-                            className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition flex items-center justify-center gap-2 flex-1 md:flex-none whitespace-nowrap"
+                            className="px-4 py-2 bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)] text-white text-sm font-medium rounded hover:bg-blue-700 transition flex items-center justify-center gap-2 flex-1 md:flex-none whitespace-nowrap"
                         >
                             <Filter size={16} /> Appliquer
                         </button>
@@ -158,15 +158,15 @@ function ArchivedOrders({ orders, userRole, userId, onSelectOrder, onDeleteOrder
             </div>
 
             {archivedOrders.length === 0 ? (
-                <div className="bg-gray-800 rounded-lg p-12 text-center">
+                <div className="bg-[#112C70] rounded-lg p-12 text-center">
                     <Archive size={48} className="mx-auto text-gray-600 mb-4" />
                     <p className="text-gray-400">Aucune commande archivée trouvée</p>
                 </div>
             ) : (
-                <div className="bg-gray-800 rounded-lg overflow-hidden">
+                <div className="bg-[#112C70] rounded-lg overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full min-w-[800px]">
-                        <thead className="bg-gray-900 border-b border-gray-700">
+                        <thead className="bg-[#0A2353] border-b border-gray-700">
                             <tr>
                                 <th className="px-6 py-4 text-left text-sm font-medium text-gray-400">ID</th>
                                 <th className="px-6 py-4 text-left text-sm font-medium text-gray-400">Client</th>
@@ -196,7 +196,7 @@ function ArchivedOrders({ orders, userRole, userId, onSelectOrder, onDeleteOrder
                                         <div className="flex gap-4 items-center">
                                             <button
                                                 onClick={() => onSelectOrder(order)}
-                                                className="text-blue-500 hover:text-blue-400 transition font-medium"
+                                                className="text-[#03ccff] hover:text-[#03ccff] transition font-medium"
                                             >
                                                 Voir détails
                                             </button>

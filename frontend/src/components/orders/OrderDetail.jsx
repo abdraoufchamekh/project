@@ -70,10 +70,10 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
 
   const handleUploadProductImage = async (productId, file) => {
     if (!file) return;
-    
+
     const formData = new FormData();
     formData.append('image', file);
-    
+
     try {
       const response = await fetch(`${API_BASE_URL}/orders/products/${productId}/image`, {
         method: 'PUT',
@@ -82,25 +82,91 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
         },
         body: formData
       });
-      
+
       if (!response.ok) {
         throw new Error('Upload failed');
       }
-      
+
       const { product: updatedProduct } = await response.json();
-      
+
       const updatedOrder = {
         ...localOrder,
-        products: localOrder.products.map(p => 
+        products: localOrder.products.map(p =>
           p.id === productId ? { ...p, image_url: updatedProduct.image_url } : p
         )
       };
       setLocalOrder(updatedOrder);
-      
+
     } catch (error) {
       console.error('Error uploading product image:', error);
       alert("Erreur: Impossible d'uploader l'image");
     }
+  };
+
+  const handleDeleteProductImage = async (productId) => {
+    if (!window.confirm("Voulez-vous vraiment supprimer l'image de ce produit ?")) return;
+    try {
+      await axios.delete(`${API_BASE_URL}/orders/products/${productId}/image`, {
+        headers: { Authorization: `Bearer ${sessionStorage.getItem('aurea_token')}` }
+      });
+      setLocalOrder(prev => ({
+        ...prev,
+        products: prev.products.map(p => p.id === productId ? { ...p, image_url: null } : p)
+      }));
+    } catch (error) {
+      console.error('Error deleting product image:', error);
+      alert("Erreur lors de la suppression de l'image du produit.");
+    }
+  };
+
+  const handleDeletePhoto = async (photoId) => {
+    if (!window.confirm("Voulez-vous vraiment supprimer cette photo ?")) return;
+    try {
+      await axios.delete(`${API_BASE_URL}/orders/photos/${photoId}`, {
+        headers: { Authorization: `Bearer ${sessionStorage.getItem('aurea_token')}` }
+      });
+      setLocalOrder(prev => ({
+        ...prev,
+        photos: prev.photos.filter(p => p.id !== photoId)
+      }));
+    } catch (error) {
+      console.error('Error deleting photo:', error);
+      alert("Erreur lors de la suppression de la photo.");
+    }
+  };
+  const handleAddPhoto = async (e) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+      formData.append('photos', files[i]);
+    }
+    // Set type as 'client' or determine by user role.
+    formData.append('type', 'client');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/orders/${order.id}/photos`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${sessionStorage.getItem('aurea_token')}`
+        },
+        body: formData
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Upload failed');
+      }
+      const data = await response.json();
+      setLocalOrder(prev => ({
+        ...prev,
+        photos: [...(prev.photos || []), ...data.photos]
+      }));
+    } catch (error) {
+      console.error('Error adding photos:', error);
+      alert("Erreur: Impossible d'ajouter la/les photo(s)");
+    }
+    e.target.value = '';
   };
 
   const handleSave = () => {
@@ -115,9 +181,9 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
 
   const productsSubtotal = (localOrder.products && localOrder.products.length > 0)
     ? localOrder.products.reduce(
-        (sum, p) => sum + (Number(p.quantity) || 1) * (Number(p.unit_price ?? p.unitPrice) || 0),
-        0
-      )
+      (sum, p) => sum + (Number(p.quantity) || 1) * (Number(p.unit_price ?? p.unitPrice) || 0),
+      0
+    )
     : Number(localOrder.products_subtotal || 0);
   const deliveryFeeAmount = Number(localOrder.delivery_fee ?? localOrder.deliveryFee ?? 0) || 0;
   const discountAmount = Number(localOrder.discount ?? 0) || 0;
@@ -131,7 +197,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
     if (status === 'En production' || status === 'Réalisée') return 'bg-yellow-900 text-yellow-300';
     if (status === 'En design') return 'bg-purple-900 text-purple-300';
     if (status === 'Retourné') return 'bg-red-900 text-red-300';
-    return 'bg-blue-900 text-blue-300'; // Nouvelle commande
+    return 'bg-[linear-gradient(135deg,_#460071,_#d403e1)] text-white'; // Nouvelle commande
   };
 
   const statusSteps = localOrder.source === 'atelier' ? [
@@ -155,7 +221,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
         <div>
           <button
             onClick={onBack}
-            className="text-blue-500 hover:text-blue-400 mb-2 flex items-center gap-2 transition"
+            className="text-[#03ccff] hover:text-[#03ccff] mb-2 flex items-center gap-2 transition"
           >
             ← Retour aux commandes
           </button>
@@ -174,7 +240,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
               </button>
               <button
                 onClick={() => setEditMode(true)}
-                className="flex-1 md:flex-none flex justify-center items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition shadow-sm"
+                className="flex-1 md:flex-none flex justify-center items-center gap-2 px-4 py-2 bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)] hover:opacity-90 text-white rounded-lg transition shadow-sm"
               >
                 <Edit2 size={20} />
                 Modifier
@@ -214,7 +280,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
-        <div className="bg-gray-800 rounded-lg p-4 md:p-6">
+        <div className="bg-[#112C70] rounded-lg p-4 md:p-6">
           <h3 className="text-lg font-semibold text-white mb-3 md:mb-4">Informations Destinataire</h3>
           <div className="space-y-2">
             <p className="text-white font-medium">{localOrder.clientName || localOrder.client_name}</p>
@@ -227,14 +293,14 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
               )}
               <span className="block">📍 {localOrder.wilaya || localOrder.wilaya ? `${localOrder.wilaya || localOrder.wilaya}${localOrder.commune ? ` - ${localOrder.commune}` : ''}` : ''}</span>
               {(localOrder.deliveryType === 'stop_desk' || localOrder.delivery_type === 'stop_desk' || localOrder.deliveryType === 'bureau' || localOrder.delivery_type === 'bureau') && (
-                <span className="block text-blue-300">🏢 {localOrder.stopDeskAgency || localOrder.stop_desk_agency || 'Au bureau'}</span>
+                <span className="block text-[#03ccff]">🏢 {localOrder.stopDeskAgency || localOrder.stop_desk_agency || 'Au bureau'}</span>
               )}
               <span className="block mt-1">🏠 Adresse: {localOrder.address ? localOrder.address : 'Non spécifiée'}</span>
             </p>
           </div>
         </div>
 
-        <div className="bg-gray-800 rounded-lg p-4 md:p-6">
+        <div className="bg-[#112C70] rounded-lg p-4 md:p-6">
           <h3 className="text-lg font-semibold text-white mb-3 md:mb-4">Détails Commande</h3>
           <div className="space-y-2">
             <p className="text-gray-400">
@@ -268,7 +334,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
                   step="100"
                   value={localOrder.delivery_fee ?? localOrder.deliveryFee ?? ''}
                   onChange={(e) => setLocalOrder(prev => ({ ...prev, delivery_fee: Number(e.target.value) || 0 }))}
-                  className="w-full max-w-[140px] p-2 bg-gray-900 border border-gray-600 text-white rounded outline-none focus:border-blue-500"
+                  className="w-full max-w-[140px] p-2 bg-[#0A2353] border border-gray-600 text-white rounded outline-none focus:border-[#03ccff]"
                 />
                 <label className="block text-gray-400 text-sm mt-2">Remise (DA)</label>
                 <input
@@ -277,7 +343,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
                   step="100"
                   value={localOrder.discount ?? ''}
                   onChange={(e) => setLocalOrder(prev => ({ ...prev, discount: Number(e.target.value) || 0 }))}
-                  className="w-full max-w-[140px] p-2 bg-gray-900 border border-gray-600 text-white rounded outline-none focus:border-blue-500"
+                  className="w-full max-w-[140px] p-2 bg-[#0A2353] border border-gray-600 text-white rounded outline-none focus:border-[#03ccff]"
                 />
                 <label className="block text-gray-400 text-sm mt-2">Versement (DA)</label>
                 <input
@@ -286,7 +352,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
                   step="100"
                   value={localOrder.versement ?? ''}
                   onChange={(e) => setLocalOrder(prev => ({ ...prev, versement: Number(e.target.value) || 0 }))}
-                  className="w-full max-w-[140px] p-2 bg-gray-900 border border-gray-600 text-white rounded outline-none focus:border-blue-500"
+                  className="w-full max-w-[140px] p-2 bg-[#0A2353] border border-gray-600 text-white rounded outline-none focus:border-[#03ccff]"
                 />
               </div>
             ) : null}
@@ -295,7 +361,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
                 Total: <span className="text-white font-bold">{totalAmount.toLocaleString()} DA</span>
               </p>
               <p className="text-gray-300 font-medium text-xl mt-1">
-                Reste à payer: <span className="text-blue-400 font-bold">{resteAPayer.toLocaleString()} DA</span>
+                Reste à payer: <span className="text-[#03ccff] font-bold">{resteAPayer.toLocaleString()} DA</span>
               </p>
             </div>
           </div>
@@ -305,13 +371,13 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
       </div>
 
       {/* Progress Steps UI */}
-      <div className="bg-gray-800 rounded-lg p-4 md:p-6 mb-6 md:mb-8">
+      <div className="bg-[#112C70] rounded-lg p-4 md:p-6 mb-6 md:mb-8">
         <h3 className="text-xl font-semibold text-white mb-6 md:mb-8">État de la commande</h3>
         <div className="overflow-x-auto pb-6 -mx-4 px-4 sm:mx-0 sm:px-0">
           <div className="relative mx-4 sm:mx-10 mb-6 min-w-[600px]">
             <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-gray-700 -z-0"></div>
             <div
-              className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-blue-500 -z-0 transition-all duration-500"
+              className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)] -z-0 transition-all duration-500"
               style={{ width: `${(Math.max(0, currentStepIdx) / (statusSteps.length - 1)) * 100}%` }}
             ></div>
             <div className="flex justify-between relative z-10 w-full">
@@ -323,12 +389,12 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
                     <button
                       onClick={() => editMode && updateOrderStatus(step)}
                       disabled={!editMode}
-                      className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${isCompleted ? 'bg-blue-500 text-white shadow-[0_0_15px_rgba(59,130,246,0.5)]' : 'bg-gray-800 text-gray-400 border-2 border-gray-600'
+                      className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${isCompleted ? 'bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)] text-white shadow-[0_0_15px_rgba(59,130,246,0.5)]' : 'bg-[#112C70] text-gray-400 border-2 border-gray-600'
                         } ${editMode ? 'cursor-pointer hover:scale-110' : 'cursor-default'}`}
                     >
                       {isCompleted && !isCurrent ? <Check size={20} /> : idx + 1}
                     </button>
-                    <span className={`absolute top-12 whitespace-nowrap text-xs font-medium ${isCurrent ? 'text-blue-400 font-bold' : 'text-gray-400'}`}>
+                    <span className={`absolute top-12 whitespace-nowrap text-xs font-medium ${isCurrent ? 'text-[#03ccff] font-bold' : 'text-gray-400'}`}>
                       {step}
                     </span>
                   </div>
@@ -340,12 +406,27 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
       </div>
 
       {/* Photos Viewer */}
-      <div className="bg-gray-800 rounded-lg p-4 md:p-6 mb-6 md:mb-8">
-        <h3 className="text-xl font-semibold text-white mb-4 md:mb-6">Photos Jointes</h3>
+      <div className="bg-[#112C70] rounded-lg p-4 md:p-6 mb-6 md:mb-8">
+        <div className="flex justify-between items-center mb-4 md:mb-6">
+          <h3 className="text-xl font-semibold text-white">Photos Jointes</h3>
+          {userRole && (
+            <label className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)] hover:opacity-90 text-white rounded-lg transition shadow-sm text-sm font-medium">
+              <Upload size={16} />
+              Ajouter des photos
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                className="hidden"
+                onChange={handleAddPhoto}
+              />
+            </label>
+          )}
+        </div>
         {localOrder.photos && localOrder.photos.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {localOrder.photos.map(photo => (
-              <div key={photo.id} className="bg-gray-900 rounded-lg overflow-hidden border border-gray-700 group">
+              <div key={photo.id} className="bg-[#0A2353] rounded-lg overflow-hidden border border-gray-700 group">
                 <div className="h-64 overflow-hidden relative">
                   <img
                     src={getPhotoUrl(photo.filename, { width: 600 })}
@@ -365,142 +446,169 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
                     </a>
                   </div>
                 </div>
-                <div className="p-4 bg-gray-900 flex justify-between items-center border-t border-gray-800">
-                  <span className="text-sm text-gray-300 truncate max-w-[60%] font-medium">
-                    {photo.filename}
-                  </span>
-                  <a
-                    href={getPhotoUrlOriginal(photo.filename)}
-                    download
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-blue-400 hover:text-blue-300 text-sm font-semibold flex items-center gap-1"
-                  >
-                    ⬇ Télécharger
-                  </a>
+                <div className="p-4 bg-[#0A2353] flex flex-col gap-3 border-t border-gray-800">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-300 truncate max-w-[60%] font-medium" title={photo.filename}>
+                      {photo.filename}
+                    </span>
+                    <a
+                      href={getPhotoUrlOriginal(photo.filename)}
+                      download
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-[#03ccff] hover:text-[#03ccff] text-sm font-semibold flex items-center gap-1"
+                    >
+                      ⬇ Télécharger
+                    </a>
+                  </div>
+                  {userRole && (
+                    <div className="flex justify-end items-center pt-2 border-t border-gray-800">
+                      <button
+                        onClick={() => handleDeletePhoto(photo.id)}
+                        className="flex items-center gap-1 text-xs text-red-500 hover:text-red-400 transition px-2 py-1 bg-[#112C70] rounded border border-gray-700 hover:border-red-500"
+                        title="Supprimer la photo"
+                      >
+                        <Trash2 size={14} />
+                        Supprimer
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 bg-gray-900/50 rounded-lg border border-gray-800 border-dashed">
+          <div className="text-center py-12 bg-[#0A2353]/50 rounded-lg border border-gray-800 border-dashed">
             <p className="text-gray-400">Aucune photo jointe à cette commande.</p>
           </div>
         )}
       </div>
 
-      <div className="bg-gray-800 rounded-lg p-4 md:p-6">
+      <div className="bg-[#112C70] rounded-lg p-4 md:p-6">
         <h3 className="text-xl font-semibold text-white mb-4">Produits de la commande</h3>
 
         {loadingDetail && (!localOrder.products || localOrder.products.length === 0) ? (
           <p className="text-gray-400 italic">Chargement des articles...</p>
         ) : (
           localOrder.products.map(product => (
-          <div key={product.id} className="bg-gray-900 rounded-lg mb-4 overflow-hidden">
-            <div
-              className="p-4 cursor-pointer hover:bg-gray-850 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition"
-              onClick={() => toggleProduct(product.id)}
-            >
-              <div className="flex items-start md:items-center gap-3 w-full md:w-auto">
-                <div className="mt-1 md:mt-0">
-                  {expandedProducts[product.id] ? (
-                    <ChevronDown size={20} className="text-gray-400" />
+            <div key={product.id} className="bg-[#0A2353] rounded-lg mb-4 overflow-hidden">
+              <div
+                className="p-4 cursor-pointer hover:bg-gray-850 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition"
+                onClick={() => toggleProduct(product.id)}
+              >
+                <div className="flex items-start md:items-center gap-3 w-full md:w-auto">
+                  <div className="mt-1 md:mt-0">
+                    {expandedProducts[product.id] ? (
+                      <ChevronDown size={20} className="text-gray-400" />
+                    ) : (
+                      <ChevronRight size={20} className="text-gray-400" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-lg font-medium text-white">
+                      {product.type} × {product.quantity || 1}
+                    </h4>
+                  </div>
+                </div>
+
+                <div onClick={(e) => e.stopPropagation()} className="w-full md:w-auto flex justify-end">
+                  {editMode ? (
+                    <select
+                      value={product.status || 'Nouvelle commande'}
+                      onChange={(e) => updateProductStatus(product.id, e.target.value)}
+                      className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-[#03ccff] w-full md:w-auto"
+                    >
+                      {statusSteps.map(status => (
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
+                      ))}
+                    </select>
                   ) : (
-                    <ChevronRight size={20} className="text-gray-400" />
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusClass(
+                        product.status
+                      )}`}
+                    >
+                      {product.status}
+                    </span>
                   )}
                 </div>
-                <div className="flex-1">
-                  <h4 className="text-lg font-medium text-white">
-                    {product.type} × {product.quantity || 1}
-                  </h4>
-                </div>
               </div>
 
-              <div onClick={(e) => e.stopPropagation()} className="w-full md:w-auto flex justify-end">
-                {editMode ? (
-                  <select
-                    value={product.status || 'Nouvelle commande'}
-                    onChange={(e) => updateProductStatus(product.id, e.target.value)}
-                    className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500 w-full md:w-auto"
-                  >
-                    {statusSteps.map(status => (
-                      <option key={status} value={status}>
-                        {status}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusClass(
-                      product.status
-                    )}`}
-                  >
-                    {product.status}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {expandedProducts[product.id] && (
-              <div className="p-4 border-t border-gray-800 bg-gray-850">
-                <div className="flex flex-col gap-4">
-                  <div>
-                    <h5 className="text-sm font-medium text-gray-400 mb-3">
-                      🖼️ Photo de l'article
-                    </h5>
-                    <div className="space-y-4">
-                      {product.image_url ? (
-                        <div className="h-40 w-40 md:h-48 md:w-48 rounded-lg overflow-hidden border border-gray-700 bg-gray-900 group relative">
-                          <img
-                            src={getPhotoUrl(product.image_url, { width: 400 })}
-                            alt=""
-                            loading="lazy"
-                            decoding="async"
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                          <a 
-                            href={getPhotoUrlOriginal(product.image_url)} 
-                            target="_blank" 
-                            rel="noreferrer"
-                            className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer text-white text-sm font-semibold backdrop-blur-sm"
-                          >
-                            Agrandir
-                          </a>
-                        </div>
-                      ) : (
-                        <div className="flex flex-col gap-3">
-                          <p className="text-gray-500 text-sm italic">Aucune photo associée</p>
-                          {userRole && (
-                            <label className="cursor-pointer flex items-center gap-2 text-sm text-blue-500 hover:text-blue-400 transition w-fit px-4 py-2 bg-gray-800 rounded-lg border border-gray-700 hover:border-blue-500 shadow-sm">
-                              <Upload size={16} />
-                              <span className="font-medium">Uploader l'image</span>
-                              <input 
-                                type="file" 
-                                className="hidden" 
-                                accept="image/*"
-                                onChange={(e) => {
-                                  if (e.target.files && e.target.files[0]) {
-                                    handleUploadProductImage(product.id, e.target.files[0]);
-                                  }
-                                }}
+              {expandedProducts[product.id] && (
+                <div className="p-4 border-t border-gray-800 bg-gray-850">
+                  <div className="flex flex-col gap-4">
+                    <div>
+                      <h5 className="text-sm font-medium text-gray-400 mb-3">
+                        🖼️ Photo de l'article
+                      </h5>
+                      <div className="space-y-4">
+                        {product.image_url ? (
+                          <div className="flex flex-col gap-3">
+                            <div className="h-40 w-40 md:h-48 md:w-48 rounded-lg overflow-hidden border border-gray-700 bg-[#0A2353] group relative">
+                              <img
+                                src={getPhotoUrl(product.image_url, { width: 400 })}
+                                alt=""
+                                loading="lazy"
+                                decoding="async"
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                               />
-                            </label>
-                          )}
-                        </div>
-                      )}
+                              <a
+                                href={getPhotoUrlOriginal(product.image_url)}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer text-white text-sm font-semibold backdrop-blur-sm"
+                              >
+                                Agrandir
+                              </a>
+                            </div>
+                            {userRole && (
+                              <div className="flex gap-2 mt-1">
+                                <button
+                                  onClick={() => handleDeleteProductImage(product.id)}
+                                  className="flex items-center gap-1 text-xs text-red-500 hover:text-red-400 transition px-2 py-1 bg-[#112C70] rounded border border-gray-700 hover:border-red-500"
+                                >
+                                  <Trash2 size={14} />
+                                  Supprimer
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="flex flex-col gap-3">
+                            <p className="text-gray-500 text-sm italic">Aucune photo associée</p>
+                            {userRole && (
+                              <label className="cursor-pointer flex items-center gap-2 text-sm text-[#03ccff] hover:text-[#03ccff] transition w-fit px-4 py-2 bg-[#112C70] rounded-lg border border-gray-700 hover:border-[#03ccff] shadow-sm">
+                                <Upload size={16} />
+                                <span className="font-medium">Uploader l'image</span>
+                                <input
+                                  type="file"
+                                  className="hidden"
+                                  accept="image/*"
+                                  onChange={(e) => {
+                                    if (e.target.files && e.target.files[0]) {
+                                      handleUploadProductImage(product.id, e.target.files[0]);
+                                    }
+                                  }}
+                                />
+                              </label>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
-        )))}
+              )}
+            </div>
+          )))}
       </div>
       {/* Invoice Modal */}
-      <InvoicePreviewModal 
-        isOpen={invoiceModalOpen} 
-        onClose={() => setInvoiceModalOpen(false)} 
-        orderId={order.id} 
+      <InvoicePreviewModal
+        isOpen={invoiceModalOpen}
+        onClose={() => setInvoiceModalOpen(false)}
+        orderId={order.id}
       />
     </div>
   );
