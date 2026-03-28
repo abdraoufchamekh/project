@@ -197,7 +197,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
     if (status === 'En production' || status === 'Réalisée') return 'bg-yellow-900 text-yellow-300';
     if (status === 'En design') return 'bg-purple-900 text-purple-300';
     if (status === 'Retourné') return 'bg-red-900 text-red-300';
-    return 'bg-[linear-gradient(135deg,_#460071,_#d403e1)] text-white'; // Nouvelle commande
+    return 'bg-[#5B58EB] text-white'; // Nouvelle commande
   };
 
   const statusSteps = localOrder.source === 'atelier' ? [
@@ -221,7 +221,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
         <div>
           <button
             onClick={onBack}
-            className="text-[#03ccff] hover:text-[#03ccff] mb-2 flex items-center gap-2 transition"
+            className="text-[#56E1E9] hover:text-[#56E1E9] mb-2 flex items-center gap-2 transition"
           >
             ← Retour aux commandes
           </button>
@@ -240,7 +240,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
               </button>
               <button
                 onClick={() => setEditMode(true)}
-                className="flex-1 md:flex-none flex justify-center items-center gap-2 px-4 py-2 bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)] hover:opacity-90 text-white rounded-lg transition shadow-sm"
+                className="flex-1 md:flex-none flex justify-center items-center gap-2 px-4 py-2 bg-[linear-gradient(135deg,_#5B58EB,_#09fbff)] hover:opacity-90 text-white rounded-lg transition shadow-sm"
               >
                 <Edit2 size={20} />
                 Modifier
@@ -293,7 +293,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
               )}
               <span className="block">📍 {localOrder.wilaya || localOrder.wilaya ? `${localOrder.wilaya || localOrder.wilaya}${localOrder.commune ? ` - ${localOrder.commune}` : ''}` : ''}</span>
               {(localOrder.deliveryType === 'stop_desk' || localOrder.delivery_type === 'stop_desk' || localOrder.deliveryType === 'bureau' || localOrder.delivery_type === 'bureau') && (
-                <span className="block text-[#03ccff]">🏢 {localOrder.stopDeskAgency || localOrder.stop_desk_agency || 'Au bureau'}</span>
+                <span className="block text-[#56E1E9]">🏢 {localOrder.stopDeskAgency || localOrder.stop_desk_agency || 'Au bureau'}</span>
               )}
               <span className="block mt-1">🏠 Adresse: {localOrder.address ? localOrder.address : 'Non spécifiée'}</span>
             </p>
@@ -334,7 +334,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
                   step="100"
                   value={localOrder.delivery_fee ?? localOrder.deliveryFee ?? ''}
                   onChange={(e) => setLocalOrder(prev => ({ ...prev, delivery_fee: Number(e.target.value) || 0 }))}
-                  className="w-full max-w-[140px] p-2 bg-[#0A2353] border border-gray-600 text-white rounded outline-none focus:border-[#03ccff]"
+                  className="w-full max-w-[140px] p-2 bg-[#0A2353] border border-gray-600 text-white rounded outline-none focus:border-[#56E1E9]"
                 />
                 <label className="block text-gray-400 text-sm mt-2">Remise (DA)</label>
                 <input
@@ -343,7 +343,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
                   step="100"
                   value={localOrder.discount ?? ''}
                   onChange={(e) => setLocalOrder(prev => ({ ...prev, discount: Number(e.target.value) || 0 }))}
-                  className="w-full max-w-[140px] p-2 bg-[#0A2353] border border-gray-600 text-white rounded outline-none focus:border-[#03ccff]"
+                  className="w-full max-w-[140px] p-2 bg-[#0A2353] border border-gray-600 text-white rounded outline-none focus:border-[#56E1E9]"
                 />
                 <label className="block text-gray-400 text-sm mt-2">Versement (DA)</label>
                 <input
@@ -352,7 +352,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
                   step="100"
                   value={localOrder.versement ?? ''}
                   onChange={(e) => setLocalOrder(prev => ({ ...prev, versement: Number(e.target.value) || 0 }))}
-                  className="w-full max-w-[140px] p-2 bg-[#0A2353] border border-gray-600 text-white rounded outline-none focus:border-[#03ccff]"
+                  className="w-full max-w-[140px] p-2 bg-[#0A2353] border border-gray-600 text-white rounded outline-none focus:border-[#56E1E9]"
                 />
               </div>
             ) : null}
@@ -361,7 +361,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
                 Total: <span className="text-white font-bold">{totalAmount.toLocaleString()} DA</span>
               </p>
               <p className="text-gray-300 font-medium text-xl mt-1">
-                Reste à payer: <span className="text-[#03ccff] font-bold">{resteAPayer.toLocaleString()} DA</span>
+                Reste à payer: <span className="text-[#BB63FF] font-bold">{resteAPayer.toLocaleString()} DA</span>
               </p>
             </div>
           </div>
@@ -377,7 +377,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
           <div className="relative mx-4 sm:mx-10 mb-6 min-w-[600px]">
             <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-gray-700 -z-0"></div>
             <div
-              className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)] -z-0 transition-all duration-500"
+              className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-[linear-gradient(135deg,_#5B58EB,_#09fbff)] -z-0 transition-all duration-500"
               style={{ width: `${(Math.max(0, currentStepIdx) / (statusSteps.length - 1)) * 100}%` }}
             ></div>
             <div className="flex justify-between relative z-10 w-full">
@@ -389,12 +389,12 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
                     <button
                       onClick={() => editMode && updateOrderStatus(step)}
                       disabled={!editMode}
-                      className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${isCompleted ? 'bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)] text-white shadow-[0_0_15px_rgba(59,130,246,0.5)]' : 'bg-[#112C70] text-gray-400 border-2 border-gray-600'
+                      className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${isCompleted ? 'bg-[linear-gradient(135deg,_#5B58EB,_#09fbff)] text-white shadow-[0_0_15px_rgba(9,251,255,0.5)]' : 'bg-[#112C70] text-gray-400 border-2 border-gray-600'
                         } ${editMode ? 'cursor-pointer hover:scale-110' : 'cursor-default'}`}
                     >
                       {isCompleted && !isCurrent ? <Check size={20} /> : idx + 1}
                     </button>
-                    <span className={`absolute top-12 whitespace-nowrap text-xs font-medium ${isCurrent ? 'text-[#03ccff] font-bold' : 'text-gray-400'}`}>
+                    <span className={`absolute top-12 whitespace-nowrap text-xs font-medium ${isCurrent ? 'text-[#56E1E9] font-bold' : 'text-gray-400'}`}>
                       {step}
                     </span>
                   </div>
@@ -410,7 +410,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
         <div className="flex justify-between items-center mb-4 md:mb-6">
           <h3 className="text-xl font-semibold text-white">Photos Jointes</h3>
           {userRole && (
-            <label className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)] hover:opacity-90 text-white rounded-lg transition shadow-sm text-sm font-medium">
+            <label className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-[linear-gradient(135deg,_#5B58EB,_#09fbff)] hover:opacity-90 text-white rounded-lg transition shadow-sm text-sm font-medium">
               <Upload size={16} />
               Ajouter des photos
               <input
@@ -456,7 +456,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
                       download
                       target="_blank"
                       rel="noreferrer"
-                      className="text-[#03ccff] hover:text-[#03ccff] text-sm font-semibold flex items-center gap-1"
+                      className="text-[#56E1E9] hover:text-[#56E1E9] text-sm font-semibold flex items-center gap-1"
                     >
                       ⬇ Télécharger
                     </a>
@@ -516,7 +516,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
                     <select
                       value={product.status || 'Nouvelle commande'}
                       onChange={(e) => updateProductStatus(product.id, e.target.value)}
-                      className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-[#03ccff] w-full md:w-auto"
+                      className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-[#56E1E9] w-full md:w-auto"
                     >
                       {statusSteps.map(status => (
                         <option key={status} value={status}>
@@ -579,7 +579,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
                           <div className="flex flex-col gap-3">
                             <p className="text-gray-500 text-sm italic">Aucune photo associée</p>
                             {userRole && (
-                              <label className="cursor-pointer flex items-center gap-2 text-sm text-[#03ccff] hover:text-[#03ccff] transition w-fit px-4 py-2 bg-[#112C70] rounded-lg border border-gray-700 hover:border-[#03ccff] shadow-sm">
+                              <label className="cursor-pointer flex items-center gap-2 text-sm text-[#56E1E9] hover:text-[#56E1E9] transition w-fit px-4 py-2 bg-[#112C70] rounded-lg border border-gray-700 hover:border-[#56E1E9] shadow-sm">
                                 <Upload size={16} />
                                 <span className="font-medium">Uploader l'image</span>
                                 <input

@@ -149,8 +149,8 @@ exports.generateInvoice = async (req, res) => {
         const boxWidth  = 260;
         const boxHeight = 70;
 
-        doc.rect(40, startY, boxWidth, boxHeight).fillOpacity(0.08).fill('#1d4ed8').fillOpacity(1);
-        doc.fillColor('#1d4ed8').fontSize(11).text('Informations vendeur', 48, startY + 6);
+        doc.rect(40, startY, boxWidth, boxHeight).fillOpacity(0.08).fill('#5B58EB').fillOpacity(1);
+        doc.fillColor('#5B58EB').fontSize(11).text('Informations vendeur', 48, startY + 6);
         doc.fillColor('#111827').fontSize(10)
             .text(`Vendeur : ${vendorName}`,  48, startY + 22)
             .text(`Activité : ${activity}`,   48, startY + 34, { width: boxWidth - 16 })
@@ -186,7 +186,9 @@ exports.generateInvoice = async (req, res) => {
         const totalX     = itemX + 415;
 
         // Table header
-        doc.rect(itemX, tableTop, tableWidth, 22).fill('#1d4ed8');
+        const tableGrad = doc.linearGradient(itemX, tableTop, itemX + tableWidth, tableTop + 22);
+        tableGrad.stop(0, '#5B58EB').stop(1, '#460071');
+        doc.rect(itemX, tableTop, tableWidth, 22).fill(tableGrad);
         doc.fillColor('#ffffff').fontSize(11)
             .text('Description',  itemX + 8,  tableTop + 6)
             .text('Prix unitaire', unitPriceX, tableTop + 6, { width: 90, align: 'right' })

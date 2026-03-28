@@ -28,7 +28,7 @@ export default function Sidebar({ active, setActive, isOpen, setIsOpen }) {
       <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#0A2353] border-r border-gray-800 h-screen flex flex-col transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 ${isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}`}>
         <div className="p-6 border-b border-gray-800 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-[#03ccff]">Auréa Déco</h1>
+            <h1 className="text-2xl font-bold text-[#56E1E9]">Auréa Déco</h1>
             <p className="text-sm text-gray-400 mt-1">{user?.name}</p>
           </div>
           <button onClick={() => setIsOpen(false)} className="md:hidden text-gray-400 hover:text-white p-1">
@@ -46,8 +46,8 @@ export default function Sidebar({ active, setActive, isOpen, setIsOpen }) {
                 key={item.id}
                 onClick={() => setActive(item.id)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${active === item.id
-                  ? 'bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)] text-white'
-                  : 'text-gray-400 hover:bg-[#112C70] hover:text-white'
+                  ? 'bg-[linear-gradient(135deg,_#460071,_#BB63FF)] text-white'
+                  : 'text-[#B0D8E0] hover:text-white'
                   }`}
               >
                 <Icon size={20} />
@@ -60,7 +60,7 @@ export default function Sidebar({ active, setActive, isOpen, setIsOpen }) {
       <div className="p-4 border-t border-gray-800">
         <button
           onClick={logout}
-          className="w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:bg-[#112C70] hover:text-white rounded-lg transition"
+          className="w-full flex items-center gap-3 px-4 py-3 text-[#B0D8E0] hover:text-white rounded-lg transition"
         >
           <LogOut size={20} />
           <span>Déconnexion</span>

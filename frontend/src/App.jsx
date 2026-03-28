@@ -1,4 +1,4 @@
-import React, { Suspense, useState, useCallback, useEffect, useMemo } from 'react';
+import React, { Suspense, useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Menu } from 'lucide-react';
@@ -32,6 +32,20 @@ function MainApp() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [listParams, setListParams] = useState(null);
   const [statusPageConfig, setStatusPageConfig] = useState(null);
+
+  const prevUserId = useRef(user?.id);
+
+  useEffect(() => {
+    if (user?.id !== prevUserId.current) {
+      if (user) {
+        setActivePage('dashboard');
+        setSelectedOrder(null);
+        setStatusPageConfig(null);
+      }
+      prevUserId.current = user?.id;
+    }
+  }, [user?.id, user]);
+
 
   useEffect(() => {
     if (!user || selectedOrder) return;
@@ -236,7 +250,7 @@ function MainApp() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0A2353] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#03ccff]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#56E1E9]"></div>
       </div>
     );
   }
@@ -259,7 +273,7 @@ function MainApp() {
 
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         <div className="md:hidden bg-[#0A2353] border-b border-gray-800 p-4 flex items-center justify-between z-20">
-          <h1 className="text-xl font-bold text-[#03ccff]">Auréa Déco</h1>
+          <h1 className="text-xl font-bold text-[#56E1E9]">Auréa Déco</h1>
           <button onClick={() => setIsSidebarOpen(true)} className="text-gray-400 hover:text-white transition p-1">
             <Menu size={24} />
           </button>

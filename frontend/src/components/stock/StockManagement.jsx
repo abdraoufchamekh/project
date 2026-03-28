@@ -69,7 +69,7 @@ export default function StockManagement() {
         <h2 className="text-3xl font-bold text-white">Gestion de Stock</h2>
         <button
           onClick={handleOpenModal}
-          className="flex items-center gap-2 px-4 py-2 bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)] hover:opacity-90 text-white rounded-lg transition shadow-lg"
+          className="flex items-center gap-2 px-4 py-2 bg-[linear-gradient(135deg,_#5B58EB,_#56E1E9)] hover:opacity-90 text-white rounded-lg transition shadow-lg"
         >
           <Plus size={20} />
           <span>Ajouter un article</span>
@@ -93,7 +93,7 @@ export default function StockManagement() {
               {isLoading ? (
                 <tr>
                   <td colSpan="6" className="p-8 text-center text-gray-400">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#03ccff] mx-auto mb-4"></div>
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#56E1E9] mx-auto mb-4"></div>
                     Chargement du stock...
                   </td>
                 </tr>
@@ -111,7 +111,7 @@ export default function StockManagement() {
                       {product.color ? <span className="bg-[#112C70] border border-gray-600 px-2 py-0.5 rounded text-pink-300 text-sm">{product.color}</span> : <span className="text-gray-600">-</span>}
                     </td>
                     <td className="p-4 align-middle text-gray-400">
-                      {product.dimension ? <span className="bg-[#112C70] border border-gray-600 px-2 py-0.5 rounded text-[#03ccff] text-sm">{product.dimension}</span> : <span className="text-gray-600">-</span>}
+                      {product.dimension ? <span className="bg-[#112C70] border border-gray-600 px-2 py-0.5 rounded text-[#56E1E9] text-sm">{product.dimension}</span> : <span className="text-gray-600">-</span>}
                     </td>
                     <td className="p-4 align-middle text-gray-400">
                       {product.size ? <span className="bg-[#112C70] border border-gray-600 px-2 py-0.5 rounded text-green-300 text-sm">{product.size}</span> : <span className="text-gray-600">-</span>}
@@ -124,7 +124,7 @@ export default function StockManagement() {
                     <td className="p-4 align-middle text-right space-x-2">
                        <button 
                          onClick={() => handleEditProduct(product)}
-                         className="text-gray-400 hover:text-[#03ccff] transition p-2 bg-[#112C70] rounded opacity-0 group-hover:opacity-100 focus:opacity-100"
+                         className="text-gray-400 hover:text-[#56E1E9] transition p-2 bg-[#112C70] rounded opacity-0 group-hover:opacity-100 focus:opacity-100"
                          title="Modifier"
                       >
                         <Edit2 size={16} />

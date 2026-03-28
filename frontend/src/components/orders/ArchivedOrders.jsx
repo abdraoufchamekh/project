@@ -100,7 +100,7 @@ function ArchivedOrders({ orders, userRole, userId, onSelectOrder, onDeleteOrder
                                 onChange={handleFilterChange}
                                 onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
                                 placeholder="Nom ou tel..."
-                                className="w-full bg-gray-700 text-white text-sm rounded px-3 py-2 pl-9 focus:outline-none focus:ring-1 focus:ring-[#03ccff]"
+                                className="w-full bg-gray-700 text-white text-sm rounded px-3 py-2 pl-9 focus:outline-none focus:ring-1 focus:ring-[#56E1E9]"
                             />
                         </div>
                     </div>
@@ -110,7 +110,7 @@ function ArchivedOrders({ orders, userRole, userId, onSelectOrder, onDeleteOrder
                             name="status"
                             value={filters.status}
                             onChange={handleFilterChange}
-                            className="w-full bg-gray-700 text-white text-sm rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#03ccff]"
+                            className="w-full bg-gray-700 text-white text-sm rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#56E1E9]"
                         >
                             <option value="">Tous les statuts</option>
                             <option value="Livré">Livré</option>
@@ -126,7 +126,7 @@ function ArchivedOrders({ orders, userRole, userId, onSelectOrder, onDeleteOrder
                             onChange={handleFilterChange}
                             onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
                             placeholder="Ex: Alger"
-                            className="w-full bg-gray-700 text-white text-sm rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#03ccff]"
+                            className="w-full bg-gray-700 text-white text-sm rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#56E1E9]"
                         />
                     </div>
                     <div className="flex-1 w-full">
@@ -136,7 +136,7 @@ function ArchivedOrders({ orders, userRole, userId, onSelectOrder, onDeleteOrder
                             name="date"
                             value={filters.date}
                             onChange={handleFilterChange}
-                            className="w-full bg-gray-700 text-white text-sm rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#03ccff]"
+                            className="w-full bg-gray-700 text-white text-sm rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#56E1E9]"
                         />
                     </div>
                     <div className="flex gap-2 w-full md:w-auto pt-4 md:pt-0">
@@ -149,7 +149,7 @@ function ArchivedOrders({ orders, userRole, userId, onSelectOrder, onDeleteOrder
                         </button>
                         <button
                             onClick={applyFilters}
-                            className="px-4 py-2 bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)] text-white text-sm font-medium rounded hover:bg-blue-700 transition flex items-center justify-center gap-2 flex-1 md:flex-none whitespace-nowrap"
+                            className="px-4 py-2 bg-[linear-gradient(135deg,_#5B58EB,_#09fbff)] hover:opacity-90 text-white text-sm font-medium rounded transition flex items-center justify-center gap-2 flex-1 md:flex-none whitespace-nowrap"
                         >
                             <Filter size={16} /> Appliquer
                         </button>
@@ -168,18 +168,18 @@ function ArchivedOrders({ orders, userRole, userId, onSelectOrder, onDeleteOrder
                         <table className="w-full min-w-[800px]">
                         <thead className="bg-[#0A2353] border-b border-gray-700">
                             <tr>
-                                <th className="px-6 py-4 text-left text-sm font-medium text-gray-400">ID</th>
-                                <th className="px-6 py-4 text-left text-sm font-medium text-gray-400">Client</th>
-                                <th className="px-6 py-4 text-left text-sm font-medium text-gray-400">Téléphone</th>
-                                <th className="px-6 py-4 text-left text-sm font-medium text-gray-400">Produits</th>
-                                <th className="px-6 py-4 text-left text-sm font-medium text-gray-400">Statut</th>
-                                <th className="px-6 py-4 text-left text-sm font-medium text-gray-400">Date</th>
-                                <th className="px-6 py-4 text-left text-sm font-medium text-gray-400">Actions</th>
+                                <th className="px-6 py-4 text-left text-sm font-medium text-[#B0D8E0]">ID</th>
+                                <th className="px-6 py-4 text-left text-sm font-medium text-[#B0D8E0]">Client</th>
+                                <th className="px-6 py-4 text-left text-sm font-medium text-[#B0D8E0]">Téléphone</th>
+                                <th className="px-6 py-4 text-left text-sm font-medium text-[#B0D8E0]">Produits</th>
+                                <th className="px-6 py-4 text-left text-sm font-medium text-[#B0D8E0]">Statut</th>
+                                <th className="px-6 py-4 text-left text-sm font-medium text-[#B0D8E0]">Date</th>
+                                <th className="px-6 py-4 text-left text-sm font-medium text-[#B0D8E0]">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-700">
                             {archivedOrders.map(order => (
-                                <tr key={order.id} className="hover:bg-gray-750 transition">
+                                <tr key={order.id} className="hover:bg-[#112C70]/70 transition">
                                     <td className="px-6 py-4 text-white font-medium">#{order.id}</td>
                                     <td className="px-6 py-4 text-gray-300">{order.clientName || order.client_name || `${order.first_name || ''} ${order.last_name || ''}`.trim() || 'Inconnu'}</td>
                                     <td className="px-6 py-4 text-gray-500">{order.phone}</td>
@@ -196,7 +196,7 @@ function ArchivedOrders({ orders, userRole, userId, onSelectOrder, onDeleteOrder
                                         <div className="flex gap-4 items-center">
                                             <button
                                                 onClick={() => onSelectOrder(order)}
-                                                className="text-[#03ccff] hover:text-[#03ccff] transition font-medium"
+                                                className="text-[#56E1E9] hover:text-[#56E1E9] transition font-medium"
                                             >
                                                 Voir détails
                                             </button>

@@ -69,7 +69,7 @@ export default function DesignersPage() {
         </div>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="flex items-center gap-2 px-4 py-2 bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)] hover:opacity-90 text-white rounded-lg transition"
+          className="flex items-center gap-2 px-4 py-2 bg-[linear-gradient(135deg,_#5B58EB,_#56E1E9)] hover:opacity-90 text-white rounded-lg transition"
         >
           <Plus size={20} />
           Ajouter Membre
@@ -77,7 +77,7 @@ export default function DesignersPage() {
       </div>
 
       {showAddForm && (
-        <div className="bg-[#112C70] rounded-lg p-6 mb-6 border border-[#03ccff]">
+        <div className="bg-[#112C70] rounded-lg p-6 mb-6 border border-[#56E1E9]">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-xl font-semibold text-white">Nouveau Membre de l'Atelier</h3>
             <button
@@ -98,7 +98,7 @@ export default function DesignersPage() {
                   type="text"
                   value={newDesigner.name}
                   onChange={(e) => setNewDesigner({ ...newDesigner, name: e.target.value })}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-[#03ccff]"
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-[#56E1E9]"
                   placeholder="Nom et prénom"
                 />
               </div>
@@ -111,7 +111,7 @@ export default function DesignersPage() {
                   type="email"
                   value={newDesigner.email}
                   onChange={(e) => setNewDesigner({ ...newDesigner, email: e.target.value })}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-[#03ccff]"
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-[#56E1E9]"
                   placeholder="email@example.com"
                 />
               </div>
@@ -124,7 +124,7 @@ export default function DesignersPage() {
                   type="password"
                   value={newDesigner.password}
                   onChange={(e) => setNewDesigner({ ...newDesigner, password: e.target.value })}
-                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-[#03ccff]"
+                  className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-[#56E1E9]"
                   placeholder="Min. 6 caractères"
                 />
               </div>
@@ -133,7 +133,7 @@ export default function DesignersPage() {
             <div className="flex gap-4 pt-4">
               <button
                 onClick={handleAddDesigner}
-                className="px-6 py-2 bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)] hover:opacity-90 text-white rounded-lg transition font-medium"
+                className="px-6 py-2 bg-[linear-gradient(135deg,_#5B58EB,_#56E1E9)] hover:opacity-90 text-white rounded-lg transition font-medium"
               >
                 ✓ Ajouter Membre
               </button>
@@ -173,7 +173,7 @@ export default function DesignersPage() {
                   <Briefcase size={16} />
                   Commandes actives:
                 </span>
-                <span className="text-[#03ccff] font-bold text-lg">{designer.activeOrders}</span>
+                <span className="text-[#56E1E9] font-bold text-lg">{designer.activeOrders}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-400 text-sm">Commandes terminées:</span>
@@ -188,7 +188,7 @@ export default function DesignersPage() {
             </div>
 
             <div className="pt-4 border-t border-gray-700 flex gap-2">
-              <button className="flex-1 px-4 py-2 bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)] hover:opacity-90 text-white rounded-lg transition text-sm font-medium">
+              <button className="flex-1 px-4 py-2 bg-[linear-gradient(135deg,_#5B58EB,_#56E1E9)] hover:opacity-90 text-white rounded-lg transition text-sm font-medium">
                 ✏️ Modifier
               </button>
               <button
@@ -208,7 +208,7 @@ export default function DesignersPage() {
           <p className="text-gray-400">Aucun membre pour le moment</p>
           <button
             onClick={() => setShowAddForm(true)}
-            className="mt-4 text-[#03ccff] hover:text-[#03ccff]"
+            className="mt-4 text-[#56E1E9] hover:text-[#56E1E9]"
           >
             Ajouter le premier membre
           </button>

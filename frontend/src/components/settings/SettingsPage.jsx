@@ -75,7 +75,7 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-full">
-        <Loader2 className="animate-spin text-[#03ccff] mr-2" />
+        <Loader2 className="animate-spin text-[#56E1E9] mr-2" />
         <span className="text-gray-400">Chargement...</span>
       </div>
     );
@@ -106,7 +106,7 @@ export default function SettingsPage() {
               name="company_name"
               value={settings.company_name || ''}
               onChange={handleChange}
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-[#03ccff] focus:ring-1 focus:ring-[#03ccff]"
+              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-[#56E1E9] focus:ring-1 focus:ring-[#56E1E9]"
               required
             />
           </div>
@@ -118,7 +118,7 @@ export default function SettingsPage() {
               name="vendor_name"
               value={settings.vendor_name || ''}
               onChange={handleChange}
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-[#03ccff] focus:ring-1 focus:ring-[#03ccff]"
+              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-[#56E1E9] focus:ring-1 focus:ring-[#56E1E9]"
             />
           </div>
 
@@ -129,7 +129,7 @@ export default function SettingsPage() {
               name="activity"
               value={settings.activity || ''}
               onChange={handleChange}
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-[#03ccff] focus:ring-1 focus:ring-[#03ccff]"
+              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-[#56E1E9] focus:ring-1 focus:ring-[#56E1E9]"
             />
           </div>
 
@@ -140,7 +140,7 @@ export default function SettingsPage() {
               name="address"
               value={settings.address || ''}
               onChange={handleChange}
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-[#03ccff] focus:ring-1 focus:ring-[#03ccff]"
+              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-[#56E1E9] focus:ring-1 focus:ring-[#56E1E9]"
             />
           </div>
 
@@ -151,7 +151,7 @@ export default function SettingsPage() {
               name="phone"
               value={settings.phone || ''}
               onChange={handleChange}
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-[#03ccff] focus:ring-1 focus:ring-[#03ccff]"
+              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-[#56E1E9] focus:ring-1 focus:ring-[#56E1E9]"
             />
           </div>
         </div>
@@ -160,7 +160,7 @@ export default function SettingsPage() {
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center gap-2 px-6 py-2.5 bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)] hover:opacity-90 disabled:bg-blue-800 disabled:opacity-50 text-white rounded-lg transition shadow-md font-medium"
+            className="flex items-center gap-2 px-6 py-2.5 bg-[linear-gradient(135deg,_#5B58EB,_#09fbff)] hover:opacity-90 disabled:bg-blue-800 disabled:opacity-50 text-white rounded-lg transition shadow-md font-medium"
           >
             {saving ? (
               <Loader2 size={20} className="animate-spin" />

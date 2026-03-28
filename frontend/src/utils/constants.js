@@ -13,7 +13,7 @@ export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5
 
 export const getStatusColor = (status) => {
   const colors = {
-    'Nouvelle commande': 'bg-[linear-gradient(135deg,_#460071,_#d403e1)] text-white',
+    'Nouvelle commande': 'bg-[#5B58EB] text-white',
     'En design': 'bg-purple-900 text-purple-300',
     'En production': 'bg-yellow-900 text-yellow-300',
     'Expédié': 'bg-green-900 text-green-300',

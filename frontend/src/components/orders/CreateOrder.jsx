@@ -174,7 +174,7 @@ export default function CreateOrder({ onSave }) {
             {!showPhone2 ? (
               <button
                 onClick={() => setShowPhone2(true)}
-                className="bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)]/20 text-[#03ccff] border border-[#03ccff]/30 px-4 py-2 rounded hover:bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)]/40 transition w-full md:w-auto mt-4"
+                className="bg-transparent text-[#56E1E9] border-[#56E1E9] border px-4 py-2 rounded transition w-full md:w-auto mt-4"
               >
                 Ajouter un autre téléphone
               </button>
@@ -192,11 +192,11 @@ export default function CreateOrder({ onSave }) {
               <span className="w-full md:w-1/3 p-2 text-gray-400 font-medium border-b md:border-b-0 md:border-r border-gray-600">Type de livraison</span>
               <div className="w-full md:w-2/3 flex p-2 gap-4">
                 <label className="flex items-center gap-2 cursor-pointer text-white">
-                  <input type="radio" value="domicile" checked={deliveryType === 'domicile'} onChange={(e) => setDeliveryType(e.target.value)} className="w-4 h-4 text-[#03ccff] bg-[#0A2353] border-gray-600 focus:ring-[#03ccff]" />
+                  <input type="radio" value="domicile" checked={deliveryType === 'domicile'} onChange={(e) => setDeliveryType(e.target.value)} className="w-4 h-4 accent-[#56E1E9] text-[#56E1E9] bg-[#0A2353] border-gray-600 focus:ring-[#56E1E9]" />
                   À domicile
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer text-white">
-                  <input type="radio" value="stop_desk" checked={deliveryType === 'stop_desk'} onChange={(e) => setDeliveryType(e.target.value)} className="w-4 h-4 text-[#03ccff] bg-[#0A2353] border-gray-600 focus:ring-[#03ccff]" />
+                  <input type="radio" value="stop_desk" checked={deliveryType === 'stop_desk'} onChange={(e) => setDeliveryType(e.target.value)} className="w-4 h-4 accent-[#56E1E9] text-[#56E1E9] bg-[#0A2353] border-gray-600 focus:ring-[#56E1E9]" />
                   Au bureau / Stop Desk
                 </label>
               </div>
@@ -231,7 +231,7 @@ export default function CreateOrder({ onSave }) {
                       {wilaya && communesByWilaya[wilayas.find(w => w.name === wilaya)?.id]?.map(c => (
                         <option key={c} value={c}>{c}</option>
                       ))}
-                      {wilaya && <option value="Autre" className="text-[#03ccff] font-bold">Autre (Saisir manuellement)...</option>}
+                      {wilaya && <option value="Autre" className="text-[#56E1E9] font-bold">Autre (Saisir manuellement)...</option>}
                     </select>
                     {commune === 'Autre' && (
                       <input
@@ -266,7 +266,7 @@ export default function CreateOrder({ onSave }) {
             <div className="border border-gray-600 rounded p-4 mb-4 bg-[#112C70]/80">
               <div className="flex justify-between items-center mb-6">
                 <span className="text-gray-300 font-medium">Produit(s) à livrer</span>
-                <button onClick={addProduct} className="text-[#03ccff] hover:text-[#03ccff] flex items-center text-sm transition font-medium">
+                <button onClick={addProduct} className="text-[#56E1E9] hover:text-[#56E1E9] flex items-center text-sm transition font-medium">
                   <Plus size={16} className="mr-1" /> Ajouter un produit
                 </button>
               </div>
@@ -307,7 +307,7 @@ export default function CreateOrder({ onSave }) {
                             setProductFromStock(idx, '', '', 0);
                           }
                         }}
-                        className="w-full p-2.5 bg-[#0A2353] border border-gray-600 text-white rounded outline-none focus:border-[#03ccff] transition"
+                        className="w-full p-2.5 bg-[#0A2353] border border-gray-600 text-white rounded outline-none focus:border-[#5B58EB] transition"
                       >
                         <option value="">Sélectionner un produit...</option>
                         {stockProducts.map(sp => {
@@ -333,7 +333,7 @@ export default function CreateOrder({ onSave }) {
                         value={product.quantity || ''}
                         onChange={(e) => updateProduct(idx, 'quantity', parseInt(e.target.value) || '')}
                         onWheel={(e) => e.target.blur()}
-                        className="w-full p-2.5 bg-[#0A2353] border border-gray-600 text-white rounded outline-none transition text-center focus:border-[#03ccff] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className="w-full p-2.5 bg-[#0A2353] border border-gray-600 text-white rounded outline-none transition text-center focus:border-[#5B58EB] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                     </div>
 
@@ -349,7 +349,7 @@ export default function CreateOrder({ onSave }) {
                           value={product.unitPrice || ''}
                           onChange={(e) => updateProduct(idx, 'unitPrice', e.target.value)}
                           onWheel={(e) => e.target.blur()}
-                          className="w-full p-2.5 bg-[#0A2353] border border-gray-600 text-white rounded-l outline-none transition text-center focus:border-[#03ccff] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          className="w-full p-2.5 bg-[#0A2353] border border-gray-600 text-white rounded-l outline-none transition text-center focus:border-[#5B58EB] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                         <span className="px-2 py-2.5 bg-[#0A2353] border border-l-0 border-gray-600 text-xs text-gray-400 rounded-r">DA</span>
                       </div>
@@ -358,7 +358,7 @@ export default function CreateOrder({ onSave }) {
                     {/* Line total */}
                     <div className="w-full md:w-2/12 flex flex-col">
                       <span className="md:hidden text-xs text-gray-400 font-medium mb-1">Total</span>
-                      <div className="w-full p-2.5 bg-[#0A2353] border border-gray-600 text-[#03ccff] rounded text-center font-semibold">
+                      <div className="w-full p-2.5 bg-[#0A2353] border border-gray-600 text-[#BB63FF] rounded text-center font-semibold">
                         {((Number(product.quantity) || 0) * (Number(product.unitPrice) || 0)).toLocaleString()} DA
                       </div>
                     </div>
@@ -385,7 +385,7 @@ export default function CreateOrder({ onSave }) {
                 <span className="text-gray-300 font-bold uppercase text-sm -mt-2">PRIX TOTAL DES PRODUITS</span>
                 <div className="flex flex-col items-end gap-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-2xl text-[#03ccff] font-bold">
+                    <span className="text-2xl text-[#BB63FF] font-bold">
                       {Number(totalPrice || 0).toLocaleString()} DA
                     </span>
                   </div>
@@ -411,15 +411,15 @@ export default function CreateOrder({ onSave }) {
                   onChange={(e) => setDeliveryFee(isFreeDelivery ? 0 : (parseFloat(e.target.value) || 0))}
                   onWheel={(e) => e.target.blur()}
                   disabled={isFreeDelivery}
-                  className="w-32 p-2 bg-[#0A2353] border border-gray-600 text-white rounded outline-none focus:border-[#03ccff] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none disabled:opacity-60"
+                  className="w-32 p-2 bg-[#0A2353] border border-gray-600 text-white rounded outline-none focus:border-[#5B58EB] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none disabled:opacity-60"
                 />
                 <span className="text-gray-400 text-sm">DA</span>
               </div>
             </div>
 
-            <div className="flex flex-col md:flex-row bg-[#112C70]/80 rounded border border-[#03ccff]/50 overflow-hidden mt-4">
-              <span className="w-full md:w-1/3 p-2 text-[#03ccff] font-medium border-b md:border-b-0 md:border-r border-gray-600">Total (produits + livraison)</span>
-              <div className="w-full md:w-2/3 p-2 bg-transparent text-[#03ccff] font-bold flex items-center">
+            <div className="flex flex-col md:flex-row bg-[#112C70]/80 rounded border border-[#56E1E9]/50 overflow-hidden mt-4">
+              <span className="w-full md:w-1/3 p-2 text-[#56E1E9] font-medium border-b md:border-b-0 md:border-r border-gray-600">Total (produits + livraison)</span>
+              <div className="w-full md:w-2/3 p-2 bg-transparent text-[#BB63FF] font-bold flex items-center">
                 {((Number(totalPrice) || 0) + (isFreeDelivery ? 0 : (Number(deliveryFee) || 0))).toLocaleString()} DA
               </div>
             </div>
@@ -433,7 +433,7 @@ export default function CreateOrder({ onSave }) {
                   setIsFreeDelivery(checked);
                   if (checked) setDeliveryFee(0);
                 }}
-                className="w-4 h-4 rounded text-[#03ccff] border-gray-600 bg-[#0A2353] focus:ring-[#03ccff]"
+                className="w-4 h-4 rounded text-[#56E1E9] accent-[#56E1E9] border-gray-600 bg-[#0A2353] focus:ring-[#5B58EB]"
               />
               Livraison gratuite?
             </label>
@@ -443,7 +443,7 @@ export default function CreateOrder({ onSave }) {
                 type="checkbox"
                 checked={hasExchange}
                 onChange={(e) => setHasExchange(e.target.checked)}
-                className="w-4 h-4 mt-1 rounded text-[#03ccff] border-gray-600 bg-[#0A2353] focus:ring-[#03ccff]"
+                className="w-4 h-4 mt-1 rounded text-[#56E1E9] accent-[#56E1E9] border-gray-600 bg-[#0A2353] focus:ring-[#5B58EB]"
               />
               <span className="flex-1 text-sm">
                 Demander un échange après livraison (ceci va créer un second bordereau pour le retour de l'objet à échanger)
@@ -456,7 +456,7 @@ export default function CreateOrder({ onSave }) {
         <div className="bg-gray-700/50 rounded-lg overflow-hidden border border-gray-600">
           <div className="p-4 bg-[#112C70] border-b border-gray-600 flex items-center gap-2">
             <h3 className="font-bold text-gray-200">Assurance du colis</h3>
-            <span className="bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)]/30 text-[#03ccff] text-xs px-2 py-1 rounded">En savoir plus</span>
+            <span className="border border-[#56E1E9] text-[#56E1E9] text-xs px-2 py-1 rounded">En savoir plus</span>
           </div>
           <div className="p-4 space-y-4">
             <p className="text-gray-300 font-medium mb-2">Voulez vous souscrire à l'assurance?</p>
@@ -469,7 +469,7 @@ export default function CreateOrder({ onSave }) {
                   value="no"
                   checked={!hasInsurance}
                   onChange={() => { setHasInsurance(false); setDeclaredValue(''); }}
-                  className="w-4 h-4 mt-1 text-[#03ccff] bg-[#0A2353] border-gray-600 focus:ring-[#03ccff]"
+                  className="w-4 h-4 mt-1 text-[#56E1E9] accent-[#56E1E9] bg-[#0A2353] border-gray-600 focus:ring-[#5B58EB]"
                 />
                 Non (aucun frais, remboursement maximum de 5000da)
               </label>
@@ -480,7 +480,7 @@ export default function CreateOrder({ onSave }) {
                   value="yes"
                   checked={hasInsurance}
                   onChange={() => setHasInsurance(true)}
-                  className="w-4 h-4 mt-1 text-[#03ccff] bg-[#0A2353] border-gray-600 focus:ring-[#03ccff]"
+                  className="w-4 h-4 mt-1 text-[#56E1E9] accent-[#56E1E9] bg-[#0A2353] border-gray-600 focus:ring-[#5B58EB]"
                 />
                 Oui (frais 0% de la valeur déclarée, remboursement intégral de la valeur déclarée)
               </label>
@@ -541,7 +541,7 @@ export default function CreateOrder({ onSave }) {
         <div className="flex justify-center pt-6 pb-20">
           <button
             onClick={handleSubmit}
-            className="px-8 py-3 bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)] hover:opacity-90 text-white rounded font-medium shadow-lg w-full md:w-auto md:min-w-[300px]"
+            className="px-8 py-3 bg-[linear-gradient(135deg,_#5B58EB,_#09fbff)] hover:opacity-90 text-white rounded font-medium shadow-lg w-full md:w-auto md:min-w-[300px]"
           >
             Créer le colis
           </button>

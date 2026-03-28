@@ -1,59 +1,46 @@
 const fs = require('fs');
 const path = require('path');
 
-const srcDir = path.join(__dirname, 'src');
+const directoryPath = path.join(__dirname, 'src');
 
-function walk(dir, fileList = []) {
+// The color mapping to apply
+const replacements = [
+  { old: '#0A1628', new: '#0A2353' },
+  { old: '#0E2240', new: '#112C70' },
+  { old: '#1DB8B0', new: '#56E1E9' },
+  { old: '#0A6B8A', new: '#5B58EB' }
+];
+
+function processDirectory(dir) {
   const files = fs.readdirSync(dir);
+
   for (const file of files) {
-    const stat = fs.statSync(path.join(dir, file));
+    const filePath = path.join(dir, file);
+    const stat = fs.statSync(filePath);
+
     if (stat.isDirectory()) {
-      walk(path.join(dir, file), fileList);
-    } else {
-      if (file.endsWith('.jsx') || file.endsWith('.js')) {
-        fileList.push(path.join(dir, file));
+      processDirectory(filePath);
+    } else if (filePath.endsWith('.jsx') || filePath.endsWith('.js') || filePath.endsWith('.css')) {
+      let content = fs.readFileSync(filePath, 'utf8');
+      let changed = false;
+
+      // Handle both uppercase and lowercase hex in the source files just in case, though they are usually uppercase.
+      for (const { old: oldColor, new: newColor } of replacements) {
+        // Regex for case-insensitive exact replacement
+        const regex = new RegExp(oldColor, 'gi');
+        if (regex.test(content)) {
+          content = content.replace(regex, newColor);
+          changed = true;
+        }
+      }
+
+      if (changed) {
+        fs.writeFileSync(filePath, content, 'utf8');
+        console.log(`Updated colors in ${filePath}`);
       }
     }
   }
-  return fileList;
 }
 
-const files = walk(srcDir);
-
-for (const file of files) {
-  let content = fs.readFileSync(file, 'utf-8');
-  let original = content;
-
-  // 1. Background replacements (Main / Card)
-  content = content.replace(/bg-gray-900/g, 'bg-[#0A2353]');
-  content = content.replace(/bg-gray-800/g, 'bg-[#112C70]');
-
-  // 2. PRIMARY Action Buttons & Sidebar
-  // Match bg-blue-[56]00 hover:bg-blue-[67]00
-  content = content.replace(/bg-blue-[56]00\s+hover:bg-blue-[67]00/g, 'bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)] hover:opacity-90');
-  
-  // Any remaining solitary bg-blue-600 or bg-blue-500
-  content = content.replace(/bg-blue-[56]00/g, 'bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)]');
-
-  // 3. BADGES: Nouvelle commande (was bg-blue-900 text-blue-300 usually)
-  content = content.replace(/bg-blue-900\s+text-blue-300/g, 'bg-[linear-gradient(135deg,_#460071,_#d403e1)] text-white');
-  content = content.replace(/bg-blue-900/g, 'bg-[linear-gradient(135deg,_#460071,_#d403e1)]');
-
-  // 4. Text Links & Highlighted Text & Brand Name
-  content = content.replace(/text-blue-[3456]00/g, 'text-[#03ccff]');
-
-  // 5. Borders & Secondary Buttons & En savoir plus badge
-  content = content.replace(/border-blue-[3456]00/g, 'border-[#03ccff]');
-
-  // 6. Focus Rings / Radio rings
-  content = content.replace(/ring-blue-[3456]00/g, 'ring-[#03ccff]');
-
-  // 7. Focus border
-  content = content.replace(/focus:border-blue-[3456]00/g, 'focus:border-[#03ccff]');
-  content = content.replace(/focus:ring-blue-[3456]00/g, 'focus:ring-[#03ccff]');
-
-  if (content !== original) {
-    fs.writeFileSync(file, content, 'utf-8');
-    console.log(`Updated ${file}`);
-  }
-}
+processDirectory(directoryPath);
+console.log('Done!');

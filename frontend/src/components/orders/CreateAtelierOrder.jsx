@@ -146,7 +146,7 @@ export default function CreateAtelierOrder({ onSave }) {
             <div className="border border-gray-600 rounded p-4 mb-4 bg-[#112C70]/80">
               <div className="flex justify-between items-center mb-6">
                 <span className="text-gray-300 font-medium">Produit(s) commandé(s)</span>
-                <button onClick={addProduct} className="text-[#03ccff] hover:text-[#03ccff] flex items-center text-sm transition font-medium">
+                <button onClick={addProduct} className="text-[#56E1E9] hover:text-[#56E1E9] flex items-center text-sm transition font-medium">
                   <Plus size={16} className="mr-1" /> Ajouter un produit
                 </button>
               </div>
@@ -185,7 +185,7 @@ export default function CreateAtelierOrder({ onSave }) {
                             setProductFromStock(idx, '', '', 0);
                           }
                         }}
-                        className="w-full p-2.5 bg-[#0A2353] border border-gray-600 text-white rounded outline-none focus:border-[#03ccff] transition"
+                        className="w-full p-2.5 bg-[#0A2353] border border-gray-600 text-white rounded outline-none focus:border-[#5B58EB] transition"
                       >
                         <option value="">Sélectionner un produit...</option>
                         {stockProducts.map(sp => {
@@ -211,7 +211,7 @@ export default function CreateAtelierOrder({ onSave }) {
                         value={product.quantity || ''}
                         onChange={(e) => updateProduct(idx, 'quantity', parseInt(e.target.value) || '')}
                         onWheel={(e) => e.target.blur()}
-                        className="w-full p-2.5 bg-[#0A2353] border border-gray-600 text-white rounded outline-none transition text-center focus:border-[#03ccff] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className="w-full p-2.5 bg-[#0A2353] border border-gray-600 text-white rounded outline-none transition text-center focus:border-[#5B58EB] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                     </div>
 
@@ -227,7 +227,7 @@ export default function CreateAtelierOrder({ onSave }) {
                           value={product.unitPrice || ''}
                           onChange={(e) => updateProduct(idx, 'unitPrice', e.target.value)}
                           onWheel={(e) => e.target.blur()}
-                          className="w-full p-2.5 bg-[#0A2353] border border-gray-600 text-white rounded-l outline-none transition text-center focus:border-[#03ccff] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          className="w-full p-2.5 bg-[#0A2353] border border-gray-600 text-white rounded-l outline-none transition text-center focus:border-[#5B58EB] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                         <span className="px-2 py-2.5 bg-[#0A2353] border border-l-0 border-gray-600 text-xs text-gray-400 rounded-r">DA</span>
                       </div>
@@ -236,7 +236,7 @@ export default function CreateAtelierOrder({ onSave }) {
                     {/* Line total */}
                     <div className="w-full md:w-2/12 flex flex-col">
                       <span className="md:hidden text-xs text-gray-400 font-medium mb-1">Total</span>
-                      <div className="w-full p-2.5 bg-[#0A2353] border border-gray-600 text-[#03ccff] rounded text-center font-semibold">
+                      <div className="w-full p-2.5 bg-[#0A2353] border border-gray-600 text-[#BB63FF] rounded text-center font-semibold">
                         {((Number(product.quantity) || 0) * (Number(product.unitPrice) || 0)).toLocaleString()} DA
                       </div>
                     </div>
@@ -262,7 +262,7 @@ export default function CreateAtelierOrder({ onSave }) {
               <div className="pt-4 mt-6 border-t border-gray-600 space-y-3">
                 <div className="flex justify-between items-center text-sm font-medium">
                   <span className="text-gray-400 uppercase">PRIX TOTAL DES PRODUITS</span>
-                  <span className="text-gray-300">{Number(totalPrice || 0).toLocaleString()} DA</span>
+                  <span className="text-[#BB63FF] font-bold">{Number(totalPrice || 0).toLocaleString()} DA</span>
                 </div>
                 
                 <div className="flex justify-between items-center bg-[#0A2353]/50 p-3 rounded-lg border border-gray-700">
@@ -275,7 +275,7 @@ export default function CreateAtelierOrder({ onSave }) {
                       value={versement || ''}
                       onChange={(e) => setVersement(Number(e.target.value) || 0)}
                       onWheel={(e) => e.target.blur()}
-                      className="w-full p-2.5 bg-[#0A2353] border border-gray-600 text-white rounded-l outline-none transition text-center focus:border-[#03ccff] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      className="w-full p-2.5 bg-[#0A2353] border border-gray-600 text-white rounded-l outline-none transition text-center focus:border-[#5B58EB] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
                     <span className="px-2 py-2.5 bg-[#0A2353] border border-l-0 border-gray-600 text-xs text-gray-400 rounded-r">DA</span>
                   </div>
@@ -284,7 +284,7 @@ export default function CreateAtelierOrder({ onSave }) {
                 <div className="flex justify-between items-center pt-2">
                   <span className="text-gray-300 font-bold uppercase text-sm">Reste à payer</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-2xl text-[#03ccff] font-bold">
+                    <span className="text-2xl text-[#BB63FF] font-bold">
                       {Math.max(0, totalPrice - versement).toLocaleString()} DA
                     </span>
                   </div>
@@ -316,7 +316,7 @@ export default function CreateAtelierOrder({ onSave }) {
         <div className="flex justify-center pt-6 pb-20">
           <button
             onClick={handleSubmit}
-            className="px-8 py-3 bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)] hover:opacity-90 text-white rounded font-medium shadow-lg w-full md:w-auto md:min-w-[300px]"
+            className="px-8 py-3 bg-[linear-gradient(135deg,_#5B58EB,_#09fbff)] hover:opacity-90 text-white rounded font-medium shadow-lg w-full md:w-auto md:min-w-[300px]"
           >
             Créer la commande
           </button>

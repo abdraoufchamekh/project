@@ -116,7 +116,7 @@ const InvoicePreviewModal = ({ isOpen, onClose, orderId }) => {
               <>
                 <button
                   onClick={handleDownload}
-                  className="flex items-center space-x-2 px-4 py-2 bg-[linear-gradient(135deg,_#03ccff,_#09fbff,_#d403e1)] text-white rounded-md hover:bg-blue-700 transition"
+                  className="flex items-center space-x-2 px-4 py-2 bg-[linear-gradient(135deg,_#5B58EB,_#09fbff)] text-white rounded-md hover:bg-blue-700 transition"
                 >
                   <Download size={18} />
                   <span>Télécharger PDF</span>
@@ -143,7 +143,7 @@ const InvoicePreviewModal = ({ isOpen, onClose, orderId }) => {
         <div className="flex-1 bg-gray-100 p-4 relative flex justify-center items-center">
           {loading && (
             <div className="flex flex-col items-center justify-center space-y-4">
-              <Loader2 size={48} className="text-[#03ccff] animate-spin" />
+              <Loader2 size={48} className="text-[#56E1E9] animate-spin" />
               <p className="text-gray-500 font-medium">Génération de la facture en cours...</p>
             </div>
           )}
@@ -153,7 +153,7 @@ const InvoicePreviewModal = ({ isOpen, onClose, orderId }) => {
               <p className="font-semibold">{error}</p>
               <button 
                 onClick={generateInvoice}
-                className="mt-4 text-[#03ccff] hover:underline"
+                className="mt-4 text-[#56E1E9] hover:underline"
               >
                 Réessayer
               </button>
