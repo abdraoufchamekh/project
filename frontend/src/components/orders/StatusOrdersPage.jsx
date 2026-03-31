@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Package, Search, Filter, X, ArrowLeft } from 'lucide-react';
 import { getStatusColor } from '../../utils/constants';
 import { useDebouncedValue } from '../../hooks/useDebouncedValue';
+import OrderStatusDropdown from './OrderStatusDropdown';
 
-function StatusOrdersPage({ config, orders, onSelectOrder, fetchOrders, pagination }) {
+function StatusOrdersPage({ config, orders, userRole, onSelectOrder, fetchOrders, pagination }) {
     const [filters, setFilters] = useState({
         search: '',
         status: config?.status || '',
@@ -185,10 +186,8 @@ function StatusOrdersPage({ config, orders, onSelectOrder, fetchOrders, paginati
                                     <td className="px-6 py-4 text-white">{order.clientName || order.client_name || `${order.first_name || ''} ${order.last_name || ''}`.trim() || 'Inconnu'}</td>
                                     <td className="px-6 py-4 text-gray-400">{order.phone}</td>
                                     <td className="px-6 py-4 text-gray-400">{order.product_count ?? order.products?.length ?? 0}</td>
-                                    <td className="px-6 py-4">
-                                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status || 'Nouvelle commande')}`}>
-                                            {order.status || 'Nouvelle commande'}
-                                        </span>
+                                    <td className="px-6 py-4 w-40 max-w-[160px]">
+                                        <OrderStatusDropdown order={order} userRole={userRole} />
                                     </td>
                                     <td className="px-6 py-4 text-gray-400">
                                         {order.created_at ? String(order.created_at).slice(0, 10) : order.createdAt || '—'}

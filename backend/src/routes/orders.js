@@ -20,6 +20,7 @@ router.get('/:id/invoice', require('../controllers/invoiceController').generateI
 router.patch('/products/:productId/status', orderController.updateProductStatus);
 router.put('/products/:productId/image', upload.single('image'), orderController.updateProductImage);
 router.delete('/products/:productId/image', orderController.deleteProductImage);
+router.post('/upload-image', upload.single('image'), orderController.uploadImage);
 
 // Photo routes
 router.post('/:orderId/photos', upload.array('photos', 10), orderController.uploadPhotos);

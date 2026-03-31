@@ -110,7 +110,8 @@ exports.createOrder = async (req, res) => {
         quantity: safeQuantity,
         unitPrice: safeUnitPrice,
         status: 'En attente',
-        imageUrl: productData.imageUrl
+        imageUrl: productData.imageUrl,
+        articleType: productData.article_type || 'stock'
       }, client);
       createdProducts.push(product);
 
@@ -452,6 +453,19 @@ exports.uploadPhotos = async (req, res) => {
   } catch (error) {
     console.error('Upload photos error:', error);
     res.status(500).json({ error: 'Server error' });
+  }
+};
+
+exports.uploadImage = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image file provided' });
+    }
+    const imageUrl = req.file.path || req.file.filename;
+    res.json({ url: imageUrl });
+  } catch (error) {
+    console.error('Upload image error:', error);
+    res.status(500).json({ error: 'Server error uploading image' });
   }
 };
 

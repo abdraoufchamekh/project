@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, memo } from 'react';
 import { Archive, Search, Filter, X } from 'lucide-react';
 import { getStatusColor } from '../../utils/constants';
 import { useDebouncedValue } from '../../hooks/useDebouncedValue';
+import OrderStatusDropdown from './OrderStatusDropdown';
 
 function ArchivedOrders({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fetchOrders, pagination, globalStats = {} }) {
     const [filters, setFilters] = useState({
@@ -184,10 +185,8 @@ function ArchivedOrders({ orders, userRole, userId, onSelectOrder, onDeleteOrder
                                     <td className="px-6 py-4 text-gray-300">{order.clientName || order.client_name || `${order.first_name || ''} ${order.last_name || ''}`.trim() || 'Inconnu'}</td>
                                     <td className="px-6 py-4 text-gray-500">{order.phone}</td>
                                     <td className="px-6 py-4 text-gray-500">{order.product_count ?? order.products?.length ?? 0}</td>
-                                    <td className="px-6 py-4">
-                                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status || 'Nouvelle commande')}`}>
-                                            {order.status || 'Nouvelle commande'}
-                                        </span>
+                                    <td className="px-6 py-4 w-40 max-w-[160px]">
+                                        <OrderStatusDropdown order={order} userRole={userRole} />
                                     </td>
                                     <td className="px-6 py-4 text-gray-500">
                                         {order.created_at ? String(order.created_at).slice(0, 10) : order.createdAt || '—'}

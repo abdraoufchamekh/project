@@ -3,6 +3,7 @@ import { Package, Search, Filter, X, AlertTriangle } from 'lucide-react';
 import axios from 'axios';
 import { getStatusColor, API_BASE_URL } from '../../utils/constants';
 import { useDebouncedValue } from '../../hooks/useDebouncedValue';
+import OrderStatusDropdown from './OrderStatusDropdown';
 
 const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fetchOrders, pagination, globalStats = {}, onNavigateToStatus, isFetchingOrders }) => {
   const [filters, setFilters] = useState({
@@ -294,10 +295,8 @@ const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fet
                   <td className="px-6 py-4 text-gray-400">
                     {order.product_count ?? order.products?.length ?? 0}
                   </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status || 'Nouvelle commande')}`}>
-                      {order.status || 'Nouvelle commande'}
-                    </span>
+                  <td className="px-6 py-4 w-40 max-w-[160px]">
+                    <OrderStatusDropdown order={order} userRole={userRole} />
                   </td>
                   <td className="px-6 py-4 text-gray-400">
                     {order.created_at

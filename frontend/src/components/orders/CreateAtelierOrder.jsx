@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, Upload, Loader2, Image as ImageIcon } from 'lucide-react';
 import axios from 'axios';
 import { API_BASE_URL } from '../../utils/constants';
 
@@ -16,7 +16,10 @@ export default function CreateAtelierOrder({ onSave }) {
     type: '',
     quantity: 1,
     unitPrice: 0,
-    inventoryItemId: ''
+    inventoryItemId: '',
+    article_type: 'stock',
+    imageUrl: '',
+    isUploading: false
   }]);
   const [photos, setPhotos] = useState([]);
 
@@ -45,7 +48,10 @@ export default function CreateAtelierOrder({ onSave }) {
   };
 
   const addProduct = () => {
-    setProducts([...products, { type: '', quantity: 1, unitPrice: 0, inventoryItemId: '' }]);
+    setProducts([...products, { 
+      type: '', quantity: 1, unitPrice: 0, inventoryItemId: '', 
+      article_type: 'stock', imageUrl: '', isUploading: false 
+    }]);
   };
 
   const removeProduct = (idx) => {
@@ -61,9 +67,34 @@ export default function CreateAtelierOrder({ onSave }) {
   const setProductFromStock = (idx, inventoryItemId, typeLabel, unitPriceFromStock) => {
     setProducts(prev => prev.map((p, i) =>
       i === idx
-        ? { ...p, inventoryItemId, type: typeLabel, unitPrice: unitPriceFromStock ?? p.unitPrice }
+        ? { ...p, inventoryItemId, type: typeLabel, unitPrice: unitPriceFromStock ?? p.unitPrice, article_type: 'stock' }
         : p
     ));
+  };
+  
+  const handleImageUpload = async (idx, file) => {
+    if (!file) return;
+    
+    updateProduct(idx, 'isUploading', true);
+    
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      const res = await axios.post(`${API_BASE_URL}/orders/upload-image`, formData, {
+        headers: {
+          'Authorization': `Bearer ${sessionStorage.getItem('aurea_token')}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      updateProduct(idx, 'imageUrl', res.data.url);
+    } catch (err) {
+      console.error('Error uploading product image:', err);
+      alert('Erreur lors du téléchargement de l\'image.');
+    } finally {
+      updateProduct(idx, 'isUploading', false);
+    }
   };
 
   const handleSubmit = () => {
@@ -93,7 +124,9 @@ export default function CreateAtelierOrder({ onSave }) {
         quantity: Number(p.quantity) || 1,
         unitPrice: Number(p.unitPrice) || 0,
         status: 'En attente',
-        inventoryItemId: p.inventoryItemId
+        inventoryItemId: p.article_type === 'stock' ? p.inventoryItemId : undefined,
+        article_type: p.article_type || 'stock',
+        imageUrl: p.imageUrl || null
       }))
     };
 
@@ -103,7 +136,7 @@ export default function CreateAtelierOrder({ onSave }) {
     setFirstName('');
     setLastName('');
     setPhone('');
-    setProducts([{ type: '', quantity: 1, unitPrice: 0, inventoryItemId: '' }]);
+    setProducts([{ type: '', quantity: 1, unitPrice: 0, inventoryItemId: '', article_type: 'stock', imageUrl: '', isUploading: false }]);
     setPhotos([]);
     setVersement(0);
   };
@@ -164,43 +197,98 @@ export default function CreateAtelierOrder({ onSave }) {
                   return (
                   <div key={idx} className="flex flex-col md:flex-row gap-4 items-start md:items-start bg-[#0A2353]/50 md:bg-transparent p-4 md:p-0 rounded-lg border border-gray-700 md:border-none">
                     
-                    {/* Product Selection */}
+                    {/* Product Selection / Configuration */}
                     <div className="w-full md:w-6/12 flex flex-col gap-2">
-                      <span className="md:hidden text-xs text-gray-400 font-medium">Type de produit</span>
-                      <select
-                        value={product.inventoryItemId || ''}
-                        onChange={(e) => {
-                          const pId = e.target.value;
-                          const sp = stockProducts.find(s => s.id === parseInt(pId, 10));
-                          if (sp) {
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="md:hidden text-xs text-gray-400 font-medium">Article</span>
+                        <div className="flex gap-1 bg-[#0A2353] p-1 rounded-md border border-gray-600">
+                           <button
+                             onClick={(e) => { e.preventDefault(); updateProduct(idx, 'article_type', 'stock'); }}
+                             className={`px-3 py-1 text-xs rounded transition-colors ${product.article_type !== 'manuel' ? 'bg-[#5B58EB] text-white shadow' : 'text-gray-400 hover:text-white'}`}
+                           >
+                             Depuis le stock
+                           </button>
+                           <button
+                             onClick={(e) => { e.preventDefault(); updateProduct(idx, 'article_type', 'manuel'); }}
+                             className={`px-3 py-1 text-xs rounded transition-colors ${product.article_type === 'manuel' ? 'bg-[#BB63FF] text-white shadow' : 'text-gray-400 hover:text-white'}`}
+                           >
+                             Ajouter manuellement
+                           </button>
+                        </div>
+                      </div>
+
+                      {product.article_type === 'manuel' ? (
+                        <div className="flex flex-col gap-3">
+                          <input
+                            type="text"
+                            placeholder="Nom de l'article"
+                            value={product.type || ''}
+                            onChange={(e) => updateProduct(idx, 'type', e.target.value)}
+                            className="w-full p-2.5 bg-[#0A2353] border border-gray-600 text-white rounded outline-none focus:border-[#BB63FF] transition"
+                            required
+                          />
+                          <div className="flex items-center gap-3">
+                            <label className={`flex flex-1 items-center justify-center gap-2 p-2.5 rounded border border-dashed transition cursor-pointer ${product.isUploading ? 'bg-gray-700/50 border-gray-500 cursor-not-allowed' : 'bg-[#0A2353] border-gray-500 hover:border-[#BB63FF] text-gray-300'}`}>
+                              {product.isUploading ? (
+                                <><Loader2 size={18} className="animate-spin text-[#BB63FF]" /> <span className="text-sm">Téléchargement...</span></>
+                              ) : (
+                                <><Upload size={18} /> <span className="text-sm">Photo (optionnel)</span></>
+                              )}
+                              <input 
+                                type="file" 
+                                accept="image/*" 
+                                className="hidden" 
+                                disabled={product.isUploading}
+                                onChange={(e) => {
+                                  if (e.target.files && e.target.files[0]) {
+                                    handleImageUpload(idx, e.target.files[0]);
+                                  }
+                                }} 
+                              />
+                            </label>
+                            {product.imageUrl && (
+                              <div className="w-11 h-11 rounded border border-gray-600 overflow-hidden flex-shrink-0 bg-gray-800 flex items-center justify-center">
+                                <img src={product.imageUrl} alt="preview" className="w-full h-full object-cover" />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <select
+                          value={product.inventoryItemId || ''}
+                          onChange={(e) => {
+                            const pId = e.target.value;
+                            const sp = stockProducts.find(s => s.id === parseInt(pId, 10));
+                            if (sp) {
+                              let labelParts = [];
+                              if (sp.color) labelParts.push(sp.color);
+                              if (sp.dimension) labelParts.push(sp.dimension);
+                              if (sp.size) labelParts.push(`Taille: ${sp.size}`);
+                              const label = labelParts.length > 0 ? labelParts.join(' - ') : '';
+                              const fullType = label ? `${sp.name} (${label})` : sp.name;
+                              const price = (sp.price !== undefined && sp.price !== null && sp.price !== '') ? Number(sp.price) : 0;
+                              setProductFromStock(idx, pId, fullType, price);
+                            } else {
+                              setProductFromStock(idx, '', '', 0);
+                            }
+                          }}
+                          className="w-full p-2.5 bg-[#0A2353] border border-gray-600 text-white rounded outline-none focus:border-[#5B58EB] transition"
+                        >
+                          <option value="">Sélectionner un produit...</option>
+                          {stockProducts.map(sp => {
                             let labelParts = [];
                             if (sp.color) labelParts.push(sp.color);
                             if (sp.dimension) labelParts.push(sp.dimension);
                             if (sp.size) labelParts.push(`Taille: ${sp.size}`);
                             const label = labelParts.length > 0 ? labelParts.join(' - ') : '';
-                            const fullType = label ? `${sp.name} (${label})` : sp.name;
-                            const price = (sp.price !== undefined && sp.price !== null && sp.price !== '') ? Number(sp.price) : 0;
-                            setProductFromStock(idx, pId, fullType, price);
-                          } else {
-                            setProductFromStock(idx, '', '', 0);
-                          }
-                        }}
-                        className="w-full p-2.5 bg-[#0A2353] border border-gray-600 text-white rounded outline-none focus:border-[#5B58EB] transition"
-                      >
-                        <option value="">Sélectionner un produit...</option>
-                        {stockProducts.map(sp => {
-                          let labelParts = [];
-                          if (sp.color) labelParts.push(sp.color);
-                          if (sp.dimension) labelParts.push(sp.dimension);
-                          if (sp.size) labelParts.push(`Taille: ${sp.size}`);
-                          const label = labelParts.length > 0 ? labelParts.join(' - ') : '';
-                          return (
-                            <option key={sp.id} value={sp.id}>
-                              {sp.name} {label ? `(${label})` : ''} - Stock: {sp.quantity}
-                            </option>
-                          );
-                        })}
-                      </select>
+                            return (
+                              <option key={sp.id} value={sp.id}>
+                                {sp.name} {label ? `(${label})` : ''} - Stock: {sp.quantity}
+                              </option>
+                            );
+                          })}
+                        </select>
+                      )}
                     </div>
 
                     {/* Quantity */}
@@ -316,7 +404,8 @@ export default function CreateAtelierOrder({ onSave }) {
         <div className="flex justify-center pt-6 pb-20">
           <button
             onClick={handleSubmit}
-            className="px-8 py-3 bg-[linear-gradient(135deg,_#5B58EB,_#09fbff)] hover:opacity-90 text-white rounded font-medium shadow-lg w-full md:w-auto md:min-w-[300px]"
+            disabled={products.some(p => p.isUploading)}
+            className="px-8 py-3 bg-[linear-gradient(135deg,_#5B58EB,_#09fbff)] hover:opacity-90 disabled:opacity-50 text-white rounded font-medium shadow-lg w-full md:w-auto md:min-w-[300px]"
           >
             Créer la commande
           </button>

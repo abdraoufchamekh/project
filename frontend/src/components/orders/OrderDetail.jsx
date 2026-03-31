@@ -504,10 +504,15 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
                       <ChevronRight size={20} className="text-gray-400" />
                     )}
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 flex items-center gap-2">
                     <h4 className="text-lg font-medium text-white">
                       {product.type} × {product.quantity || 1}
                     </h4>
+                    {product.article_type === 'manuel' && (
+                      <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-[#BB63FF]/20 text-[#BB63FF] border border-[#BB63FF]/30 rounded-full">
+                        Manuel
+                      </span>
+                    )}
                   </div>
                 </div>
 

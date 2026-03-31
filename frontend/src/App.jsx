@@ -318,6 +318,7 @@ function MainApp() {
                   }
                 }}
                 orders={orders}
+                userRole={user.role}
                 onSelectOrder={setSelectedOrder}
                 fetchOrders={fetchOrders}
                 pagination={pagination}
