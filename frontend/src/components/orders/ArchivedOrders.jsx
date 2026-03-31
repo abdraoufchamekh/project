@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, memo } from 'react';
 import { Archive, Search, Filter, X } from 'lucide-react';
-import { getStatusColor } from '../../utils/constants';
+
 import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 import OrderStatusDropdown from './OrderStatusDropdown';
 

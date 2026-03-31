@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, X, Upload, Loader2, Image as ImageIcon } from 'lucide-react';
+import { Plus, X, Upload, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import { API_BASE_URL } from '../../utils/constants';
 import { wilayas, communesByWilaya } from '../../utils/algeria';

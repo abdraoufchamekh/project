@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Package, Search, Filter, X, AlertTriangle } from 'lucide-react';
 import axios from 'axios';
-import { getStatusColor, API_BASE_URL } from '../../utils/constants';
+import { API_BASE_URL } from '../../utils/constants';
 import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 import OrderStatusDropdown from './OrderStatusDropdown';
 
