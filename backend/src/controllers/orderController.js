@@ -7,6 +7,7 @@ const path = require('path');
 const cloudinary = require('cloudinary').v2;
 const pool = require('../config/database');
 const { getCachedStats, setCachedStats, invalidateStatsCache } = require('../utils/statsCache');
+const yalidineService = require('../services/yalidineService');
 
 function mapSummaryOrderRow(row) {
   const {
@@ -40,10 +41,21 @@ exports.createOrder = async (req, res) => {
   try {
     const {
       clientName, firstName, lastName, phone, phone2, address, wilaya, commune,
-      deliveryType, stopDeskAgency, isFreeDelivery, hasExchange,
+      wilaya_id, commune_id,
+      deliveryType, delivery_type, stop_desk_agency,
+      isFreeDelivery, hasExchange,
       hasInsurance, declaredValue, products,
-      deliveryFee, discount, source, versement
+      deliveryFee, discount, source, versement, agency_id
     } = req.body;
+
+    // Log to verify fields are received
+    console.log('ORDER FIELDS:', {
+      wilaya, wilaya_id,
+      commune, commune_id,
+      deliveryType: deliveryType || delivery_type,
+      stop_desk_agency,
+      agency_id
+    });
 
     const assignedDesigner = req.body.assignedDesigner !== undefined ? req.body.assignedDesigner : req.body.assigned_designer;
     const finalClientName = clientName || `${firstName || ''} ${lastName || ''}`.trim() || 'Client Anonyme';
@@ -59,9 +71,9 @@ exports.createOrder = async (req, res) => {
       if (productData.inventoryItemId) {
         const item = await Stock.getItemById(productData.inventoryItemId, client);
         if (!item) {
-           await client.query('ROLLBACK');
-           client.release();
-           return res.status(404).json({ error: `Article de stock introuvable pour ${productData.type}` });
+          await client.query('ROLLBACK');
+          client.release();
+          return res.status(404).json({ error: `Article de stock introuvable pour ${productData.type}` });
         }
         if (item) {
           productData.imageUrl = item.image_url;
@@ -82,9 +94,13 @@ exports.createOrder = async (req, res) => {
       phone2: phone2 || null,
       address: address || null,
       wilaya: wilaya || null,
+      wilaya_id: wilaya_id || null,
       commune: commune || null,
-      deliveryType: deliveryType || 'domicile',
-      stopDeskAgency: stopDeskAgency || null,
+      commune_id: commune_id || null,
+      stop_desk_agency: stop_desk_agency || req.body.stopDeskAgency || null,
+      agency_id: agency_id || null,
+      stopDeskAgency: stop_desk_agency || req.body.stopDeskAgency || null,
+      deliveryType: deliveryType || delivery_type || 'domicile',
       isFreeDelivery: freeDelivery,
       hasExchange: hasExchange || false,
       hasInsurance: hasInsurance || false,
@@ -124,11 +140,23 @@ exports.createOrder = async (req, res) => {
     client.release();
     invalidateStatsCache();
 
+    // Trigger Yalidine Sync for Admins
+    let yalidineResult = null;
+    if (req.user && req.user.role === 'admin') {
+      try {
+        yalidineResult = await yalidineService.syncOrderAuto(order.id);
+      } catch (syncErr) {
+        console.error('[Yalidine Sync] Non-blocking error during order creation:', syncErr);
+        // Not throwing since order is already committed in database
+      }
+    }
+
     res.status(201).json({
       message: 'Order created successfully',
       order: {
         ...order,
-        products: createdProducts
+        products: createdProducts,
+        ...(yalidineResult || {})
       }
     });
   } catch (error) {
@@ -537,5 +565,40 @@ exports.replacePhoto = async (req, res) => {
   } catch (error) {
     console.error('Replace photo error:', error);
     res.status(500).json({ error: 'Server error replacing photo' });
+  }
+};
+
+exports.syncYalidine = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Access denied. Admin only.' });
+    }
+
+    const orderRes = await pool.query('SELECT * FROM orders WHERE id = $1', [id]);
+    if (orderRes.rows.length === 0) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    const syncResult = await yalidineService.syncOrderAuto(id);
+
+    // Return FULL updated order - not just tracking fields
+    const updatedOrder = await Order.findById(Number(id));
+    const products = await Product.findByOrderId(Number(id));
+    const photos = await Photo.findByOrderId(Number(id));
+
+    res.json({
+      message: 'Yalidine sync complete',
+      order: {
+        ...updatedOrder,
+        products: products || [],
+        photos: photos || []
+      },
+      yalidineResult: syncResult
+    });
+  } catch (error) {
+    console.error('Manual Yalidine sync error:', error);
+    res.status(500).json({ error: 'Server error during manual synchronization' });
   }
 };

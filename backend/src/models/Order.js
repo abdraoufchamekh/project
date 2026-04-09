@@ -3,45 +3,47 @@ const pool = require('../config/database');
 class Order {
   static async create(orderData, client = pool) {
     const {
-      clientName, phone, phone2, address, wilaya, commune,
+      clientName, phone, phone2, address, wilaya, commune, wilaya_id, commune_id,
       deliveryType, stopDeskAgency, isFreeDelivery, hasExchange,
       hasInsurance, declaredValue, status, assignedDesigner,
       firstName, lastName,
-      deliveryFee, discount, source, versement
+      deliveryFee, discount, source, versement, agency_id
     } = orderData;
 
     const query = `
       INSERT INTO orders (
-        client_name, first_name, last_name, phone, phone2, address, wilaya, commune,
-        delivery_type, stop_desk_agency, is_free_delivery, has_exchange,
-        has_insurance, declared_value, status, assigned_designer,
-        delivery_fee, discount, source, versement, created_at
+        client_name, first_name, last_name, phone, phone2, address, wilaya, wilaya_id, commune, commune_id,
+        delivery_type, stop_desk_agency, agency_id,
+        delivery_fee, discount, versement, is_free_delivery,
+        has_exchange, has_insurance, declared_value, source, status, created_at
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, NOW())
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, NOW())
       RETURNING *
     `;
 
     const result = await client.query(query, [
       clientName || `${firstName || ''} ${lastName || ''}`.trim(),
-      firstName,
-      lastName,
+      firstName || null,
+      lastName || null,
       phone,
       phone2 || null,
       address || null,
       wilaya || null,
+      wilaya_id ? parseInt(wilaya_id, 10) : null,
       commune || null,
+      commune_id ? parseInt(commune_id, 10) : null,
       deliveryType || 'domicile',
       stopDeskAgency || null,
+      orderData.agency_id ? parseInt(orderData.agency_id, 10) : null,
+      Math.max(0, Number(deliveryFee) || 0),
+      Math.max(0, Number(discount) || 0),
+      Math.max(0, Number(versement) || 0),
       isFreeDelivery || false,
       hasExchange || false,
       hasInsurance || false,
       declaredValue ? parseFloat(declaredValue) : null,
-      status || 'Nouvelle commande',
-      assignedDesigner,
-      Math.max(0, Number(deliveryFee) || 0),
-      Math.max(0, Number(discount) || 0),
       source || 'admin',
-      Math.max(0, Number(versement) || 0)
+      status || 'Nouvelle commande'
     ]);
     return result.rows[0];
   }

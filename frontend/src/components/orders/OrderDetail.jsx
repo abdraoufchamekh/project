@@ -4,6 +4,7 @@ import axios from 'axios';
 import { API_BASE_URL } from '../../utils/constants';
 import { getPhotoUrl, getPhotoUrlOriginal } from '../../utils/images';
 import InvoicePreviewModal from './InvoicePreviewModal';
+import { syncYalidineOrder, getParcelStatus } from '../../api/yalidine';
 
 export default function OrderDetail({ order, onBack, onUpdate, userRole, onDeleteOrder }) {
   const [editMode, setEditMode] = useState(false);
@@ -11,6 +12,11 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
   const [expandedProducts, setExpandedProducts] = useState({});
   const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(true);
+  
+  // Yalidine States
+  const [liveYalidineStatus, setLiveYalidineStatus] = useState(null);
+  const [isSyncingYalidine, setIsSyncingYalidine] = useState(false);
+
   const fetchedOrderRef = useRef(null);
 
   // Fetch full order by ID so we always have delivery_fee, discount, and latest data from DB
@@ -44,6 +50,32 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
     return () => { cancelled = true; };
   }, [order?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Fetch Yalidine Live Status
+  useEffect(() => {
+    if (userRole === 'admin' && localOrder.yalidine_status === 'success' && localOrder.yalidine_tracking) {
+       getParcelStatus(localOrder.yalidine_tracking)
+         .then(res => setLiveYalidineStatus(res.last_status))
+         .catch(err => console.error("Could not fetch live yalidine status", err));
+    }
+  }, [userRole, localOrder.yalidine_status, localOrder.yalidine_tracking]);
+
+  const handleSyncYalidine = async () => {
+    setIsSyncingYalidine(true);
+    try {
+      const result = await syncYalidineOrder(localOrder.id);
+      setLocalOrder(prev => ({
+        ...prev,
+        ...result.order,
+        products: prev.products || [],
+        photos: prev.photos || []
+      }));
+    } catch (err) {
+      alert("Erreur lors de la synchronisation Yalidine: " + (err.response?.data?.error || err.message));
+    } finally {
+      setIsSyncingYalidine(false);
+    }
+  };
+
   const toggleProduct = (productId) => {
     setExpandedProducts(prev => ({
       ...prev,
@@ -54,7 +86,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
   const updateProductStatus = (productId, newStatus) => {
     const updated = {
       ...localOrder,
-      products: localOrder.products.map(p =>
+      products: (localOrder.products || []).map(p =>
         p.id === productId ? { ...p, status: newStatus } : p
       )
     };
@@ -91,7 +123,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
 
       const updatedOrder = {
         ...localOrder,
-        products: localOrder.products.map(p =>
+        products: (localOrder.products || []).map(p =>
           p.id === productId ? { ...p, image_url: updatedProduct.image_url } : p
         )
       };
@@ -180,7 +212,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
   };
 
   const productsSubtotal = (localOrder.products && localOrder.products.length > 0)
-    ? localOrder.products.reduce(
+    ? (localOrder.products || []).reduce(
       (sum, p) => sum + (Number(p.quantity) || 1) * (Number(p.unit_price ?? p.unitPrice) || 0),
       0
     )
@@ -289,7 +321,20 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
             </p>
             <p className="text-gray-400 text-sm mt-2 border-t border-gray-700 pt-2">
               {localOrder.source !== 'atelier' && localOrder.deliveryType !== 'sur_place' && localOrder.delivery_type !== 'sur_place' && (
-                <span className="block text-gray-300 mb-1">Livraison: {localOrder.deliveryType === 'stop_desk' || localOrder.delivery_type === 'stop_desk' || localOrder.deliveryType === 'bureau' || localOrder.delivery_type === 'bureau' ? 'Point relais / Au bureau (Stop Desk)' : 'À domicile'}</span>
+                <span className="block text-gray-300 mb-1">Livraison: {localOrder.deliveryType === 'stop_desk' || localOrder.delivery_type === 'stop_desk' || localOrder.deliveryType === 'bureau' || localOrder.delivery_type === 'bureau' ? 'Point relais / Au bureau (Stop Desk)' : 'À domicile'}
+                  {localOrder.delivery_carrier === 'guepex' && (
+                    <span className="inline-block px-2 py-0.5 bg-orange-900/50 text-orange-400 text-xs rounded-full border border-orange-800 ml-2">📦 Guepex</span>
+                  )}
+                  {localOrder.delivery_carrier === 'yalidine' && (
+                    <span className="inline-block px-2 py-0.5 bg-blue-900/50 text-blue-400 text-xs rounded-full border border-blue-800 ml-2">📦 Yalidine</span>
+                  )}
+                  {!localOrder.delivery_carrier && localOrder.delivery_type === 'domicile' && (
+                    <span className="inline-block px-2 py-0.5 bg-orange-900/50 text-orange-400 text-xs rounded-full border border-orange-800 ml-2">📦 Guepex</span>
+                  )}
+                  {!localOrder.delivery_carrier && localOrder.delivery_type === 'stop_desk' && (
+                    <span className="inline-block px-2 py-0.5 bg-blue-900/50 text-blue-400 text-xs rounded-full border border-blue-800 ml-2">📦 Yalidine</span>
+                  )}
+                </span>
               )}
               <span className="block">📍 {localOrder.wilaya || localOrder.wilaya ? `${localOrder.wilaya || localOrder.wilaya}${localOrder.commune ? ` - ${localOrder.commune}` : ''}` : ''}</span>
               {(localOrder.deliveryType === 'stop_desk' || localOrder.delivery_type === 'stop_desk' || localOrder.deliveryType === 'bureau' || localOrder.delivery_type === 'bureau') && (
@@ -370,6 +415,59 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
 
       </div>
 
+      {/* Yalidine Info Section (Admin Only) */}
+      {userRole === 'admin' && (
+        <div className="bg-[#112C70] rounded-lg p-4 md:p-6 mb-6 md:mb-8 border border-blue-800">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-semibold text-white">Informations Livraison Yalidine</h3>
+            {(localOrder.yalidine_status === 'failed' || localOrder.yalidine_status === 'pending') && (
+              <button
+                onClick={handleSyncYalidine}
+                disabled={isSyncingYalidine}
+                className="px-4 py-2 bg-[linear-gradient(135deg,_#5B58EB,_#09fbff)] text-white text-sm font-semibold rounded-md shadow-md disabled:opacity-50"
+              >
+                {isSyncingYalidine ? 'Synchronisation...' : 'Réessayer la synchronisation'}
+              </button>
+            )}
+          </div>
+          
+          <div className="space-y-3">
+            {localOrder.yalidine_status === 'success' && localOrder.yalidine_tracking && (
+              <>
+                <p className="text-gray-300">
+                  <span className="font-medium text-gray-400">Numéro de Suivi: </span>
+                  <span className="text-[#56E1E9] font-bold tracking-wider">{localOrder.yalidine_tracking}</span>
+                </p>
+                <p className="text-gray-300">
+                  <span className="font-medium text-gray-400">État d'expédition (En direct): </span>
+                  <span className="inline-block px-2 py-1 bg-green-900/50 text-green-400 text-xs rounded-full border border-green-800">
+                    {liveYalidineStatus || 'Chargement...'}
+                  </span>
+                </p>
+                {localOrder.yalidine_label_url && (
+                  <p className="pt-2">
+                    <a href={localOrder.yalidine_label_url} target="_blank" rel="noreferrer" className="inline-flex items-center text-[#BB63FF] hover:text-[#56E1E9] text-sm font-medium transition-colors">
+                      <FileText size={16} className="mr-1" /> Imprimer le bordereau
+                    </a>
+                  </p>
+                )}
+              </>
+            )}
+
+            {localOrder.yalidine_status === 'failed' && (
+              <div className="p-3 bg-red-900/30 border border-red-800 rounded-md">
+                <p className="text-red-400 font-medium">Synchronisation Yalidine échouée</p>
+                <p className="text-sm text-red-300 mt-1">{localOrder.yalidine_error || "Erreur inconnue"}</p>
+              </div>
+            )}
+
+            {(localOrder.yalidine_status === 'pending' || !localOrder.yalidine_status) && (
+              <p className="text-blue-300 italic">Synchronisation Yalidine en cours...</p>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Progress Steps UI */}
       <div className="bg-[#112C70] rounded-lg p-4 md:p-6 mb-6 md:mb-8">
         <h3 className="text-xl font-semibold text-white mb-6 md:mb-8">État de la commande</h3>
@@ -381,7 +479,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
               style={{ width: `${(Math.max(0, currentStepIdx) / (statusSteps.length - 1)) * 100}%` }}
             ></div>
             <div className="flex justify-between relative z-10 w-full">
-              {statusSteps.map((step, idx) => {
+              {(statusSteps || []).map((step, idx) => {
                 const isCompleted = idx <= currentStepIdx;
                 const isCurrent = idx === currentStepIdx;
                 return (
@@ -425,7 +523,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
         </div>
         {localOrder.photos && localOrder.photos.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {localOrder.photos.map(photo => (
+            {(localOrder.photos || []).map(photo => (
               <div key={photo.id} className="bg-[#0A2353] rounded-lg overflow-hidden border border-gray-700 group">
                 <div className="h-64 overflow-hidden relative">
                   <img
@@ -490,7 +588,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
         {loadingDetail && (!localOrder.products || localOrder.products.length === 0) ? (
           <p className="text-gray-400 italic">Chargement des articles...</p>
         ) : (
-          localOrder.products.map(product => (
+          (localOrder.products || []).map(product => (
             <div key={product.id} className="bg-[#0A2353] rounded-lg mb-4 overflow-hidden">
               <div
                 className="p-4 cursor-pointer hover:bg-gray-850 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition"

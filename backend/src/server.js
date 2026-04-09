@@ -1,8 +1,8 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const compression = require('compression');
 const path = require('path');
-require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
 const orderRoutes = require('./routes/orders');
@@ -10,6 +10,7 @@ const userRoutes = require('./routes/users');
 const stockRoutes = require('./routes/stock');
 const settingsRoutes = require('./routes/settingsRoutes');
 const notificationRoutes = require('./routes/notifications');
+const yalidineRoutes = require('./routes/yalidine');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -43,6 +44,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/stock', stockRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/yalidine', yalidineRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

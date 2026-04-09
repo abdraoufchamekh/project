@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Plus, X, Upload, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import { API_BASE_URL } from '../../utils/constants';
-import { wilayas, communesByWilaya } from '../../utils/algeria';
+import { getWilayas, getCommunes } from '../../api/yalidine';
 
 export default function CreateOrder({ onSave }) {
   // Destinataire
@@ -12,9 +12,21 @@ export default function CreateOrder({ onSave }) {
   const [phone2, setPhone2] = useState('');
   const [showPhone2, setShowPhone2] = useState(false);
   const [wilaya, setWilaya] = useState('');
+  const [wilayaId, setWilayaId] = useState(null);
+
+  // Yalidine Data
+  const [wilayasData, setWilayasData] = useState([]);
+  const [communesData, setCommunesData] = useState([]);
   const [commune, setCommune] = useState('');
+  const [communeId, setCommuneId] = useState(null);
+  const [loadingCommunes, setLoadingCommunes] = useState(false);
   const [customCommune, setCustomCommune] = useState('');
   const [address, setAddress] = useState('');
+
+  const [agenciesData, setAgenciesData] = useState([]);
+  const [agency, setAgency] = useState('');
+  const [agencyId, setAgencyId] = useState(null);
+  const [loadingAgencies, setLoadingAgencies] = useState(false);
 
   // Livraison
   const [deliveryType, setDeliveryType] = useState('domicile');
@@ -50,7 +62,130 @@ export default function CreateOrder({ onSave }) {
 
   useEffect(() => {
     fetchStock();
+    fetchWilayasData();
   }, []);
+
+  const fetchWilayasData = async () => {
+    try {
+      const data = await getWilayas();
+      setWilayasData(data || []);
+    } catch (err) {
+      console.error('Error fetching wilayas:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (wilaya && wilayasData.length > 0) {
+      const selectedW = wilayasData.find(w => w.name === wilaya);
+      if (selectedW) {
+        fetchCommunesData(selectedW.wilaya_id || selectedW.id || selectedW.has_id);
+      }
+    } else {
+      setCommunesData([]);
+    }
+  }, [wilaya, wilayasData]);
+
+  const fetchCommunesData = async (wId) => {
+    try {
+      if (!wId) return;
+      const data = await getCommunes(wId);
+      setCommunesData(data || []);
+    } catch (err) {
+      console.error('Error fetching communes:', err);
+    }
+  };
+
+  const handleWilayaChange = async (e) => {
+    const selectedName = e.target.value;
+    setWilaya(selectedName);
+    setCommune(''); setCommuneId(null);
+    setAgency(''); setAgencyId(null);
+    setCommunesData([]); setAgenciesData([]);
+
+    const selectedW = wilayasData.find(w => w.name === selectedName);
+    if (selectedW) {
+      const wId = selectedW.wilaya_id || selectedW.id;
+      setWilayaId(wId);
+      setLoadingCommunes(true);
+      try {
+        const res = await axios.get(`${API_BASE_URL}/yalidine/communes/${wId}`, {
+          headers: { Authorization: `Bearer ${sessionStorage.getItem('aurea_token')}` }
+        });
+        setCommunesData(res.data || []);
+      } catch (e) {
+        console.error('Failed to load communes:', e);
+      } finally {
+        setLoadingCommunes(false);
+      }
+    }
+  };
+
+  const handleCommuneChange = async (e) => {
+    const selectedName = e.target.value;
+    setCommune(selectedName);
+    setAgency(''); setAgencyId(null); setAgenciesData([]);
+
+    // Custom commune check
+    if (selectedName === 'Autre') {
+      setCommuneId(null);
+      return;
+    }
+
+    const selectedC = communesData.find(c => c.name === selectedName);
+    if (selectedC) {
+      const cId = selectedC.commune_id || selectedC.id;
+      setCommuneId(cId);
+      if (deliveryType === 'stop_desk') {
+        setLoadingAgencies(true);
+        try {
+          const res = await axios.get(`${API_BASE_URL}/yalidine/agencies/${cId}`, {
+            headers: { Authorization: `Bearer ${sessionStorage.getItem('aurea_token')}` }
+          });
+          setAgenciesData(res.data || []);
+        } catch (e) {
+          console.error('Failed to load agencies:', e);
+        } finally {
+          setLoadingAgencies(false);
+        }
+      }
+    }
+  };
+
+  const handleDeliveryTypeChange = async (newType) => {
+    setDeliveryType(newType);
+    setAgency(''); setAgencyId(null); setAgenciesData([]);
+    if (newType === 'stop_desk' && communeId) {
+      setLoadingAgencies(true);
+      try {
+        const res = await axios.get(`${API_BASE_URL}/yalidine/agencies/${communeId}`, {
+            headers: { Authorization: `Bearer ${sessionStorage.getItem('aurea_token')}` }
+        });
+        setAgenciesData(res.data || []);
+      } catch (e) {
+        console.error('Failed to load agencies:', e);
+      } finally {
+        setLoadingAgencies(false);
+      }
+    }
+  };
+
+  const fetchAgencies = async (communeId) => {
+    if (!communeId || deliveryType !== 'stop_desk') return;
+    setLoadingAgencies(true);
+    try {
+      const response = await axios.get(`${API_BASE_URL}/yalidine/agencies/${communeId}`, {
+         headers: { Authorization: `Bearer ${sessionStorage.getItem('aurea_token')}` }
+      });
+      setAgenciesData(response.data || []);
+      setAgency('');
+      setAgencyId(null);
+    } catch (error) {
+      console.error('Error fetching agencies:', error);
+      setAgenciesData([]);
+    } finally {
+      setLoadingAgencies(false);
+    }
+  };
 
   const fetchStock = async () => {
     try {
@@ -125,9 +260,13 @@ export default function CreateOrder({ onSave }) {
       phone,
       phone2: showPhone2 ? phone2 : null,
       wilaya,
-      commune: deliveryType === 'stop_desk' ? null : (commune === 'Autre' ? customCommune : commune),
+      wilaya_id: wilayaId ? Number(wilayaId) : null,
+      commune: deliveryType === 'stop_desk' ? commune : (commune === 'Autre' ? customCommune : commune),
+      commune_id: communeId ? Number(communeId) : null,
       address: deliveryType === 'stop_desk' ? null : address,
       deliveryType,
+      stop_desk_agency: agency || null,
+      agency_id: agencyId ? Number(agencyId) : null,
       isFreeDelivery,
       hasExchange,
       hasInsurance,
@@ -160,9 +299,14 @@ export default function CreateOrder({ onSave }) {
     setShowPhone2(false);
     setWilaya('');
     setCommune('');
+    setCommuneId(null);
+    setWilayaId(null);
     setCustomCommune('');
     setAddress('');
     setDeliveryType('domicile');
+    setAgency('');
+    setAgencyId(null);
+    setAgenciesData([]);
     setIsFreeDelivery(false);
     setDeliveryFee(0);
     setHasExchange(false);
@@ -226,11 +370,11 @@ export default function CreateOrder({ onSave }) {
               <span className="w-full md:w-1/3 p-2 text-gray-400 font-medium border-b md:border-b-0 md:border-r border-gray-600">Type de livraison</span>
               <div className="w-full md:w-2/3 flex p-2 gap-4">
                 <label className="flex items-center gap-2 cursor-pointer text-white">
-                  <input type="radio" value="domicile" checked={deliveryType === 'domicile'} onChange={(e) => setDeliveryType(e.target.value)} className="w-4 h-4 accent-[#56E1E9] text-[#56E1E9] bg-[#0A2353] border-gray-600 focus:ring-[#56E1E9]" />
+                  <input type="radio" value="domicile" checked={deliveryType === 'domicile'} onChange={() => handleDeliveryTypeChange('domicile')} className="w-4 h-4 accent-[#56E1E9] text-[#56E1E9] bg-[#0A2353] border-gray-600 focus:ring-[#56E1E9]" />
                   À domicile
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer text-white">
-                  <input type="radio" value="stop_desk" checked={deliveryType === 'stop_desk'} onChange={(e) => setDeliveryType(e.target.value)} className="w-4 h-4 accent-[#56E1E9] text-[#56E1E9] bg-[#0A2353] border-gray-600 focus:ring-[#56E1E9]" />
+                  <input type="radio" value="stop_desk" checked={deliveryType === 'stop_desk'} onChange={() => handleDeliveryTypeChange('stop_desk')} className="w-4 h-4 accent-[#56E1E9] text-[#56E1E9] bg-[#0A2353] border-gray-600 focus:ring-[#56E1E9]" />
                   Au bureau / Stop Desk
                 </label>
               </div>
@@ -240,50 +384,77 @@ export default function CreateOrder({ onSave }) {
               <span className="w-full md:w-1/3 p-2 text-red-400 font-medium border-b md:border-b-0 md:border-r border-gray-600">Wilaya</span>
               <select
                 value={wilaya}
-                onChange={(e) => { setWilaya(e.target.value); setCommune(''); setCustomCommune(''); }}
+                onChange={handleWilayaChange}
                 className="w-full md:w-2/3 p-2 outline-none bg-[#112C70] text-white"
               >
                 <option value="">Choisissez</option>
-                {wilayas.map(w => (
-                  <option key={w.id} value={w.name}>{w.id} - {w.name}</option>
+                {wilayasData.map(w => (
+                  <option key={w.wilaya_id || w.id || w.name} value={w.name}>{w.name}</option>
                 ))}
               </select>
             </div>
 
-            {deliveryType === 'domicile' && (
-              <>
-                <div className="flex flex-col md:flex-row bg-[#112C70]/80 rounded border border-gray-600 overflow-hidden mt-4">
-                  <span className="w-full md:w-1/3 p-2 text-red-400 font-medium border-b md:border-b-0 md:border-r border-gray-600">Commune</span>
-                  <div className="w-full md:w-2/3 flex flex-col">
-                    <select
-                      value={commune}
-                      onChange={(e) => setCommune(e.target.value)}
-                      className="w-full p-2 outline-none bg-[#112C70] text-white"
-                      disabled={!wilaya}
-                    >
-                      <option value="">{wilaya ? 'Choisissez une commune' : "Choisissez d'abord la wilaya"}</option>
-                      {wilaya && communesByWilaya[wilayas.find(w => w.name === wilaya)?.id]?.map(c => (
-                        <option key={c} value={c}>{c}</option>
-                      ))}
-                      {wilaya && <option value="Autre" className="text-[#56E1E9] font-bold">Autre (Saisir manuellement)...</option>}
-                    </select>
-                    {commune === 'Autre' && (
-                      <input
-                        type="text"
-                        value={customCommune}
-                        onChange={(e) => setCustomCommune(e.target.value)}
-                        placeholder="Saisissez le nom de la commune"
-                        className="w-full p-2 bg-[#0A2353] border-t border-gray-600 text-white outline-none"
-                      />
-                    )}
-                  </div>
-                </div>
+            {/* COMMUNE DROPDOWN */}
+            <div className="flex flex-col md:flex-row bg-[#112C70]/80 rounded border border-gray-600 overflow-hidden mt-4">
+              <span className={`w-full md:w-1/3 p-2 font-medium border-b md:border-b-0 md:border-r border-gray-600 ${!wilayaId ? 'text-red-400' : 'text-gray-400'}`}>Commune</span>
+              <div className="w-full md:w-2/3 flex flex-col">
+                <select
+                  value={commune}
+                  onChange={handleCommuneChange}
+                  disabled={!wilayaId || loadingCommunes}
+                  className="w-full p-2 outline-none bg-[#112C70] text-white disabled:opacity-50"
+                >
+                  <option value="">
+                    {loadingCommunes ? '⏳ Chargement...' : !wilayaId ? 'Choisissez d\'abord la wilaya' : 'Choisissez une commune'}
+                  </option>
+                  {communesData.map((c, i) => (
+                    <option key={c.commune_id || c.id || i} value={c.name}>{c.name}</option>
+                  ))}
+                  {wilayaId && deliveryType === 'domicile' && <option value="Autre" className="text-[#56E1E9] font-bold">Autre (Saisir manuellement)...</option>}
+                </select>
+                {commune === 'Autre' && deliveryType === 'domicile' && (
+                  <input
+                    type="text"
+                    value={customCommune}
+                    onChange={(e) => setCustomCommune(e.target.value)}
+                    placeholder="Saisissez le nom de la commune"
+                    className="w-full p-2 bg-[#0A2353] border-t border-gray-600 text-white outline-none"
+                  />
+                )}
+              </div>
+            </div>
 
-                <div className="flex flex-col md:flex-row bg-[#112C70]/80 rounded border border-gray-600 overflow-hidden mt-4">
-                  <span className="w-full md:w-1/3 p-2 text-gray-400 border-b md:border-b-0 md:border-r border-gray-600">L'adresse postale</span>
-                  <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} className="w-full md:w-2/3 p-2 bg-transparent text-white outline-none" />
-                </div>
-              </>
+            {/* AGENCE DROPDOWN — STOP DESK ONLY */}
+            {deliveryType === 'stop_desk' && (
+              <div className="flex flex-col md:flex-row bg-[#112C70]/80 rounded border border-gray-600 overflow-hidden mt-4">
+                <span className="w-full md:w-1/3 p-2 text-gray-400 font-medium border-b md:border-b-0 md:border-r border-gray-600">Agence</span>
+                <select
+                  value={agency}
+                  onChange={(e) => {
+                    const selectedName = e.target.value;
+                    setAgency(selectedName);
+                    const selectedA = agenciesData.find(a => a.name === selectedName || a.agency_name === selectedName);
+                    if (selectedA) setAgencyId(selectedA.center_id || selectedA.id || selectedA.agency_id);
+                  }}
+                  disabled={!communeId || loadingAgencies}
+                  className="w-full md:w-2/3 p-2 outline-none bg-[#112C70] text-white disabled:opacity-50"
+                >
+                  <option value="">
+                    {loadingAgencies ? '⏳ Chargement...' : !communeId ? 'Choisissez d\'abord la commune' : agenciesData.length === 0 ? 'Aucune agence disponible' : 'Choisissez une agence'}
+                  </option>
+                  {agenciesData.map((a, i) => (
+                    <option key={a.center_id || a.id || i} value={a.name || a.agency_name}>{a.name || a.agency_name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* ADRESSE POSTALE — DOMICILE ONLY */}
+            {deliveryType === 'domicile' && (
+              <div className="flex flex-col md:flex-row bg-[#112C70]/80 rounded border border-gray-600 overflow-hidden mt-4">
+                <span className="w-full md:w-1/3 p-2 text-gray-400 border-b md:border-b-0 md:border-r border-gray-600">L'adresse postale</span>
+                <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} className="w-full md:w-2/3 p-2 bg-transparent text-white outline-none" />
+              </div>
             )}
           </div>
         </div>

@@ -34,6 +34,13 @@ function MainApp() {
   const [statusPageConfig, setStatusPageConfig] = useState(null);
 
   const prevUserId = useRef(user?.id);
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo(0, 0);
+    }
+  }, [activePage, selectedOrder, statusPageConfig]);
 
   useEffect(() => {
     if (user?.id !== prevUserId.current) {
@@ -137,6 +144,14 @@ function MainApp() {
 
           await queryClient.invalidateQueries({ queryKey: ['orders'] });
           await queryClient.invalidateQueries({ queryKey: ['orderStats'] });
+
+          if (createdOrder.yalidine_tracking) {
+            alert(`✅ Commande créée avec succès — Numéro de suivi Yalidine : ${createdOrder.yalidine_tracking}`);
+          } else if (createdOrder.yalidine_error || createdOrder.yalidine_status === 'failed') {
+            alert(`⚠️ Commande sauvegardée localement mais non envoyée à Yalidine. Réessayez plus tard.`);
+          } else {
+            // Optional fallback
+          }
 
           if (photos && photos.length > 0) {
             const formData = new FormData();
@@ -279,7 +294,7 @@ function MainApp() {
           </button>
         </div>
 
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto" ref={scrollRef}>
           <Suspense fallback={pageFallback}>
             {selectedOrder ? (
               <OrderDetail

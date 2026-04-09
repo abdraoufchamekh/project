@@ -15,6 +15,7 @@ router.get('/:id', orderController.getOrderById);
 router.put('/:id', designerOrAdmin, orderController.updateOrder);
 router.delete('/:id', designerOrAdmin, orderController.deleteOrder);
 router.get('/:id/invoice', require('../controllers/invoiceController').generateInvoice);
+router.post('/:id/sync-yalidine', adminOnly, orderController.syncYalidine);
 
 // Product routes
 router.patch('/products/:productId/status', orderController.updateProductStatus);
