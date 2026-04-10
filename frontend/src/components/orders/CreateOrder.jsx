@@ -169,23 +169,6 @@ export default function CreateOrder({ onSave }) {
     }
   };
 
-  const fetchAgencies = async (communeId) => {
-    if (!communeId || deliveryType !== 'stop_desk') return;
-    setLoadingAgencies(true);
-    try {
-      const response = await axios.get(`${API_BASE_URL}/yalidine/agencies/${communeId}`, {
-         headers: { Authorization: `Bearer ${sessionStorage.getItem('aurea_token')}` }
-      });
-      setAgenciesData(response.data || []);
-      setAgency('');
-      setAgencyId(null);
-    } catch (error) {
-      console.error('Error fetching agencies:', error);
-      setAgenciesData([]);
-    } finally {
-      setLoadingAgencies(false);
-    }
-  };
 
   const fetchStock = async () => {
     try {
