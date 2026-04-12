@@ -3,6 +3,7 @@ import { Plus, X, Upload, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import { API_BASE_URL } from '../../utils/constants';
 import { getWilayas, getCommunes } from '../../api/yalidine';
+import { getGeupexWilayas, getGeupexCommunes, getGeupexAgencies } from '../../api/guepex';
 
 export default function CreateOrder({ onSave }) {
   // Destinataire
@@ -65,10 +66,15 @@ export default function CreateOrder({ onSave }) {
     fetchWilayasData();
   }, []);
 
-  const fetchWilayasData = async () => {
+  const fetchWilayasData = async (type = deliveryType) => {
     try {
-      const data = await getWilayas();
-      setWilayasData(data || []);
+      if (type === 'stop_desk') {
+        const data = await getGeupexWilayas();
+        setWilayasData(data || []);
+      } else {
+        const data = await getWilayas();
+        setWilayasData(data || []);
+      }
     } catch (err) {
       console.error('Error fetching wilayas:', err);
     }
@@ -85,11 +91,16 @@ export default function CreateOrder({ onSave }) {
     }
   }, [wilaya, wilayasData]);
 
-  const fetchCommunesData = async (wId) => {
+  const fetchCommunesData = async (wId, type = deliveryType) => {
     try {
       if (!wId) return;
-      const data = await getCommunes(wId);
-      setCommunesData(data || []);
+      if (type === 'stop_desk') {
+        const data = await getGeupexCommunes(wId);
+        setCommunesData(data || []);
+      } else {
+        const data = await getCommunes(wId);
+        setCommunesData(data || []);
+      }
     } catch (err) {
       console.error('Error fetching communes:', err);
     }
@@ -108,10 +119,15 @@ export default function CreateOrder({ onSave }) {
       setWilayaId(wId);
       setLoadingCommunes(true);
       try {
-        const res = await axios.get(`${API_BASE_URL}/yalidine/communes/${wId}`, {
-          headers: { Authorization: `Bearer ${sessionStorage.getItem('aurea_token')}` }
-        });
-        setCommunesData(res.data || []);
+        if (deliveryType === 'stop_desk') {
+          const data = await getGeupexCommunes(wId);
+          setCommunesData(data || []);
+        } else {
+          const res = await axios.get(`${API_BASE_URL}/yalidine/communes/${wId}`, {
+            headers: { Authorization: `Bearer ${sessionStorage.getItem('aurea_token')}` }
+          });
+          setCommunesData(res.data || []);
+        }
       } catch (e) {
         console.error('Failed to load communes:', e);
       } finally {
@@ -138,7 +154,7 @@ export default function CreateOrder({ onSave }) {
       if (deliveryType === 'stop_desk') {
         setLoadingAgencies(true);
         try {
-          const res = await axios.get(`${API_BASE_URL}/yalidine/agencies/${cId}`, {
+          const res = await axios.get(`${API_BASE_URL}/guepex/agencies/${cId}`, {
             headers: { Authorization: `Bearer ${sessionStorage.getItem('aurea_token')}` }
           });
           setAgenciesData(res.data || []);
@@ -153,20 +169,12 @@ export default function CreateOrder({ onSave }) {
 
   const handleDeliveryTypeChange = async (newType) => {
     setDeliveryType(newType);
+    setWilaya(''); setWilayaId(null); setWilayasData([]);
+    setCommune(''); setCommuneId(null); setCommunesData([]);
     setAgency(''); setAgencyId(null); setAgenciesData([]);
-    if (newType === 'stop_desk' && communeId) {
-      setLoadingAgencies(true);
-      try {
-        const res = await axios.get(`${API_BASE_URL}/yalidine/agencies/${communeId}`, {
-            headers: { Authorization: `Bearer ${sessionStorage.getItem('aurea_token')}` }
-        });
-        setAgenciesData(res.data || []);
-      } catch (e) {
-        console.error('Failed to load agencies:', e);
-      } finally {
-        setLoadingAgencies(false);
-      }
-    }
+    
+    // Repopulate root dropdown
+    await fetchWilayasData(newType);
   };
 
 

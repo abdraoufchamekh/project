@@ -11,6 +11,7 @@ const stockRoutes = require('./routes/stock');
 const settingsRoutes = require('./routes/settingsRoutes');
 const notificationRoutes = require('./routes/notifications');
 const yalidineRoutes = require('./routes/yalidine');
+const guepexRoutes = require('./routes/guepex');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -46,6 +47,7 @@ app.use('/api/stock', stockRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/yalidine', yalidineRoutes);
+app.use('/api/guepex', guepexRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -32,6 +32,20 @@ ALTER TABLE orders
 ALTER TABLE products
   ADD COLUMN IF NOT EXISTS image_url TEXT;
 
+-- Photos table: transition from images to photos with types and user tracking.
+ALTER TABLE photos
+  ADD COLUMN IF NOT EXISTS filename VARCHAR(255),
+  ADD COLUMN IF NOT EXISTS type VARCHAR(50) DEFAULT 'client',
+  ADD COLUMN IF NOT EXISTS uploaded_by INTEGER REFERENCES users(id) ON DELETE SET NULL;
+  
+-- Backfill filename from url if url exists
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'photos' AND column_name = 'url') THEN
+    UPDATE photos SET filename = url WHERE filename IS NULL AND url IS NOT NULL;
+  END IF;
+END $$;
+
 -- Inventory table used by current Stock model.
 CREATE TABLE IF NOT EXISTS inventory_items (
   id SERIAL PRIMARY KEY,

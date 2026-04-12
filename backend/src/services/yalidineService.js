@@ -405,11 +405,11 @@ const syncOrderAuto = async (orderId) => {
   console.log('delivery_type:', order.delivery_type);
 
   if (order.delivery_type === 'domicile') {
-    console.log('→ Routing to GUEPEX (domicile)');
-    return await syncOrderGuepex(orderId);
-  } else if (order.delivery_type === 'stop_desk') {
-    console.log('→ Routing to YALIDINE (stop_desk)');
+    console.log('→ Routing to YALIDINE (domicile)');
     return await syncOrder(orderId);
+  } else if (order.delivery_type === 'stop_desk') {
+    console.log('→ Routing to GUEPEX (stop_desk)');
+    return await syncOrderGuepex(orderId);
   } else {
     throw new Error(`Unknown delivery_type: ${order.delivery_type}`);
   }
