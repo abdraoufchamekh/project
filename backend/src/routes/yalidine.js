@@ -17,6 +17,30 @@ router.get('/wilayas', async (req, res) => {
   }
 });
 
+// GET /api/yalidine/debug
+router.get('/debug', async (req, res) => {
+  try {
+    const axios = require('axios');
+    const response = await axios.get('https://api.yalidine.app/v1/wilayas/', {
+      headers: {
+        'X-API-ID': process.env.YALIDINE_API_ID,
+        'X-API-TOKEN': process.env.YALIDINE_API_TOKEN
+      },
+      timeout: 10000
+    });
+    res.json({ success: true, count: response.data?.data?.length || 0, sample: response.data?.data?.[0] });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+      env_has_id: !!process.env.YALIDINE_API_ID,
+      env_has_token: !!process.env.YALIDINE_API_TOKEN
+    });
+  }
+});
+
 // GET /api/yalidine/communes/:wilayaId
 router.get('/communes/:wilayaId', async (req, res) => {
   try { res.json(await yalidineService.fetchCommunes(req.params.wilayaId)); }
