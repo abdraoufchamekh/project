@@ -29,7 +29,6 @@ const importData = async () => {
 
     // Create tables with EXACT real columns
     await supabase.query(`
-
       CREATE TABLE users (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255),
@@ -141,7 +140,6 @@ const importData = async () => {
         created_at TIMESTAMP DEFAULT NOW(),
         updated_at TIMESTAMP DEFAULT NOW()
       );
-
     `);
     console.log('✅ All tables created with correct columns');
 
@@ -211,6 +209,16 @@ const importData = async () => {
     }
     console.log('✅ Products imported:', data.products.length);
 
+    // Import photos
+    for (const ph of data.photos) {
+      await supabase.query(
+        `INSERT INTO photos (id, order_id, url, created_at)
+         VALUES ($1,$2,$3,$4) ON CONFLICT (id) DO NOTHING`,
+        [ph.id, ph.order_id, ph.url, ph.created_at]
+      );
+    }
+    console.log('✅ Photos imported:', data.photos.length);
+
     // Import inventory_items
     for (const i of data.inventory_items) {
       await supabase.query(
@@ -237,13 +245,37 @@ const importData = async () => {
     }
     console.log('✅ Notifications imported:', data.notifications.length);
 
-    // Fix all sequences so new inserts get correct IDs
-    await supabase.query(`SELECT setval('users_id_seq', (SELECT MAX(id) FROM users));`);
-    await supabase.query(`SELECT setval('orders_id_seq', (SELECT MAX(id) FROM orders));`);
-    await supabase.query(`SELECT setval('products_id_seq', (SELECT MAX(id) FROM products));`);
-    await supabase.query(`SELECT setval('inventory_items_id_seq', (SELECT MAX(id) FROM inventory_items));`);
-    await supabase.query(`SELECT setval('notifications_id_seq', (SELECT MAX(id) FROM notifications));`);
-    await supabase.query(`SELECT setval('company_settings_id_seq', (SELECT MAX(id) FROM company_settings));`);
+    // Import stock_products
+    for (const sp of data.stock_products) {
+      await supabase.query(
+        `INSERT INTO stock_products (id, name, description, created_at, updated_at)
+         VALUES ($1,$2,$3,$4,$5) ON CONFLICT (id) DO NOTHING`,
+        [sp.id, sp.name, sp.description, sp.created_at, sp.updated_at]
+      );
+    }
+    console.log('✅ Stock products imported:', data.stock_products.length);
+
+    // Import stock_product_variants
+    for (const spv of data.stock_product_variants) {
+      await supabase.query(
+        `INSERT INTO stock_product_variants (
+          id, stock_product_id, name, quantity, created_at, updated_at
+        ) VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT (id) DO NOTHING`,
+        [spv.id, spv.stock_product_id, spv.name, spv.quantity, spv.created_at, spv.updated_at]
+      );
+    }
+    console.log('✅ Stock product variants imported:', data.stock_product_variants.length);
+
+    // Fix all sequences
+    await supabase.query(`SELECT setval('users_id_seq', COALESCE((SELECT MAX(id) FROM users), 1));`);
+    await supabase.query(`SELECT setval('orders_id_seq', COALESCE((SELECT MAX(id) FROM orders), 1));`);
+    await supabase.query(`SELECT setval('products_id_seq', COALESCE((SELECT MAX(id) FROM products), 1));`);
+    await supabase.query(`SELECT setval('photos_id_seq', COALESCE((SELECT MAX(id) FROM photos), 1));`);
+    await supabase.query(`SELECT setval('inventory_items_id_seq', COALESCE((SELECT MAX(id) FROM inventory_items), 1));`);
+    await supabase.query(`SELECT setval('notifications_id_seq', COALESCE((SELECT MAX(id) FROM notifications), 1));`);
+    await supabase.query(`SELECT setval('company_settings_id_seq', COALESCE((SELECT MAX(id) FROM company_settings), 1));`);
+    await supabase.query(`SELECT setval('stock_products_id_seq', COALESCE((SELECT MAX(id) FROM stock_products), 1));`);
+    await supabase.query(`SELECT setval('stock_product_variants_id_seq', COALESCE((SELECT MAX(id) FROM stock_product_variants), 1));`);
     console.log('✅ Sequences fixed');
 
     // Final verification
@@ -252,9 +284,12 @@ const importData = async () => {
         (SELECT COUNT(*) FROM users) as users,
         (SELECT COUNT(*) FROM orders) as orders,
         (SELECT COUNT(*) FROM products) as products,
+        (SELECT COUNT(*) FROM photos) as photos,
         (SELECT COUNT(*) FROM inventory_items) as inventory,
         (SELECT COUNT(*) FROM notifications) as notifications,
-        (SELECT COUNT(*) FROM company_settings) as settings
+        (SELECT COUNT(*) FROM company_settings) as settings,
+        (SELECT COUNT(*) FROM stock_products) as stock_products,
+        (SELECT COUNT(*) FROM stock_product_variants) as stock_variants
     `);
     console.log('✅ Verification:', verify.rows[0]);
 
