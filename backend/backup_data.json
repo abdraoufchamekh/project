@@ -1,0 +1,180 @@
+{
+  "company_settings": [
+    {
+      "id": 1,
+      "key": "company_name",
+      "value": "AUREA DECO",
+      "created_at": "2026-03-15T14:37:08.581Z",
+      "updated_at": "2026-03-27T15:43:51.887Z"
+    },
+    {
+      "id": 2,
+      "key": "vendor_name",
+      "value": "MOSTEFAOUI NESRINE",
+      "created_at": "2026-03-15T14:37:08.581Z",
+      "updated_at": "2026-03-27T15:43:52.039Z"
+    },
+    {
+      "id": 3,
+      "key": "activity",
+      "value": "Artisant en impression sur divers supports",
+      "created_at": "2026-03-15T14:37:08.581Z",
+      "updated_at": "2026-03-27T15:43:52.158Z"
+    },
+    {
+      "id": 4,
+      "key": "address",
+      "value": "Sour El Ghozlane – Bouira",
+      "created_at": "2026-03-15T14:37:08.581Z",
+      "updated_at": "2026-03-27T15:43:52.278Z"
+    },
+    {
+      "id": 5,
+      "key": "phone",
+      "value": "07 75 96 07 56",
+      "created_at": "2026-03-15T14:37:08.581Z",
+      "updated_at": "2026-03-27T15:43:52.397Z"
+    }
+  ],
+  "inventory_items": [
+    {
+      "id": 7,
+      "name": "Couvre",
+      "color": "Blanc",
+      "dimension": null,
+      "size": null,
+      "quantity": 11,
+      "created_at": "2026-03-26T06:44:25.272Z",
+      "updated_at": "2026-04-09T20:52:16.333Z",
+      "image_url": null,
+      "price": null
+    },
+    {
+      "id": 8,
+      "name": "Couvre",
+      "color": "Bleu",
+      "dimension": null,
+      "size": null,
+      "quantity": 2,
+      "created_at": "2026-03-26T06:58:23.724Z",
+      "updated_at": "2026-04-08T20:39:17.498Z",
+      "image_url": null,
+      "price": null
+    },
+    {
+      "id": 9,
+      "name": "Tableau",
+      "color": null,
+      "dimension": "30*40",
+      "size": null,
+      "quantity": -3,
+      "created_at": "2026-03-26T06:59:00.109Z",
+      "updated_at": "2026-03-29T08:35:18.985Z",
+      "image_url": null,
+      "price": null
+    },
+    {
+      "id": 11,
+      "name": "TROPHEE COEUR",
+      "color": null,
+      "dimension": null,
+      "size": null,
+      "quantity": 44,
+      "created_at": "2026-03-29T08:36:58.628Z",
+      "updated_at": "2026-04-09T20:59:56.144Z",
+      "image_url": null,
+      "price": null
+    }
+  ],
+  "notifications": [
+    {
+      "id": 2,
+      "inventory_item_id": 8,
+      "deficit": 1,
+      "is_resolved": true,
+      "created_at": "2026-03-27T14:20:46.612Z",
+      "updated_at": "2026-03-27T14:22:52.879Z"
+    },
+    {
+      "id": 3,
+      "inventory_item_id": 9,
+      "deficit": 3,
+      "is_resolved": false,
+      "created_at": "2026-03-27T14:22:22.296Z",
+      "updated_at": "2026-03-29T08:35:18.985Z"
+    }
+  ],
+  "orders": [
+    {
+      "id": 14,
+      "client_name": "w q",
+      "phone": "06",
+      "address": null,
+      "status": "Retourné",
+      "assigned_designer": null,
+      "created_at": "2026-03-26T22:36:06.106Z",
+      "updated_at": "2026-03-28T21:42:28.927Z",
+      "first_name": "w",
+      "last_name": "q",
+      "phone2": null,
+      "wilaya": "Sétif",
+      "commune": null,
+      "delivery_type": "stop_desk",
+      "stop_desk_agency": null,
+      "is_free_delivery": false,
+      "has_exchange": false,
+      "has_insurance": false,
+      "declared_value": null,
+      "delivery_fee": "1000.00",
+      "discount": "0.00",
+      "source": "admin",
+      "versement": "0.00",
+      "yalidine_tracking": null,
+      "yalidine_label_url": null,
+      "yalidine_status": null,
+      "yalidine_error": null,
+      "yalidine_synced_at": null,
+      "wilaya_id": null,
+      "commune_id": null,
+      "delivery_carrier": null,
+      "agency_id": null
+    }
+  ],
+  "photos": [],
+  "products": [
+    {
+      "id": 17,
+      "order_id": 14,
+      "type": "Couvre (Bleu - Standard )",
+      "quantity": 6,
+      "unit_price": "2000.00",
+      "status": "En attente",
+      "created_at": "2026-03-26T22:36:06.106Z",
+      "updated_at": "2026-03-26T22:36:06.106Z",
+      "image_url": null,
+      "article_type": "stock"
+    }
+  ],
+  "stock_product_variants": [],
+  "stock_products": [],
+  "users": [
+    {
+      "id": 1,
+      "name": "Admin User",
+      "email": "admin@aurea.dz",
+      "password": "$2a$10$wCb0rTXfrOUwAGV31bYK9OtqLdzUTPZUj0azawpgQjfdqPo7T.2X2",
+      "role": "admin",
+      "created_at": "2026-03-06T16:14:31.354Z",
+      "updated_at": "2026-03-13T14:51:47.049Z"
+    },
+    {
+      "id": 2,
+      "name": "Atelier User",
+      "email": "atelier@aurea.dz",
+      "password": "$2a$10$1hLGmRm5.ip3yBBqBngR3uSkh/smFG.VbOOVgZTM85nYNW0Obv2VW",
+      "role": "designer",
+      "created_at": "2026-03-06T16:14:31.360Z",
+      "updated_at": "2026-03-13T14:51:47.171Z"
+    }
+  ]
+}
