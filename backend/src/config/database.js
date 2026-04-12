@@ -13,7 +13,7 @@ const pool = new Pool(
       connectionString: process.env.DATABASE_URL,
       ssl: { rejectUnauthorized: false }, // Required for Supabase
       max: parseInt(process.env.PG_POOL_MAX || '15', 10),
-      idleTimeoutMillis: 10_000, // Reduced from 30_000 to prevent 'Connection terminated unexpectedly'
+      idleTimeoutMillis: 10_000,
       connectionTimeoutMillis: 15_000,
       keepAlive: true,
       allowExitOnIdle: true
@@ -24,6 +24,7 @@ const pool = new Pool(
       database: process.env.DB_NAME,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
+      ssl: isProduction ? { rejectUnauthorized: false } : false,
       max: parseInt(process.env.PG_POOL_MAX || '15', 10),
       idleTimeoutMillis: 10_000,
       connectionTimeoutMillis: 15_000,

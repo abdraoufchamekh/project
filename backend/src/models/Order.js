@@ -145,7 +145,7 @@ class Order {
         (SELECT COUNT(*)::int FROM photos ph WHERE ph.order_id = o.id AND ph.type = 'designer') AS designer_photos_count
       FROM orders o
       INNER JOIN paginated_ids pid ON o.id = pid.id
-      LEFT JOIN users u ON o.assigned_designer = u.id
+      LEFT JOIN users u ON o.assigned_designer::text = u.id::text
       ORDER BY o.id DESC
     `;
     values.push(limit, offset);
@@ -160,7 +160,7 @@ class Order {
     let query = `
       SELECT o.*, u.name as designer_name
       FROM orders o
-      LEFT JOIN users u ON o.assigned_designer = u.id
+      LEFT JOIN users u ON o.assigned_designer::text = u.id::text
       WHERE 1=1
       ${filterSql}
     `;
@@ -227,8 +227,8 @@ class Order {
     const query = `
       SELECT o.*, u.name as designer_name
       FROM orders o
-      LEFT JOIN users u ON o.assigned_designer = u.id
-      WHERE o.assigned_designer = $1
+      LEFT JOIN users u ON o.assigned_designer::text = u.id::text
+      WHERE o.assigned_designer::text = $1::text
       ORDER BY o.id DESC
     `;
     const result = await pool.query(query, [designerId]);
