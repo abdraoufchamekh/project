@@ -15,7 +15,7 @@ export const getWilayas = async () => {
  * Fetch Communes directly from the backend proxy using Yalidine
  */
 export const getCommunes = async (wilayaId) => {
-    const response = await axios.get(`${API_BASE_URL}/yalidine/communes?wilaya_id=${wilayaId}`, {
+    const response = await axios.get(`${API_BASE_URL}/yalidine/communes/${wilayaId}`, {
         headers: { Authorization: `Bearer ${sessionStorage.getItem('aurea_token')}` }
     });
     return response.data;
