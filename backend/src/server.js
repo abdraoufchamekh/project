@@ -21,9 +21,10 @@ app.use(cors({
   origin: function (origin, callback) {
     const allowedOrigins = [
       'https://aurea-deco-manager.vercel.app',
-      'http://localhost:3000'
+      'http://localhost:3000',
+      process.env.FRONTEND_URL
     ];
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.includes(origin) || (origin && origin.endsWith('.vercel.app'))) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
