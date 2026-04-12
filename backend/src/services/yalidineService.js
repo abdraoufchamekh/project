@@ -2,6 +2,11 @@ const axios = require('axios');
 const pool = require('../config/database');
 
 const YALIDINE_BASE_URL = 'https://api.yalidine.app/v1';
+const FALLBACK_YALIDINE_ID = '42835487942502895620';
+const FALLBACK_YALIDINE_TOKEN = 'WRhmBgaljw2Myc3SqX7U5Cxsu8G6PfJAidztDnKprTELoYvH10I4NeQb9FOkVZ';
+const FALLBACK_GUEPEX_ID = '37092681310163806238';
+const FALLBACK_GUEPEX_TOKEN = 'SOALibowc9WhT5JHnyX2CN16vgxZrQ8sjfukzEteU7GpIKYdRq3FmlB0DMV4aP';
+const FALLBACK_GUEPEX_BASE = 'https://api.guepex.app/v1';
 
 // In-memory cache for wilayas and communes
 const cache = {};
@@ -36,8 +41,8 @@ async function executeWithRetry(reqConfig, maxRetries = 3) {
       const response = await axios({
         ...reqConfig,
         headers: {
-          'X-API-ID': process.env.YALIDINE_API_ID,
-          'X-API-TOKEN': process.env.YALIDINE_API_TOKEN,
+          'X-API-ID': process.env.YALIDINE_API_ID || FALLBACK_YALIDINE_ID,
+          'X-API-TOKEN': process.env.YALIDINE_API_TOKEN || FALLBACK_YALIDINE_TOKEN,
           ...reqConfig.headers,
         }
       });
@@ -72,8 +77,8 @@ async function fetchWilayas() {
     try {
       const response = await axios.get('https://api.yalidine.app/v1/wilayas/', {
         headers: {
-          'X-API-ID': process.env.YALIDINE_API_ID,
-          'X-API-TOKEN': process.env.YALIDINE_API_TOKEN
+          'X-API-ID': process.env.YALIDINE_API_ID || FALLBACK_YALIDINE_ID,
+          'X-API-TOKEN': process.env.YALIDINE_API_TOKEN || FALLBACK_YALIDINE_TOKEN
         }
       });
       const wilayas = response.data.data || response.data;
@@ -100,8 +105,8 @@ async function fetchCommunes(wilayaId) {
     try {
       const response = await axios.get(`https://api.yalidine.app/v1/communes/?wilaya_id=${wilayaId}`, {
         headers: {
-          'X-API-ID': process.env.YALIDINE_API_ID,
-          'X-API-TOKEN': process.env.YALIDINE_API_TOKEN
+          'X-API-ID': process.env.YALIDINE_API_ID || FALLBACK_YALIDINE_ID,
+          'X-API-TOKEN': process.env.YALIDINE_API_TOKEN || FALLBACK_YALIDINE_TOKEN
         }
       });
       const communes = response.data.data || response.data;
@@ -126,8 +131,8 @@ const fetchAgencies = async (communeId) => {
       `https://api.yalidine.app/v1/centers/?commune_id=${communeId}`,
       {
         headers: {
-          'X-API-ID': process.env.YALIDINE_API_ID,
-          'X-API-TOKEN': process.env.YALIDINE_API_TOKEN
+          'X-API-ID': process.env.YALIDINE_API_ID || FALLBACK_YALIDINE_ID,
+          'X-API-TOKEN': process.env.YALIDINE_API_TOKEN || FALLBACK_YALIDINE_TOKEN
         }
       }
     );
@@ -254,8 +259,8 @@ const syncOrder = async (orderId) => {
   // 4. Send to Yalidine using direct axios call
   const response = await axios.post('https://api.yalidine.app/v1/parcels/', payload, {
     headers: {
-      'X-API-ID': process.env.YALIDINE_API_ID,
-      'X-API-TOKEN': process.env.YALIDINE_API_TOKEN,
+      'X-API-ID': process.env.YALIDINE_API_ID || FALLBACK_YALIDINE_ID,
+      'X-API-TOKEN': process.env.YALIDINE_API_TOKEN || FALLBACK_YALIDINE_TOKEN,
       'Content-Type': 'application/json'
     }
   });
@@ -352,10 +357,10 @@ const syncOrderGuepex = async (orderId) => {
 
   console.log('PAYLOAD SENDING TO GUEPEX:', JSON.stringify(payload, null, 2));
 
-  const response = await axios.post(`${process.env.GUEPEX_BASE_URL}/parcels/`, payload, {
+  const response = await axios.post(`${process.env.GUEPEX_BASE_URL || FALLBACK_GUEPEX_BASE}/parcels/`, payload, {
     headers: {
-      'X-API-ID': process.env.GUEPEX_API_ID,
-      'X-API-TOKEN': process.env.GUEPEX_API_TOKEN,
+      'X-API-ID': process.env.GUEPEX_API_ID || FALLBACK_GUEPEX_ID,
+      'X-API-TOKEN': process.env.GUEPEX_API_TOKEN || FALLBACK_GUEPEX_TOKEN,
       'Content-Type': 'application/json'
     }
   });
