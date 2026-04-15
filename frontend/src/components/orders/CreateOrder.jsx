@@ -3,7 +3,7 @@ import { Plus, X, Upload, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import { API_BASE_URL } from '../../utils/constants';
 import { getWilayas, getCommunes } from '../../api/yalidine';
-import { getGeupexWilayas, getGeupexCommunes, getGeupexAgencies } from '../../api/guepex';
+import { getGeupexWilayas, getGeupexCommunes } from '../../api/guepex';
 
 export default function CreateOrder({ onSave }) {
   // Destinataire

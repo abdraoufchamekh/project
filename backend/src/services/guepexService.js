@@ -1,7 +1,5 @@
 const axios = require('axios');
-const pool = require('../config/database');
 
-const GUEPEX_BASE_URL = 'https://api.guepex.app/v1';
 const FALLBACK_GUEPEX_ID = '37092681310163806238';
 const FALLBACK_GUEPEX_TOKEN = 'SOALibowc9WhT5JHnyX2CN16vgxZrQ8sjfukzEteU7GpIKYdRq3FmlB0DMV4aP';
 
@@ -22,7 +20,8 @@ const guepexService = {
   async fetchWilayas() {
     return getCached('guepex_wilayas', async () => {
       try {
-        const response = await axios.get(`${GUEPEX_BASE_URL}/wilayas/`, {
+        const baseUrl = process.env.GUEPEX_BASE_URL || 'https://api.guepex.app/v1';
+        const response = await axios.get(`${baseUrl}/wilayas/`, {
           headers: {
             'X-API-ID': process.env.GUEPEX_API_ID || FALLBACK_GUEPEX_ID,
             'X-API-TOKEN': process.env.GUEPEX_API_TOKEN || FALLBACK_GUEPEX_TOKEN
@@ -40,7 +39,8 @@ const guepexService = {
   async fetchCommunes(wilayaId) {
     return getCached(`guepex_communes_${wilayaId}`, async () => {
       try {
-        const response = await axios.get(`${GUEPEX_BASE_URL}/communes/?wilaya_id=${wilayaId}`, {
+        const baseUrl = process.env.GUEPEX_BASE_URL || 'https://api.guepex.app/v1';
+        const response = await axios.get(`${baseUrl}/communes/?wilaya_id=${wilayaId}`, {
           headers: {
             'X-API-ID': process.env.GUEPEX_API_ID || FALLBACK_GUEPEX_ID,
             'X-API-TOKEN': process.env.GUEPEX_API_TOKEN || FALLBACK_GUEPEX_TOKEN
@@ -59,8 +59,9 @@ const guepexService = {
     if (!communeId) return [];
     return getCached(`guepex_agencies_${communeId}`, async () => {
       try {
+        const baseUrl = process.env.GUEPEX_BASE_URL || 'https://api.guepex.app/v1';
         const response = await axios.get(
-          `${GUEPEX_BASE_URL}/centers/?commune_id=${communeId}`,
+          `${baseUrl}/centers/?commune_id=${communeId}`,
           {
             headers: {
               'X-API-ID': process.env.GUEPEX_API_ID || FALLBACK_GUEPEX_ID,
