@@ -81,14 +81,8 @@ async function fetchWilayas() {
       });
       return data.data || data;
     } catch (error) {
-      console.error('Yalidine failed, using local fallback for wilayas:', error.message);
-      // Fallback local JSON
-      return [
-        { "id": 16, "name": "Alger" },
-        { "id": 31, "name": "Oran" },
-        { "id": 23, "name": "Annaba" },
-        { "id": 25, "name": "Constantine" }
-      ];
+      console.error('[Yalidine API Error] fetchWilayas failed:', error.message, error.response?.status, error.response?.data);
+      throw error;
     }
   });
 }
@@ -106,12 +100,8 @@ async function fetchCommunes(wilayaId) {
       });
       return data.data || data;
     } catch (error) {
-      console.error('Yalidine failed, using local fallback for communes:', error.message);
-      // Fallback local JSON
-      return [
-        { "id": 1, "wilaya_id": wilayaId, "name": "Centre Ville" },
-        { "id": 2, "wilaya_id": wilayaId, "name": "El Biar (Fallback)" }
-      ];
+      console.error('[Yalidine API Error] fetchCommunes failed:', error.message, error.response?.status, error.response?.data);
+      throw error;
     }
   });
 }
