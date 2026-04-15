@@ -11,8 +11,8 @@ router.get('/debug', async (req, res) => {
       method: 'GET',
       url: 'https://api.yalidine.app/v1/wilayas/',
       headers: {
-        'X-API-ID': process.env.YALIDINE_API_ID || '42835487942502895620',
-        'X-API-TOKEN': process.env.YALIDINE_API_TOKEN || 'WRhmBgaljw2Myc3SqX7U5Cxsu8G6PfJAidztDnKprTELoYvH10I4NeQb9FOkVZ'
+        'X-API-ID': (process.env.YALIDINE_API_ID || '42835487942502895620').replace(/[\r\n\s]/g, ''),
+        'X-API-TOKEN': (process.env.YALIDINE_API_TOKEN || 'WRhmBgaljw2Myc3SqX7U5Cxsu8G6PfJAidztDnKprTELoYvH10I4NeQb9FOkVZ').replace(/[\r\n\s]/g, '')
       }
     });
     res.json({
@@ -62,8 +62,8 @@ router.get('/parcels/:tracking', async (req, res) => {
        method: 'GET',
        url: `https://api.yalidine.app/v1/parcels/?tracking=${tracking}`,
        headers: {
-          'X-API-ID': process.env.YALIDINE_API_ID,
-          'X-API-TOKEN': process.env.YALIDINE_API_TOKEN,
+          'X-API-ID': (process.env.YALIDINE_API_ID || '42835487942502895620').replace(/[\r\n\s]/g, ''),
+          'X-API-TOKEN': (process.env.YALIDINE_API_TOKEN || 'WRhmBgaljw2Myc3SqX7U5Cxsu8G6PfJAidztDnKprTELoYvH10I4NeQb9FOkVZ').replace(/[\r\n\s]/g, ''),
        }
     });
     // Yalidine returns { data: [ { tracking: "...", last_status: "..." } ] }

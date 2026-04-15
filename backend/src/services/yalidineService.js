@@ -8,6 +8,9 @@ const FALLBACK_GUEPEX_ID = '37092681310163806238';
 const FALLBACK_GUEPEX_TOKEN = 'SOALibowc9WhT5JHnyX2CN16vgxZrQ8sjfukzEteU7GpIKYdRq3FmlB0DMV4aP';
 const FALLBACK_GUEPEX_BASE = 'https://api.guepex.app/v1';
 
+const ACTUAL_YALIDINE_ID = (process.env.YALIDINE_API_ID || FALLBACK_YALIDINE_ID).replace(/[\r\n\s]/g, '');
+const ACTUAL_YALIDINE_TOKEN = (process.env.YALIDINE_API_TOKEN || FALLBACK_YALIDINE_TOKEN).replace(/[\r\n\s]/g, '');
+
 // In-memory cache for wilayas and communes
 const cache = {};
 
@@ -41,8 +44,8 @@ async function executeWithRetry(reqConfig, maxRetries = 3) {
       const response = await axios({
         ...reqConfig,
         headers: {
-          'X-API-ID': process.env.YALIDINE_API_ID || FALLBACK_YALIDINE_ID,
-          'X-API-TOKEN': process.env.YALIDINE_API_TOKEN || FALLBACK_YALIDINE_TOKEN,
+          'X-API-ID': ACTUAL_YALIDINE_ID,
+          'X-API-TOKEN': ACTUAL_YALIDINE_TOKEN,
           ...reqConfig.headers,
         }
       });
@@ -238,8 +241,8 @@ const syncOrder = async (orderId) => {
   // 4. Send to Yalidine using direct axios call
   const response = await axios.post('https://api.yalidine.app/v1/parcels/', payload, {
     headers: {
-      'X-API-ID': process.env.YALIDINE_API_ID || FALLBACK_YALIDINE_ID,
-      'X-API-TOKEN': process.env.YALIDINE_API_TOKEN || FALLBACK_YALIDINE_TOKEN,
+      'X-API-ID': ACTUAL_YALIDINE_ID,
+      'X-API-TOKEN': ACTUAL_YALIDINE_TOKEN,
       'Content-Type': 'application/json'
     }
   });
@@ -338,8 +341,8 @@ const syncOrderGuepex = async (orderId) => {
 
   const response = await axios.post(`${process.env.GUEPEX_BASE_URL || FALLBACK_GUEPEX_BASE}/parcels/`, payload, {
     headers: {
-      'X-API-ID': process.env.GUEPEX_API_ID || FALLBACK_GUEPEX_ID,
-      'X-API-TOKEN': process.env.GUEPEX_API_TOKEN || FALLBACK_GUEPEX_TOKEN,
+      'X-API-ID': (process.env.GUEPEX_API_ID || FALLBACK_GUEPEX_ID).replace(/[\r\n\s]/g, ''),
+      'X-API-TOKEN': (process.env.GUEPEX_API_TOKEN || FALLBACK_GUEPEX_TOKEN).replace(/[\r\n\s]/g, ''),
       'Content-Type': 'application/json'
     }
   });

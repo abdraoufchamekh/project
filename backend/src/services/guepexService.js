@@ -3,6 +3,9 @@ const axios = require('axios');
 const FALLBACK_GUEPEX_ID = '37092681310163806238';
 const FALLBACK_GUEPEX_TOKEN = 'SOALibowc9WhT5JHnyX2CN16vgxZrQ8sjfukzEteU7GpIKYdRq3FmlB0DMV4aP';
 
+const ACTUAL_GUEPEX_ID = (process.env.GUEPEX_API_ID || FALLBACK_GUEPEX_ID).replace(/[\r\n\s]/g, '');
+const ACTUAL_GUEPEX_TOKEN = (process.env.GUEPEX_API_TOKEN || FALLBACK_GUEPEX_TOKEN).replace(/[\r\n\s]/g, '');
+
 // In-memory cache for wilayas and communes
 const cache = {};
 
@@ -24,8 +27,8 @@ async function executeWithRetry(reqConfig, maxRetries = 3) {
       const response = await axios({
         ...reqConfig,
         headers: {
-          'X-API-ID': process.env.GUEPEX_API_ID || FALLBACK_GUEPEX_ID,
-          'X-API-TOKEN': process.env.GUEPEX_API_TOKEN || FALLBACK_GUEPEX_TOKEN,
+          'X-API-ID': ACTUAL_GUEPEX_ID,
+          'X-API-TOKEN': ACTUAL_GUEPEX_TOKEN,
           ...reqConfig.headers,
         }
       });
