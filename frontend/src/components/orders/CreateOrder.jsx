@@ -85,17 +85,18 @@ export default function CreateOrder({ onSave }) {
     if (wilaya && wilayasData.length > 0) {
       const selectedW = wilayasData.find(w => w.name === wilaya);
       if (selectedW) {
-        fetchCommunesData(selectedW.wilaya_id || selectedW.id || selectedW.has_id);
+        fetchCommunesData(selectedW.wilaya_id || selectedW.id || selectedW.has_id, deliveryType);
       }
     } else {
       setCommunesData([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wilaya, wilayasData]);
+  }, [wilaya, wilayasData, deliveryType]);
 
   const fetchCommunesData = async (wId, type = deliveryType) => {
     try {
       if (!wId) return;
+      setLoadingCommunes(true);
       if (type === 'stop_desk') {
         const data = await getGeupexCommunes(wId);
         setCommunesData(data || []);
@@ -105,10 +106,12 @@ export default function CreateOrder({ onSave }) {
       }
     } catch (err) {
       console.error('Error fetching communes:', err);
+    } finally {
+      setLoadingCommunes(false);
     }
   };
 
-  const handleWilayaChange = async (e) => {
+  const handleWilayaChange = (e) => {
     const selectedName = e.target.value;
     setWilaya(selectedName);
     setCommune(''); setCommuneId(null);
@@ -117,24 +120,9 @@ export default function CreateOrder({ onSave }) {
 
     const selectedW = wilayasData.find(w => w.name === selectedName);
     if (selectedW) {
-      const wId = selectedW.wilaya_id || selectedW.id;
+      const wId = selectedW.wilaya_id || selectedW.id || selectedW.has_id;
       setWilayaId(wId);
-      setLoadingCommunes(true);
-      try {
-        if (deliveryType === 'stop_desk') {
-          const data = await getGeupexCommunes(wId);
-          setCommunesData(data || []);
-        } else {
-          const res = await axios.get(`${API_BASE_URL}/yalidine/communes/${wId}`, {
-            headers: { Authorization: `Bearer ${sessionStorage.getItem('aurea_token')}` }
-          });
-          setCommunesData(res.data || []);
-        }
-      } catch (e) {
-        console.error('Failed to load communes:', e);
-      } finally {
-        setLoadingCommunes(false);
-      }
+      // Data fetching is securely handled by the useEffect above
     }
   };
 

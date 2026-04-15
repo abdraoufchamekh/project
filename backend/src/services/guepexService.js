@@ -57,8 +57,8 @@ const guepexService = {
         });
         return data.data || data;
       } catch (error) {
-        console.error('Guepex failed fetching wilayas:', error.message);
-        return [];
+        console.error('[Guepex API Error] fetchWilayas failed:', error.message, error.response?.status, error.response?.data);
+        throw error;
       }
     });
   },
@@ -73,8 +73,8 @@ const guepexService = {
         });
         return data.data || data;
       } catch (error) {
-        console.error('Guepex failed fetching communes:', error.message);
-        return [];
+        console.error('[Guepex API Error] fetchCommunes failed:', error.message, error.response?.status, error.response?.data);
+        throw error;
       }
     });
   },
@@ -90,8 +90,8 @@ const guepexService = {
         });
         return data.data || data;
       } catch (error) {
-        console.error('Guepex failed fetching agencies:', error.message);
-        return [];
+        console.error('[Guepex API Error] fetchAgencies failed:', error.message, error.response?.status, error.response?.data);
+        throw error;
       }
     });
   }
