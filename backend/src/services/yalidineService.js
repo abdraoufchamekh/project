@@ -70,27 +70,24 @@ async function executeWithRetry(reqConfig, maxRetries = 3) {
 
 /**
  * Fetch Wilayas from Yalidine API (Cached 24h)
- * Returns only deliverable wilayas
+ * Returns all wilayas
  */
 async function fetchWilayas() {
   return getCached('yalidine_wilayas', async () => {
     try {
-      const response = await axios.get('https://api.yalidine.app/v1/wilayas/', {
-        headers: {
-          'X-API-ID': process.env.YALIDINE_API_ID || FALLBACK_YALIDINE_ID,
-          'X-API-TOKEN': process.env.YALIDINE_API_TOKEN || FALLBACK_YALIDINE_TOKEN
-        }
+      const data = await executeWithRetry({
+        method: 'GET',
+        url: 'https://api.yalidine.app/v1/wilayas/'
       });
-      const wilayas = response.data.data || response.data;
-      return wilayas.filter(w => w.is_deliverable === 1 || w.is_deliverable === true);
+      return data.data || data;
     } catch (error) {
       console.error('Yalidine failed, using local fallback for wilayas:', error.message);
       // Fallback local JSON
       return [
-        { "id": 16, "name": "Alger", "is_deliverable": 1 },
-        { "id": 31, "name": "Oran", "is_deliverable": 1 },
-        { "id": 23, "name": "Annaba", "is_deliverable": 1 },
-        { "id": 25, "name": "Constantine", "is_deliverable": 1 }
+        { "id": 16, "name": "Alger" },
+        { "id": 31, "name": "Oran" },
+        { "id": 23, "name": "Annaba" },
+        { "id": 25, "name": "Constantine" }
       ];
     }
   });
@@ -98,25 +95,22 @@ async function fetchWilayas() {
 
 /**
  * Fetch Communes from Yalidine API per Wilaya (Cached 24h)
- * Returns only deliverable communes
+ * Returns all communes
  */
 async function fetchCommunes(wilayaId) {
   return getCached(`yalidine_communes_${wilayaId}`, async () => {
     try {
-      const response = await axios.get(`https://api.yalidine.app/v1/communes/?wilaya_id=${wilayaId}`, {
-        headers: {
-          'X-API-ID': process.env.YALIDINE_API_ID || FALLBACK_YALIDINE_ID,
-          'X-API-TOKEN': process.env.YALIDINE_API_TOKEN || FALLBACK_YALIDINE_TOKEN
-        }
+      const data = await executeWithRetry({
+        method: 'GET',
+        url: `https://api.yalidine.app/v1/communes/?wilaya_id=${wilayaId}`
       });
-      const communes = response.data.data || response.data;
-      return communes.filter(c => c.is_deliverable === 1 || c.is_deliverable === true);
+      return data.data || data;
     } catch (error) {
       console.error('Yalidine failed, using local fallback for communes:', error.message);
       // Fallback local JSON
       return [
-        { "id": 1, "wilaya_id": wilayaId, "name": "Centre Ville", "is_deliverable": 1 },
-        { "id": 2, "wilaya_id": wilayaId, "name": "El Biar (Fallback)", "is_deliverable": 1 }
+        { "id": 1, "wilaya_id": wilayaId, "name": "Centre Ville" },
+        { "id": 2, "wilaya_id": wilayaId, "name": "El Biar (Fallback)" }
       ];
     }
   });
@@ -127,16 +121,11 @@ async function fetchCommunes(wilayaId) {
  */
 const fetchAgencies = async (communeId) => {
   try {
-    const response = await axios.get(
-      `https://api.yalidine.app/v1/centers/?commune_id=${communeId}`,
-      {
-        headers: {
-          'X-API-ID': process.env.YALIDINE_API_ID || FALLBACK_YALIDINE_ID,
-          'X-API-TOKEN': process.env.YALIDINE_API_TOKEN || FALLBACK_YALIDINE_TOKEN
-        }
-      }
-    );
-    return response.data?.data || response.data || [];
+    const data = await executeWithRetry({
+      method: 'GET',
+      url: `https://api.yalidine.app/v1/centers/?commune_id=${communeId}`
+    });
+    return data.data || data || [];
   } catch (error) {
     console.error('Error fetching agencies from Yalidine:', error.message);
     return [];

@@ -16,19 +16,43 @@ async function getCached(key, fetchFn, ttlMs = 86400000) {
   return data;
 }
 
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+async function executeWithRetry(reqConfig, maxRetries = 3) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await axios({
+        ...reqConfig,
+        headers: {
+          'X-API-ID': process.env.GUEPEX_API_ID || FALLBACK_GUEPEX_ID,
+          'X-API-TOKEN': process.env.GUEPEX_API_TOKEN || FALLBACK_GUEPEX_TOKEN,
+          ...reqConfig.headers,
+        }
+      });
+      return response.data;
+    } catch (error) {
+      if (error.response && error.response.status === 429 && attempt < maxRetries) {
+        console.warn(`[Guepex API] Rate limit hit. Attempt ${attempt}/${maxRetries}. Retrying...`);
+        const retryAfter = error.response.headers['retry-after'];
+        let waitTime = retryAfter ? parseInt(retryAfter, 10) * 1000 : attempt * 2000;
+        await delay(waitTime);
+      } else {
+        throw error;
+      }
+    }
+  }
+}
+
 const guepexService = {
   async fetchWilayas() {
     return getCached('guepex_wilayas', async () => {
       try {
         const baseUrl = process.env.GUEPEX_BASE_URL || 'https://api.guepex.app/v1';
-        const response = await axios.get(`${baseUrl}/wilayas/`, {
-          headers: {
-            'X-API-ID': process.env.GUEPEX_API_ID || FALLBACK_GUEPEX_ID,
-            'X-API-TOKEN': process.env.GUEPEX_API_TOKEN || FALLBACK_GUEPEX_TOKEN
-          }
+        const data = await executeWithRetry({
+          method: 'GET',
+          url: `${baseUrl}/wilayas/`
         });
-        const wilayas = response.data.data || response.data;
-        return wilayas.filter(w => w.is_deliverable === 1 || w.is_deliverable === true);
+        return data.data || data;
       } catch (error) {
         console.error('Guepex failed fetching wilayas:', error.message);
         return [];
@@ -40,14 +64,11 @@ const guepexService = {
     return getCached(`guepex_communes_${wilayaId}`, async () => {
       try {
         const baseUrl = process.env.GUEPEX_BASE_URL || 'https://api.guepex.app/v1';
-        const response = await axios.get(`${baseUrl}/communes/?wilaya_id=${wilayaId}`, {
-          headers: {
-            'X-API-ID': process.env.GUEPEX_API_ID || FALLBACK_GUEPEX_ID,
-            'X-API-TOKEN': process.env.GUEPEX_API_TOKEN || FALLBACK_GUEPEX_TOKEN
-          }
+        const data = await executeWithRetry({
+          method: 'GET',
+          url: `${baseUrl}/communes/?wilaya_id=${wilayaId}`
         });
-        const communes = response.data.data || response.data;
-        return communes.filter(c => c.is_deliverable === 1 || c.is_deliverable === true);
+        return data.data || data;
       } catch (error) {
         console.error('Guepex failed fetching communes:', error.message);
         return [];
@@ -60,16 +81,11 @@ const guepexService = {
     return getCached(`guepex_agencies_${communeId}`, async () => {
       try {
         const baseUrl = process.env.GUEPEX_BASE_URL || 'https://api.guepex.app/v1';
-        const response = await axios.get(
-          `${baseUrl}/centers/?commune_id=${communeId}`,
-          {
-            headers: {
-              'X-API-ID': process.env.GUEPEX_API_ID || FALLBACK_GUEPEX_ID,
-              'X-API-TOKEN': process.env.GUEPEX_API_TOKEN || FALLBACK_GUEPEX_TOKEN
-            }
-          }
-        );
-        return response.data.data || response.data;
+        const data = await executeWithRetry({
+          method: 'GET',
+          url: `${baseUrl}/centers/?commune_id=${communeId}`
+        });
+        return data.data || data;
       } catch (error) {
         console.error('Guepex failed fetching agencies:', error.message);
         return [];
