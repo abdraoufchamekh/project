@@ -64,6 +64,7 @@ export default function CreateOrder({ onSave }) {
   useEffect(() => {
     fetchStock();
     fetchWilayasData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchWilayasData = async (type = deliveryType) => {
@@ -89,6 +90,7 @@ export default function CreateOrder({ onSave }) {
     } else {
       setCommunesData([]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wilaya, wilayasData]);
 
   const fetchCommunesData = async (wId, type = deliveryType) => {
