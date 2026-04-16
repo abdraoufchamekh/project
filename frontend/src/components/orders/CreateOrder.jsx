@@ -99,7 +99,9 @@ export default function CreateOrder({ onSave }) {
       setLoadingCommunes(true);
       if (type === 'stop_desk') {
         const data = await getGeupexCommunes(wId);
-        setCommunesData(data || []);
+        // Guepex API returns all communes, we must filter those supporting stop desk
+        const filteredData = (data || []).filter(c => c.has_stop_desk === 1 || c.has_stop_desk === '1' || c.has_stop_desk === true);
+        setCommunesData(filteredData);
       } else {
         const data = await getCommunes(wId);
         setCommunesData(data || []);
