@@ -217,11 +217,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
       0
     )
     : Number(localOrder.products_subtotal || 0);
-  const deliveryFeeAmount = Number(localOrder.delivery_fee ?? localOrder.deliveryFee ?? 0) || 0;
-  const discountAmount = Number(localOrder.discount ?? 0) || 0;
-  const versementAmount = Number(localOrder.versement ?? 0) || 0;
-  const totalAmount = productsSubtotal + deliveryFeeAmount - discountAmount;
-  const resteAPayer = Math.max(0, totalAmount - versementAmount);
+  const totalAmount = productsSubtotal;
 
   const getStatusClass = (status) => {
     if (status === 'Livré' || status === 'Récupérée') return 'bg-gray-700 text-gray-300';
@@ -365,48 +361,11 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
               </span>
             )}
             <div className="mt-4 space-y-1 text-sm">
-              <p className="text-gray-400">Sous-total produits: <span className="text-white font-medium">{productsSubtotal.toLocaleString()} DA</span></p>
-              <p className="text-gray-400">Frais de livraison: <span className="text-white font-medium">{deliveryFeeAmount.toLocaleString()} DA</span></p>
-              <p className="text-gray-400">Remise: <span className="text-white font-medium">{discountAmount.toLocaleString()} DA</span></p>
-              <p className="text-gray-400">Versement (Acompte): <span className="text-white font-medium text-emerald-400">{versementAmount.toLocaleString()} DA</span></p>
             </div>
-            {editMode ? (
-              <div className="mt-4 space-y-2">
-                <label className="block text-gray-400 text-sm">Frais de livraison (DA)</label>
-                <input
-                  type="number"
-                  min="0"
-                  step="100"
-                  value={localOrder.delivery_fee ?? localOrder.deliveryFee ?? ''}
-                  onChange={(e) => setLocalOrder(prev => ({ ...prev, delivery_fee: Number(e.target.value) || 0 }))}
-                  className="w-full max-w-[140px] p-2 bg-[#0A2353] border border-gray-600 text-white rounded outline-none focus:border-[#56E1E9]"
-                />
-                <label className="block text-gray-400 text-sm mt-2">Remise (DA)</label>
-                <input
-                  type="number"
-                  min="0"
-                  step="100"
-                  value={localOrder.discount ?? ''}
-                  onChange={(e) => setLocalOrder(prev => ({ ...prev, discount: Number(e.target.value) || 0 }))}
-                  className="w-full max-w-[140px] p-2 bg-[#0A2353] border border-gray-600 text-white rounded outline-none focus:border-[#56E1E9]"
-                />
-                <label className="block text-gray-400 text-sm mt-2">Versement (DA)</label>
-                <input
-                  type="number"
-                  min="0"
-                  step="100"
-                  value={localOrder.versement ?? ''}
-                  onChange={(e) => setLocalOrder(prev => ({ ...prev, versement: Number(e.target.value) || 0 }))}
-                  className="w-full max-w-[140px] p-2 bg-[#0A2353] border border-gray-600 text-white rounded outline-none focus:border-[#56E1E9]"
-                />
-              </div>
-            ) : null}
+            {editMode ? null : null}
             <div className="mt-4 border-t border-gray-700 pt-3">
               <p className="text-gray-300 font-medium text-lg">
-                Total: <span className="text-white font-bold">{totalAmount.toLocaleString()} DA</span>
-              </p>
-              <p className="text-gray-300 font-medium text-xl mt-1">
-                Reste à payer: <span className="text-[#BB63FF] font-bold">{resteAPayer.toLocaleString()} DA</span>
+                Prix Total: <span className="text-[#BB63FF] font-bold">{totalAmount.toLocaleString()} DA</span>
               </p>
             </div>
           </div>

@@ -31,8 +31,6 @@ export default function CreateOrder({ onSave }) {
 
   // Livraison
   const [deliveryType, setDeliveryType] = useState('domicile');
-  const [isFreeDelivery, setIsFreeDelivery] = useState(false);
-  const [deliveryFee, setDeliveryFee] = useState(0);
   const [hasExchange, setHasExchange] = useState(false);
 
   // Assurance
@@ -256,8 +254,8 @@ export default function CreateOrder({ onSave }) {
       declaredValue: hasInsurance ? declaredValue : null,
       createdAt: new Date().toISOString().split('T')[0],
       status: 'Nouvelle commande',
-      deliveryFee: isFreeDelivery ? 0 : (Number(deliveryFee) || 0),
-      delivery_fee: isFreeDelivery ? 0 : (Number(deliveryFee) || 0),
+      deliveryFee: 0,
+      delivery_fee: 0,
       discount: 0,
       source: 'admin',
       products: products.map((p, i) => ({
@@ -290,8 +288,6 @@ export default function CreateOrder({ onSave }) {
     setAgency('');
     setAgencyId(null);
     setAgenciesData([]);
-    setIsFreeDelivery(false);
-    setDeliveryFee(0);
     setHasExchange(false);
     setHasInsurance(false);
     setDeclaredValue('');
@@ -634,50 +630,12 @@ export default function CreateOrder({ onSave }) {
               </div>
             </div>
 
-            <div className="flex flex-col md:flex-row bg-[#112C70]/80 rounded border border-gray-600 overflow-hidden">
-              <span className="w-full md:w-1/3 p-2 text-gray-400 border-b md:border-b-0 md:border-r border-gray-600">Prix du colis (sous-total)</span>
-              <div className="w-full md:w-2/3 p-2 bg-transparent text-white font-bold flex items-center">
+            <div className="flex flex-col md:flex-row bg-[#112C70]/80 rounded border border-[#56E1E9]/50 overflow-hidden mt-4">
+              <span className="w-full md:w-1/3 p-2 text-[#56E1E9] font-medium border-b md:border-b-0 md:border-r border-gray-600">Prix Total</span>
+              <div className="w-full md:w-2/3 p-2 bg-transparent text-[#BB63FF] font-bold flex items-center">
                 {Number(totalPrice || 0).toLocaleString()} DA
               </div>
             </div>
-
-            <div className="flex flex-col md:flex-row bg-[#112C70]/80 rounded border border-gray-600 overflow-hidden mt-4">
-              <span className="w-full md:w-1/3 p-2 text-gray-400 border-b md:border-b-0 md:border-r border-gray-600">Frais de livraison</span>
-              <div className="w-full md:w-2/3 p-2 flex items-center gap-2">
-                <input
-                  type="number"
-                  min="0"
-                  step="100"
-                  value={isFreeDelivery ? 0 : (deliveryFee || '')}
-                  onChange={(e) => setDeliveryFee(isFreeDelivery ? 0 : (parseFloat(e.target.value) || 0))}
-                  onWheel={(e) => e.target.blur()}
-                  disabled={isFreeDelivery}
-                  className="w-32 p-2 bg-[#0A2353] border border-gray-600 text-white rounded outline-none focus:border-[#5B58EB] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none disabled:opacity-60"
-                />
-                <span className="text-gray-400 text-sm">DA</span>
-              </div>
-            </div>
-
-            <div className="flex flex-col md:flex-row bg-[#112C70]/80 rounded border border-[#56E1E9]/50 overflow-hidden mt-4">
-              <span className="w-full md:w-1/3 p-2 text-[#56E1E9] font-medium border-b md:border-b-0 md:border-r border-gray-600">Total (produits + livraison)</span>
-              <div className="w-full md:w-2/3 p-2 bg-transparent text-[#BB63FF] font-bold flex items-center">
-                {((Number(totalPrice) || 0) + (isFreeDelivery ? 0 : (Number(deliveryFee) || 0))).toLocaleString()} DA
-              </div>
-            </div>
-
-            <label className="flex items-center gap-2 cursor-pointer text-gray-300 mt-4">
-              <input
-                type="checkbox"
-                checked={isFreeDelivery}
-                onChange={(e) => {
-                  const checked = e.target.checked;
-                  setIsFreeDelivery(checked);
-                  if (checked) setDeliveryFee(0);
-                }}
-                className="w-4 h-4 rounded text-[#56E1E9] accent-[#56E1E9] border-gray-600 bg-[#0A2353] focus:ring-[#5B58EB]"
-              />
-              Livraison gratuite?
-            </label>
 
             <label className="flex items-start gap-2 cursor-pointer text-gray-300 mt-2">
               <input

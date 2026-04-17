@@ -99,10 +99,10 @@ function MainApp() {
     () =>
       ordersPayload
         ? {
-            currentPage: ordersPayload.currentPage || 1,
-            totalPages: ordersPayload.totalPages || 1,
-            totalOrders: ordersPayload.totalOrders || 0
-          }
+          currentPage: ordersPayload.currentPage || 1,
+          totalPages: ordersPayload.totalPages || 1,
+          totalOrders: ordersPayload.totalOrders || 0
+        }
         : { currentPage: 1, totalPages: 1, totalOrders: 0 },
     [ordersPayload]
   );

@@ -91,16 +91,19 @@ exports.generateInvoice = async (req, res) => {
         );
         const products = productsResult.rows;
 
-        const settingsResult = await pool.query('SELECT key, value FROM company_settings');
-        const settings = {};
-        settingsResult.rows.forEach((row) => {
-            settings[row.key] = row.value;
-        });
+        let settings = {};
+        try {
+            const settingsResult = await pool.query('SELECT key, value FROM company_settings');
+            settingsResult.rows.forEach((row) => {
+                settings[row.key] = row.value;
+            });
+        } catch (err) {
+            console.warn('Could not load company_settings, using defaults');
+        }
 
         let subtotal = 0;
-        // Support both snake_case (DB) and camelCase; coerce to number, default 0
-        const deliveryFee = Math.max(0, Number(order.delivery_fee ?? order.deliveryFee ?? 0) || 0);
-        const discount = Math.max(0, Number(order.discount ?? 0) || 0);
+        const deliveryFee = 0;
+        const discount = 0;
 
         products.forEach((p) => {
             const qty = Number(p.quantity) || 1;
@@ -108,7 +111,7 @@ exports.generateInvoice = async (req, res) => {
             subtotal += qty * unitPrice;
         });
 
-        const finalTotal = Math.max(0, subtotal + deliveryFee - discount);
+        const finalTotal = subtotal;
         const finalTotalWords = `${numberToFrenchWords(finalTotal)} dinars algériens`;
 
         const invoiceNumber = `F-${new Date().getFullYear()}-${orderId.toString().padStart(4, '0')}`;
@@ -226,27 +229,8 @@ exports.generateInvoice = async (req, res) => {
         let currentTotalsY = rowY + 16;
         const totalsX   = totalX - 120;
 
-        doc.fontSize(11).fillColor('#111827')
-            .text('Sous-total :',        totalsX, currentTotalsY,      { width: 120, align: 'right' })
-            .text(`${subtotal.toLocaleString('fr-FR').replace(/\\s|\\u202F/g, ' ')} DA`,      totalX, currentTotalsY,      { width: 90, align: 'right' });
-
-        currentTotalsY += 16;
-
-        doc.text('Frais de livraison :', totalsX, currentTotalsY, { width: 120, align: 'right' })
-           .text(`${deliveryFee.toLocaleString('fr-FR').replace(/\\s|\\u202F/g, ' ')} DA`,   totalX, currentTotalsY, { width: 90, align: 'right' });
-
-        currentTotalsY += 16;
-
-        if (discount > 0) {
-            doc.text('Remise :',             totalsX, currentTotalsY, { width: 120, align: 'right' })
-               .text(`${discount.toLocaleString('fr-FR').replace(/\\s|\\u202F/g, ' ')} DA`,      totalX, currentTotalsY, { width: 90, align: 'right' });
-            currentTotalsY += 16;
-        }
-
-        currentTotalsY += 4;
-
         doc.fontSize(12).font('Helvetica-Bold')
-            .text('Montant Total :',                              totalsX, currentTotalsY, { width: 120, align: 'right' })
+            .text('Prix Total :',                              totalsX, currentTotalsY, { width: 120, align: 'right' })
             .text(`${finalTotal.toLocaleString('fr-FR').replace(/\\s|\\u202F/g, ' ')} DA`,    totalX,  currentTotalsY, { width: 90,  align: 'right' });
         doc.font('Helvetica');
 
