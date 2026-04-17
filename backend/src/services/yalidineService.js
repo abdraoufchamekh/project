@@ -187,12 +187,16 @@ const syncOrder = async (orderId) => {
 
   // 2. Calculate price from products table + delivery_fee
   let productTotal = 0;
+  let productListStr = 'Articles Auréa Déco';
   try {
     const productsResult = await pool.query(
-      'SELECT SUM(unit_price * quantity) as subtotal FROM products WHERE order_id = $1',
+      'SELECT type, quantity, unit_price FROM products WHERE order_id = $1',
       [orderId]
     );
-    productTotal = Number(productsResult.rows[0]?.subtotal || 0);
+    if (productsResult.rows.length > 0) {
+      productTotal = productsResult.rows.reduce((sum, p) => sum + (Number(p.unit_price || 0) * Number(p.quantity || 1)), 0);
+      productListStr = productsResult.rows.map(p => `${p.quantity || 1} ${p.type || 'Article'}`).join(' - ');
+    }
   } catch (e) {
     console.log('No products table or no products found, using delivery_fee only');
   }
@@ -210,19 +214,19 @@ const syncOrder = async (orderId) => {
   }
 
   // 3. Build payload with ALL required Yalidine fields
-  const uniqueOrderId = `aurea-${orderId}`;
+  const uniqueOrderId = `D${orderId}`;
   const payload = [{
     order_id: uniqueOrderId,
     firstname: order.first_name || 'Client',
     familyname: order.last_name || 'Anonyme',
     contact_phone: fixedPhone,
     address: order.address || order.commune || 'Adresse non spécifiée',
-    from_wilaya_name: 'Sétif',
+    from_wilaya_name: 'Bouira',
     to_wilaya_id: Number(order.wilaya_id) || 0,
     to_wilaya_name: order.wilaya || '',
     to_commune_id: Number(order.commune_id) || 0,
     to_commune_name: order.commune || '',
-    product_list: 'Articles Auréa Déco',
+    product_list: productListStr,
     price: finalPrice || deliveryFee || 1000,
     do_insurance: order.has_insurance === true,
     declared_value: Number(order.declared_value || 0),
@@ -298,12 +302,16 @@ const syncOrderGuepex = async (orderId) => {
 
   // Calculate price same way as Yalidine
   let productTotal = 0;
+  let productListStr = 'Articles Auréa Déco';
   try {
     const productsResult = await pool.query(
-      'SELECT SUM(unit_price * quantity) as subtotal FROM products WHERE order_id = $1',
+      'SELECT type, quantity, unit_price FROM products WHERE order_id = $1',
       [orderId]
     );
-    productTotal = Number(productsResult.rows[0]?.subtotal || 0);
+    if (productsResult.rows.length > 0) {
+      productTotal = productsResult.rows.reduce((sum, p) => sum + (Number(p.unit_price || 0) * Number(p.quantity || 1)), 0);
+      productListStr = productsResult.rows.map(p => `${p.quantity || 1} ${p.type || 'Article'}`).join(' - ');
+    }
   } catch (e) {
     console.log('No products found, using delivery_fee only');
   }
@@ -315,19 +323,19 @@ const syncOrderGuepex = async (orderId) => {
   let fixedPhone = String(order.phone || '0000000000').replace(/\s/g, '').trim();
   if (fixedPhone.length < 10) fixedPhone = fixedPhone.padEnd(10, '0');
 
-  const uniqueOrderId = `aurea-${orderId}-${Date.now()}`;
+  const uniqueOrderId = `D${orderId}`;
   const payload = [{
     order_id: uniqueOrderId,
     firstname: order.first_name || 'Client',
     familyname: order.last_name || 'Anonyme',
     contact_phone: fixedPhone,
     address: order.address || order.commune || 'Adresse non spécifiée',
-    from_wilaya_name: 'Sétif',
+    from_wilaya_name: 'Bouira',
     to_wilaya_id: Number(order.wilaya_id) || 0,
     to_wilaya_name: order.wilaya || '',
     to_commune_id: Number(order.commune_id) || 0,
     to_commune_name: order.commune || '',
-    product_list: 'Articles Auréa Déco',
+    product_list: productListStr,
     price: finalPrice || deliveryFee || 1000,
     do_insurance: order.has_insurance === true,
     declared_value: Number(order.declared_value || 0),
