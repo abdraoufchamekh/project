@@ -248,7 +248,6 @@ export default function CreateOrder({ onSave }) {
       deliveryType,
       stop_desk_agency: agency || null,
       agency_id: agencyId ? Number(agencyId) : null,
-      isFreeDelivery,
       hasExchange,
       hasInsurance,
       declaredValue: hasInsurance ? declaredValue : null,
