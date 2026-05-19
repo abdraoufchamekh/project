@@ -361,8 +361,27 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
               </span>
             )}
             <div className="mt-4 space-y-1 text-sm">
+              {userRole === 'designer' && (
+                <>
+                  <p className="text-gray-400">Prix Total des produits: <span className="text-white font-medium">{productsSubtotal.toLocaleString()} DA</span></p>
+                  <p className="text-gray-400">Versement (Acompte): <span className="text-white font-medium text-emerald-400">{(Number(localOrder.versement) || 0).toLocaleString()} DA</span></p>
+                  <p className="text-gray-400">Reste à payer: <span className="text-[#BB63FF] font-bold">{(Math.max(0, productsSubtotal - (Number(localOrder.versement) || 0))).toLocaleString()} DA</span></p>
+                </>
+              )}
             </div>
-            {editMode ? null : null}
+            {editMode && userRole === 'designer' ? (
+              <div className="mt-4 space-y-2">
+                <label className="block text-gray-400 text-sm">Versement (Acompte) (DA)</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="100"
+                  value={localOrder.versement ?? ''}
+                  onChange={(e) => setLocalOrder(prev => ({ ...prev, versement: Number(e.target.value) || 0 }))}
+                  className="w-full max-w-[140px] p-2 bg-[#0A2353] border border-gray-600 text-white rounded outline-none focus:border-[#56E1E9]"
+                />
+              </div>
+            ) : null}
             <div className="mt-4 border-t border-gray-700 pt-3">
               <p className="text-gray-300 font-medium text-lg">
                 Prix Total: <span className="text-[#BB63FF] font-bold">{totalAmount.toLocaleString()} DA</span>
