@@ -14,16 +14,27 @@ class Notification {
   }
 
   static async createOrUpdate(inventoryItemId, deficit, client = pool) {
-    // Upsert logic based on the partial unique index
-    const query = `
-      INSERT INTO notifications (inventory_item_id, deficit, is_resolved, created_at, updated_at)
-      VALUES ($1, $2, FALSE, NOW(), NOW())
-      ON CONFLICT (inventory_item_id) WHERE is_resolved = FALSE
-      DO UPDATE SET deficit = $2, updated_at = NOW()
+    const updateQuery = `
+      UPDATE notifications
+      SET deficit = $2, is_resolved = FALSE, updated_at = NOW()
+      WHERE inventory_item_id = $1
+        AND is_resolved = FALSE
       RETURNING *
     `;
-    const result = await client.query(query, [inventoryItemId, deficit]);
-    return result.rows[0];
+
+    const updated = await client.query(updateQuery, [inventoryItemId, deficit]);
+    if (updated.rows[0]) {
+      return updated.rows[0];
+    }
+
+    const insertQuery = `
+      INSERT INTO notifications (inventory_item_id, deficit, is_resolved, created_at, updated_at)
+      VALUES ($1, $2, FALSE, NOW(), NOW())
+      RETURNING *
+    `;
+
+    const inserted = await client.query(insertQuery, [inventoryItemId, deficit]);
+    return inserted.rows[0];
   }
 
   static async resolve(inventoryItemId, client = pool) {
