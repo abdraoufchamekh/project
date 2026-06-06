@@ -150,7 +150,8 @@ exports.generateInvoice = async (req, res) => {
         });
 
         // --- HEADER ---
-        doc.fontSize(22).fillColor('#111827').text(companyName, { align: 'left' });
+        doc.fontSize(32).font('Helvetica-Bold').fillColor('#111827').text('FACTURE', { align: 'center' });
+        doc.font('Helvetica');
         doc.moveDown(0.5);
 
         // Seller box
@@ -181,10 +182,9 @@ exports.generateInvoice = async (req, res) => {
             .text(`Téléphone : ${clientPhone || '—'}`, rightX + 8, clientBoxY + 46);
 
         // Title
-        doc.fontSize(18).fillColor('#111827')
-            .text('FACTURE', 0, clientBoxY + 90, { align: 'center' });
         doc.fontSize(11).fillColor('#4b5563')
             .text(`Facture N° ${invoiceNumber}`, 0, clientBoxY + 114, { align: 'center' });
+
 
         // --- TABLE ---
         const tableTop = clientBoxY + 140;
@@ -251,14 +251,8 @@ exports.generateInvoice = async (req, res) => {
         doc.fontSize(11).fillColor('#4b5563')
             .text('Cachet et signature', totalX - 40, currentTotalsY + 64, { width: 120, align: 'center' });
 
-        // --- FOOTER ---
-        const footerY = doc.page.height - doc.page.margins.bottom - 20;
-        doc.fontSize(9).fillColor('#6b7280')
-            .text(
-                `${companyName} • ${address} • Tél : ${phone}`,
-                itemX, footerY,
-                { align: 'center', width: tableWidth }
-            );
+        // --- FOOTER REMOVED ---
+
 
         doc.end();
 

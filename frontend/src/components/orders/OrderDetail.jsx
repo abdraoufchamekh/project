@@ -259,13 +259,15 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
         <div className="flex flex-wrap gap-2 md:gap-4 w-full md:w-auto mt-2 md:mt-0">
           {!editMode ? (
             <>
-              <button
-                onClick={() => setInvoiceModalOpen(true)}
-                className="flex-1 md:flex-none flex justify-center items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition shadow-sm"
-              >
-                <FileText size={20} />
-                Générer Facture
-              </button>
+              {userRole !== 'designer' && (
+                <button
+                  onClick={() => setInvoiceModalOpen(true)}
+                  className="flex-1 md:flex-none flex justify-center items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition shadow-sm"
+                >
+                  <FileText size={20} />
+                  Générer Facture
+                </button>
+              )}
               <button
                 onClick={() => setEditMode(true)}
                 className="flex-1 md:flex-none flex justify-center items-center gap-2 px-4 py-2 bg-[linear-gradient(135deg,_#5B58EB,_#09fbff)] hover:opacity-90 text-white rounded-lg transition shadow-sm"
@@ -307,7 +309,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
+      <div className={`grid grid-cols-1 ${!(userRole === 'designer' && localOrder.source !== 'atelier') ? 'md:grid-cols-2' : ''} gap-4 md:gap-6 mb-6 md:mb-8`}>
         <div className="bg-[#112C70] rounded-lg p-4 md:p-6">
           <h3 className="text-lg font-semibold text-white mb-3 md:mb-4">Informations Destinataire</h3>
           <div className="space-y-2">
@@ -341,56 +343,56 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
           </div>
         </div>
 
-        <div className="bg-[#112C70] rounded-lg p-4 md:p-6">
-          <h3 className="text-lg font-semibold text-white mb-3 md:mb-4">Détails Commande</h3>
-          <div className="space-y-2">
-            <p className="text-gray-400">
-              Date: <span className="text-white">{localOrder.createdAt || localOrder.created_at}</span>
-            </p>
-            <p className="text-gray-400">
-              Produits: <span className="text-white">{localOrder.product_count || localOrder.products?.length || 0}</span>
-            </p>
-            {(localOrder.isFreeDelivery || localOrder.is_free_delivery) && (
-              <span className="inline-block px-2 py-1 bg-green-900/50 text-green-400 text-xs rounded-full border border-green-800">
-                Livraison gratuite
-              </span>
-            )}
-            {(localOrder.hasExchange || localOrder.has_exchange) && (
-              <span className="inline-block px-2 py-1 bg-yellow-900/50 text-yellow-400 text-xs rounded-full border border-yellow-800 ml-2">
-                Échange
-              </span>
-            )}
-            <div className="mt-4 space-y-1 text-sm">
-              {userRole === 'designer' && (
-                <>
-                  <p className="text-gray-400">Prix Total des produits: <span className="text-white font-medium">{productsSubtotal.toLocaleString()} DA</span></p>
-                  <p className="text-gray-400">Versement (Acompte): <span className="text-white font-medium text-emerald-400">{(Number(localOrder.versement) || 0).toLocaleString()} DA</span></p>
-                  <p className="text-gray-400">Reste à payer: <span className="text-[#BB63FF] font-bold">{(Math.max(0, productsSubtotal - (Number(localOrder.versement) || 0))).toLocaleString()} DA</span></p>
-                </>
-              )}
-            </div>
-            {editMode && userRole === 'designer' ? (
-              <div className="mt-4 space-y-2">
-                <label className="block text-gray-400 text-sm">Versement (Acompte) (DA)</label>
-                <input
-                  type="number"
-                  min="0"
-                  step="100"
-                  value={localOrder.versement ?? ''}
-                  onChange={(e) => setLocalOrder(prev => ({ ...prev, versement: Number(e.target.value) || 0 }))}
-                  className="w-full max-w-[140px] p-2 bg-[#0A2353] border border-gray-600 text-white rounded outline-none focus:border-[#56E1E9]"
-                />
-              </div>
-            ) : null}
-            <div className="mt-4 border-t border-gray-700 pt-3">
-              <p className="text-gray-300 font-medium text-lg">
-                Prix Total: <span className="text-[#BB63FF] font-bold">{totalAmount.toLocaleString()} DA</span>
+        {!(userRole === 'designer' && localOrder.source !== 'atelier') && (
+          <div className="bg-[#112C70] rounded-lg p-4 md:p-6">
+            <h3 className="text-lg font-semibold text-white mb-3 md:mb-4">Détails Commande</h3>
+            <div className="space-y-2">
+              <p className="text-gray-400">
+                Date: <span className="text-white">{localOrder.createdAt || localOrder.created_at}</span>
               </p>
+              <p className="text-gray-400">
+                Produits: <span className="text-white">{localOrder.product_count || localOrder.products?.length || 0}</span>
+              </p>
+              {(localOrder.isFreeDelivery || localOrder.is_free_delivery) && (
+                <span className="inline-block px-2 py-1 bg-green-900/50 text-green-400 text-xs rounded-full border border-green-800">
+                  Livraison gratuite
+                </span>
+              )}
+              {(localOrder.hasExchange || localOrder.has_exchange) && (
+                <span className="inline-block px-2 py-1 bg-yellow-900/50 text-yellow-400 text-xs rounded-full border border-yellow-800 ml-2">
+                  Échange
+                </span>
+              )}
+              <div className="mt-4 space-y-1 text-sm">
+                {userRole === 'designer' && (
+                  <>
+                    <p className="text-gray-400">Prix Total des produits: <span className="text-white font-medium">{productsSubtotal.toLocaleString()} DA</span></p>
+                    <p className="text-gray-400">Versement (Acompte): <span className="text-white font-medium text-emerald-400">{(Number(localOrder.versement) || 0).toLocaleString()} DA</span></p>
+                    <p className="text-gray-400">Reste à payer: <span className="text-[#BB63FF] font-bold">{(Math.max(0, productsSubtotal - (Number(localOrder.versement) || 0))).toLocaleString()} DA</span></p>
+                  </>
+                )}
+              </div>
+              {editMode && userRole === 'designer' ? (
+                <div className="mt-4 space-y-2">
+                  <label className="block text-gray-400 text-sm">Versement (Acompte) (DA)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="100"
+                    value={localOrder.versement ?? ''}
+                    onChange={(e) => setLocalOrder(prev => ({ ...prev, versement: Number(e.target.value) || 0 }))}
+                    className="w-full max-w-[140px] p-2 bg-[#0A2353] border border-gray-600 text-white rounded outline-none focus:border-[#56E1E9]"
+                  />
+                </div>
+              ) : null}
+              <div className="mt-4 border-t border-gray-700 pt-3">
+                <p className="text-gray-300 font-medium text-lg">
+                  Prix Total: <span className="text-[#BB63FF] font-bold">{totalAmount.toLocaleString()} DA</span>
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-
-
+        )}
       </div>
 
       {/* Yalidine Info Section (Admin Only) */}
