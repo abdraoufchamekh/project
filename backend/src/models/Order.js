@@ -15,9 +15,13 @@ class Order {
         client_name, first_name, last_name, phone, phone2, address, wilaya, wilaya_id, commune, commune_id,
         delivery_type, stop_desk_agency, agency_id,
         delivery_fee, discount, versement, is_free_delivery,
-        has_exchange, has_insurance, declared_value, source, status, created_at
+        has_exchange, has_insurance, declared_value, source, status, seq_id, created_at
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, NOW())
+      VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22,
+        (SELECT COALESCE(MAX(seq_id), 0) + 1 FROM orders WHERE source = $21),
+        NOW()
+      )
       RETURNING *
     `;
 

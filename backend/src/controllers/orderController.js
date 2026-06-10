@@ -171,15 +171,23 @@ exports.createOrder = async (req, res) => {
 
 exports.getOrderStats = async (req, res) => {
   try {
-    const cached = getCachedStats();
-    if (cached) {
-      res.set('Cache-Control', 'private, max-age=25');
-      return res.json(cached);
+    let stats = getCachedStats();
+    if (!stats) {
+      stats = await Order.getStats();
+      setCachedStats(stats);
     }
-    const stats = await Order.getStats();
-    setCachedStats(stats);
+
+    let scopedStats = { ...stats };
+    if (req.user && req.user.role === 'admin') {
+      scopedStats = {
+        global: stats.admin || {},
+        admin: stats.admin || {},
+        atelier: {}
+      };
+    }
+
     res.set('Cache-Control', 'private, max-age=25');
-    res.json(stats);
+    res.json(scopedStats);
   } catch (error) {
     console.error('Get order stats error:', error);
     res.status(500).json({ error: 'Server error while fetching stats' });
@@ -196,6 +204,18 @@ exports.getOrders = async (req, res) => {
       date: req.query.date,
       source: req.query.source
     };
+
+    if (req.user) {
+      if (req.user.role === 'admin') {
+        filters.source = 'admin';
+      } else if (req.user.role === 'designer') {
+        if (req.query.source === 'admin') {
+          filters.source = 'admin';
+        } else {
+          filters.source = 'atelier';
+        }
+      }
+    }
 
     const page = parseInt(req.query.page, 10) || 1;
     const limit = Math.min(parseInt(req.query.limit, 10) || 50, 100);
@@ -231,6 +251,10 @@ exports.getOrderById = async (req, res) => {
 
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
+    }
+
+    if (req.user && req.user.role === 'admin' && order.source === 'atelier') {
+      return res.status(403).json({ error: 'Access denied. Admins cannot view atelier orders.' });
     }
 
     // Get products and photos
@@ -286,6 +310,11 @@ exports.updateOrder = async (req, res) => {
     if (req.user.role !== 'admin' && req.user.role !== 'designer') {
       client.release();
       return res.status(403).json({ error: 'Access denied.' });
+    }
+
+    if (req.user.role === 'admin' && order.source === 'atelier') {
+      client.release();
+      return res.status(403).json({ error: 'Access denied. Admins cannot update atelier orders.' });
     }
 
     await client.query('BEGIN');
@@ -461,6 +490,10 @@ exports.deleteOrder = async (req, res) => {
       return res.status(404).json({ error: 'Order not found' });
     }
 
+    if (req.user && req.user.role === 'admin' && order.source === 'atelier') {
+      return res.status(403).json({ error: 'Access denied. Admins cannot delete atelier orders.' });
+    }
+
     // Get all photos to delete their physical files
     const photos = await Photo.findByOrderId(id);
     for (const photo of photos) {
@@ -598,6 +631,10 @@ exports.uploadPhotos = async (req, res) => {
       return res.status(404).json({ error: 'Order not found' });
     }
 
+    if (req.user && req.user.role === 'admin' && order.source === 'atelier') {
+      return res.status(403).json({ error: 'Access denied to atelier orders.' });
+    }
+
     // Save photo records
     const photos = [];
     for (const file of req.files) {
@@ -712,6 +749,11 @@ exports.syncYalidine = async (req, res) => {
     const orderRes = await pool.query('SELECT * FROM orders WHERE id = $1', [id]);
     if (orderRes.rows.length === 0) {
       return res.status(404).json({ error: 'Order not found' });
+    }
+
+    const order = orderRes.rows[0];
+    if (order.source === 'atelier') {
+      return res.status(403).json({ error: 'Access denied. Admin cannot sync atelier orders with Yalidine.' });
     }
 
     const syncResult = await yalidineService.syncOrderAuto(id);

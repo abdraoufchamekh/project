@@ -114,7 +114,7 @@ exports.generateInvoice = async (req, res) => {
         const finalTotal = subtotal;
         const finalTotalWords = `${numberToFrenchWords(finalTotal)} dinars algériens`;
 
-        const invoiceNumber = `F-${new Date().getFullYear()}-${orderId.toString().padStart(4, '0')}`;
+        const invoiceNumber = `F-${new Date().getFullYear()}-${(order.seq_id || order.id).toString().padStart(4, '0')}`;
         const invoiceDate = new Date().toLocaleDateString('fr-FR');
 
         const companyName = settings.company_name || 'AUREA DECO';
@@ -142,7 +142,7 @@ exports.generateInvoice = async (req, res) => {
             const pdfBuffer = Buffer.concat(buffers);
             res.setHeader('Content-Type', 'application/pdf');
             if (req.query.download === 'true') {
-                res.setHeader('Content-Disposition', `attachment; filename="facture_${orderId}.pdf"`);
+                res.setHeader('Content-Disposition', `attachment; filename="facture_${order.seq_id || order.id}.pdf"`);
             } else {
                 res.setHeader('Content-Disposition', 'inline; filename="facture.pdf"');
             }

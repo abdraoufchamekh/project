@@ -400,7 +400,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
           >
             ← Retour aux commandes
           </button>
-          <h2 className="text-2xl md:text-3xl font-bold text-white">Commande #{order.id}</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-white">Commande #{order.seq_id || order.id}</h2>
         </div>
 
         <div className="flex flex-wrap gap-2 md:gap-4 w-full md:w-auto mt-2 md:mt-0">
@@ -424,7 +424,7 @@ export default function OrderDetail({ order, onBack, onUpdate, userRole, onDelet
               </button>
               <button
                 onClick={() => {
-                  if (window.confirm(`Êtes-vous sûr de vouloir supprimer la commande #${order.id} ?`)) {
+                  if (window.confirm(`Êtes-vous sûr de vouloir supprimer la commande #${order.seq_id || order.id} ?`)) {
                     onDeleteOrder(order.id);
                   }
                 }}

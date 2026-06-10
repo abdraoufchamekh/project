@@ -182,7 +182,7 @@ function StatusOrdersPage({ config, orders, userRole, onSelectOrder, fetchOrders
                         <tbody className="divide-y divide-gray-700">
                             {filteredOrders.map(order => (
                                 <tr key={order.id} className="hover:bg-[#112C70]/70 transition">
-                                    <td className="px-6 py-4 text-white font-medium">#{order.id}</td>
+                                    <td className="px-6 py-4 text-white font-medium">#{order.seq_id || order.id}</td>
                                     <td className="px-6 py-4 text-white">{order.clientName || order.client_name || `${order.first_name || ''} ${order.last_name || ''}`.trim() || 'Inconnu'}</td>
                                     <td className="px-6 py-4 text-gray-400">{order.phone}</td>
                                     <td className="px-6 py-4 text-gray-400">{order.product_count ?? order.products?.length ?? 0}</td>

@@ -10,8 +10,7 @@ const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fet
     search: '',
     status: '',
     wilaya: '',
-    date: '',
-    source: ''
+    date: ''
   });
   const [outOfStockItems, setOutOfStockItems] = useState([]);
   const debouncedSearch = useDebouncedValue(filters.search, 400);
@@ -56,7 +55,7 @@ const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fet
   };
 
   const clearFilters = () => {
-    const emptyFilters = { search: '', status: '', wilaya: '', date: '', source: '' };
+    const emptyFilters = { search: '', status: '', wilaya: '', date: '' };
     setFilters(emptyFilters);
     if (fetchOrders) fetchOrders({ ...emptyFilters, page: 1 });
   };
@@ -84,8 +83,8 @@ const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fet
   const stats = {
     enAtelier: atelierStatsObj.totalAtelier,
     inProgress: atelierStatsObj.totalLigne,
-    delivered: glbStats['Livré'] || 0,
-    returned: glbStats['Retourné'] || 0
+    delivered: userRole === 'admin' ? (adminStats['Livré'] || 0) : (glbStats['Livré'] || 0),
+    returned: userRole === 'admin' ? (adminStats['Retourné'] || 0) : (glbStats['Retourné'] || 0)
   };
 
   let filteredOrders = orders;
@@ -124,10 +123,10 @@ const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fet
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className={`grid grid-cols-1 ${userRole === 'admin' ? 'md:grid-cols-3' : 'md:grid-cols-4'} gap-6 mb-8`}>
         {userRole === 'designer' ? (
           [
-            { label: 'En ligne', value: atelierStatsObj.totalLigne, color: 'text-purple-400', targetKey: 'en-ligne' },
+            { label: 'AURÉA', value: atelierStatsObj.totalLigne, color: 'text-purple-400', targetKey: 'en-ligne' },
             { label: 'En atelier', value: atelierStatsObj.totalAtelier, color: 'text-[#56E1E9]', targetKey: 'en-atelier' },
             { label: 'Réalisée', value: atelierStatsObj.realisee, color: 'text-yellow-500', targetKey: 'atelier-realisee' },
             { label: 'Récupérée', value: atelierStatsObj.recuperee, color: 'text-green-500', targetKey: 'atelier-recuperee' }
@@ -148,7 +147,6 @@ const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fet
         ) : (
           [
             { label: 'En ligne', value: stats.inProgress, color: 'text-yellow-500', targetKey: 'en-ligne' },
-            { label: 'En atelier', value: stats.enAtelier, color: 'text-[#56E1E9]', targetKey: 'en-atelier' },
             { label: 'Livrées', value: stats.delivered, color: 'text-green-500', targetKey: 'livrees' },
             { label: 'Retournées', value: stats.returned, color: 'text-red-500', targetKey: 'retournees' }
           ].map((stat, idx) => (
@@ -201,19 +199,7 @@ const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fet
               <option value="Récupérée">Récupérée</option>
             </select>
           </div>
-          <div className="flex-1 w-full">
-            <label className="block text-xs font-medium text-gray-400 mb-1">Source</label>
-            <select
-              name="source"
-              value={filters.source}
-              onChange={handleFilterChange}
-              className="w-full bg-gray-700 text-white text-sm rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#56E1E9]"
-            >
-              <option value="">Toutes</option>
-              <option value="admin">En ligne</option>
-              <option value="atelier">Atelier</option>
-            </select>
-          </div>
+
           <div className="flex-1 w-full">
             <label className="block text-xs font-medium text-gray-400 mb-1">Wilaya</label>
             <input
@@ -289,7 +275,7 @@ const Dashboard = ({ orders, userRole, userId, onSelectOrder, onDeleteOrder, fet
             <tbody className="divide-y divide-gray-700">
               {filteredOrders.map(order => (
                 <tr key={order.id} className="hover:bg-[#112C70]/70 transition">
-                  <td className="px-6 py-4 text-white font-medium">#{order.id}</td>
+                  <td className="px-6 py-4 text-white font-medium">#{order.seq_id || order.id}</td>
                   <td className="px-6 py-4 text-white">{order.clientName || order.client_name || `${order.first_name || ''} ${order.last_name || ''}`.trim() || 'Inconnu'}</td>
                   <td className="px-6 py-4 text-gray-400">{order.phone}</td>
                   <td className="px-6 py-4 text-gray-400">

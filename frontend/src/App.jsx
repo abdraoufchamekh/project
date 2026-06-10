@@ -56,17 +56,18 @@ function MainApp() {
 
   useEffect(() => {
     if (!user || selectedOrder) return;
+    const defaultSource = user.role === 'admin' ? 'admin' : 'atelier';
     if (activePage === 'dashboard') {
-      setListParams(sanitizeOrderListParams({ excludeStatus: 'Livré,Retourné', page: 1 }));
+      setListParams(sanitizeOrderListParams({ excludeStatus: 'Livré,Retourné', source: defaultSource, page: 1 }));
     } else if (activePage === 'archived') {
-      setListParams(sanitizeOrderListParams({ status: 'Livré,Retourné', page: 1 }));
+      setListParams(sanitizeOrderListParams({ status: 'Livré,Retourné', source: defaultSource, page: 1 }));
     } else if (activePage === 'status-page' && statusPageConfig) {
       const { status, excludeStatus, source } = statusPageConfig;
       setListParams(
         sanitizeOrderListParams({
           status: status || '',
           excludeStatus,
-          source,
+          source: source || defaultSource,
           page: 1
         })
       );
@@ -253,8 +254,8 @@ function MainApp() {
     else if (targetKey === 'atelier-nouvelle') config = { title: 'Nouvelle commande', status: 'Nouvelle commande', source: 'atelier' };
     else if (targetKey === 'atelier-realisee') config = { title: 'Réalisée', status: 'Réalisée', source: 'atelier' };
     else if (targetKey === 'atelier-recuperee') config = { title: 'Récupérée', status: 'Récupérée', source: 'atelier' };
-    else if (targetKey === 'livrees') config = { title: 'Livrées', status: 'Livré' };
-    else if (targetKey === 'retournees') config = { title: 'Retournées', status: 'Retourné' };
+    else if (targetKey === 'livrees') config = { title: 'Livrées', status: 'Livré', source: 'admin' };
+    else if (targetKey === 'retournees') config = { title: 'Retournées', status: 'Retourné', source: 'admin' };
 
     if (config) {
       setStatusPageConfig(config);
