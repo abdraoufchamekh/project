@@ -235,7 +235,7 @@ class Order {
     return result.rows;
   }
 
-  static async update(id, orderData) {
+  static async update(id, orderData, client = pool) {
     const {
       clientName, phone, phone2, address, wilaya, commune,
       deliveryType, stopDeskAgency, isFreeDelivery, hasExchange,
@@ -255,7 +255,7 @@ class Order {
       RETURNING *
     `;
 
-    const result = await pool.query(query, [
+    const result = await client.query(query, [
       clientName || `${firstName || ''} ${lastName || ''}`.trim(),
       firstName || null,
       lastName || null,

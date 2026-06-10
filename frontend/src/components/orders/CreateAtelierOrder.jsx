@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Plus, X, Upload, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import { API_BASE_URL } from '../../utils/constants';
+import ProductSelect from './ProductSelect';
 
 export default function CreateAtelierOrder({ onSave }) {
   // Destinataire
@@ -254,40 +255,26 @@ export default function CreateAtelierOrder({ onSave }) {
                           </div>
                         </div>
                       ) : (
-                        <select
-                          value={product.inventoryItemId || ''}
-                          onChange={(e) => {
-                            const pId = e.target.value;
-                            const sp = stockProducts.find(s => s.id === parseInt(pId, 10));
-                            if (sp) {
-                              let labelParts = [];
-                              if (sp.color) labelParts.push(sp.color);
-                              if (sp.dimension) labelParts.push(sp.dimension);
-                              if (sp.size) labelParts.push(`Taille: ${sp.size}`);
-                              const label = labelParts.length > 0 ? labelParts.join(' - ') : '';
-                              const fullType = label ? `${sp.name} (${label})` : sp.name;
-                              const price = (sp.price !== undefined && sp.price !== null && sp.price !== '') ? Number(sp.price) : 0;
-                              setProductFromStock(idx, pId, fullType, price);
-                            } else {
-                              setProductFromStock(idx, '', '', 0);
-                            }
-                          }}
-                          className="w-full p-2.5 bg-[#0A2353] border border-gray-600 text-white rounded outline-none focus:border-[#5B58EB] transition"
-                        >
-                          <option value="">Sélectionner un produit...</option>
-                          {stockProducts.map(sp => {
-                            let labelParts = [];
-                            if (sp.color) labelParts.push(sp.color);
-                            if (sp.dimension) labelParts.push(sp.dimension);
-                            if (sp.size) labelParts.push(`Taille: ${sp.size}`);
-                            const label = labelParts.length > 0 ? labelParts.join(' - ') : '';
-                            return (
-                              <option key={sp.id} value={sp.id}>
-                                {sp.name} {label ? `(${label})` : ''} - Stock: {sp.quantity}
-                              </option>
-                            );
-                          })}
-                        </select>
+                          <ProductSelect
+                            value={product.inventoryItemId || ''}
+                            stockProducts={stockProducts}
+                            onChange={(e) => {
+                              const pId = e.target.value;
+                              const sp = stockProducts.find(s => s.id === parseInt(pId, 10));
+                              if (sp) {
+                                let labelParts = [];
+                                if (sp.color) labelParts.push(sp.color);
+                                if (sp.dimension) labelParts.push(sp.dimension);
+                                if (sp.size) labelParts.push(`Taille: ${sp.size}`);
+                                const label = labelParts.length > 0 ? labelParts.join(' - ') : '';
+                                const fullType = label ? `${sp.name} (${label})` : sp.name;
+                                const price = (sp.price !== undefined && sp.price !== null && sp.price !== '') ? Number(sp.price) : 0;
+                                setProductFromStock(idx, pId, fullType, price);
+                              } else {
+                                setProductFromStock(idx, '', '', 0);
+                              }
+                            }}
+                          />
                       )}
                     </div>
 

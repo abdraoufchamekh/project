@@ -4,6 +4,7 @@ import axios from 'axios';
 import { API_BASE_URL } from '../../utils/constants';
 import { getWilayas, getCommunes } from '../../api/yalidine';
 import { getGeupexWilayas, getGeupexCommunes } from '../../api/guepex';
+import ProductSelect from './ProductSelect';
 
 export default function CreateOrder({ onSave }) {
   // Destinataire
@@ -599,8 +600,9 @@ export default function CreateOrder({ onSave }) {
                             </div>
                           </div>
                         ) : (
-                          <select
+                          <ProductSelect
                             value={product.inventoryItemId || ''}
+                            stockProducts={stockProducts}
                             onChange={(e) => {
                               const pId = e.target.value;
                               const sp = stockProducts.find(s => s.id === parseInt(pId, 10));
@@ -617,22 +619,7 @@ export default function CreateOrder({ onSave }) {
                                 setProductFromStock(idx, '', '', 0);
                               }
                             }}
-                            className="w-full p-2.5 bg-[#0A2353] border border-gray-600 text-white rounded outline-none focus:border-[#5B58EB] transition"
-                          >
-                            <option value="">Sélectionner un produit...</option>
-                            {stockProducts.map(sp => {
-                              let labelParts = [];
-                              if (sp.color) labelParts.push(sp.color);
-                              if (sp.dimension) labelParts.push(sp.dimension);
-                              if (sp.size) labelParts.push(`Taille: ${sp.size}`);
-                              const label = labelParts.length > 0 ? labelParts.join(' - ') : '';
-                              return (
-                                <option key={sp.id} value={sp.id}>
-                                  {sp.name} {label ? `(${label})` : ''} - Stock: {sp.quantity}
-                                </option>
-                              );
-                            })}
-                          </select>
+                          />
                         )}
                       </div>
 

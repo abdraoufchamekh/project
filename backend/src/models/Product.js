@@ -2,7 +2,7 @@ const pool = require('../config/database');
 
 class Product {
   static async create(productData, client = pool) {
-    const { orderId, type, quantity, unitPrice, status, imageUrl, articleType } = productData;
+    const { orderId, type, quantity, unitPrice, status, imageUrl, articleType, inventoryItemId } = productData;
 
     // Ensure unitPrice is always a valid number for the NOT NULL numeric column
     const safeUnitPrice = unitPrice !== undefined && unitPrice !== null && unitPrice !== ''
@@ -10,8 +10,8 @@ class Product {
       : 0;
 
     const query = `
-      INSERT INTO products (order_id, type, quantity, unit_price, status, image_url, article_type, created_at)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+      INSERT INTO products (order_id, type, quantity, unit_price, status, image_url, article_type, inventory_item_id, created_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
       RETURNING *
     `;
 
@@ -22,7 +22,8 @@ class Product {
       safeUnitPrice,
       status || 'En attente',
       imageUrl || null,
-      articleType || 'stock'
+      articleType || 'stock',
+      inventoryItemId || null
     ]);
     return result.rows[0];
   }
@@ -58,23 +59,32 @@ class Product {
     return result.rows[0];
   }
 
-  static async update(id, productData) {
-    const { type, quantity, unitPrice, status, articleType } = productData;
+  static async update(id, productData, client = pool) {
+    const { type, quantity, unitPrice, status, articleType, inventoryItemId, imageUrl } = productData;
 
     const query = `
       UPDATE products 
-      SET type = $1, quantity = $2, unit_price = $3, status = $4, article_type = $5, updated_at = NOW()
-      WHERE id = $6
+      SET type = $1, quantity = $2, unit_price = $3, status = $4, article_type = $5, inventory_item_id = $6, image_url = $7, updated_at = NOW()
+      WHERE id = $8
       RETURNING *
     `;
 
-    const result = await pool.query(query, [type, quantity, unitPrice, status, articleType || 'stock', id]);
+    const result = await client.query(query, [
+      type,
+      quantity,
+      unitPrice,
+      status,
+      articleType || 'stock',
+      inventoryItemId || null,
+      imageUrl || null,
+      id
+    ]);
     return result.rows[0];
   }
 
-  static async delete(id) {
+  static async delete(id, client = pool) {
     const query = 'DELETE FROM products WHERE id = $1';
-    await pool.query(query, [id]);
+    await client.query(query, [id]);
   }
 
   static async updateImage(id, imageUrl) {

@@ -127,12 +127,14 @@ exports.createOrder = async (req, res) => {
         unitPrice: safeUnitPrice,
         status: 'En attente',
         imageUrl: productData.imageUrl,
-        articleType: productData.article_type || 'stock'
+        articleType: productData.article_type || 'stock',
+        inventoryItemId: productData.inventoryItemId || productData.inventory_item_id
       }, client);
       createdProducts.push(product);
 
-      if (productData.inventoryItemId) {
-        await Stock.updateItemQuantity(productData.inventoryItemId, -productData.quantity, client);
+      const invId = productData.inventoryItemId || productData.inventory_item_id;
+      if (invId) {
+        await Stock.updateItemQuantity(invId, -productData.quantity, client);
       }
     }
 
@@ -249,6 +251,7 @@ exports.getOrderById = async (req, res) => {
 };
 
 exports.updateOrder = async (req, res) => {
+  const client = await pool.connect();
   try {
     const { id } = req.params;
     const clientName = req.body.clientName || req.body.client_name;
@@ -275,13 +278,17 @@ exports.updateOrder = async (req, res) => {
 
     const order = await Order.findById(id);
     if (!order) {
+      client.release();
       return res.status(404).json({ error: 'Order not found' });
     }
 
     // Check permission - now admin and designers can update
     if (req.user.role !== 'admin' && req.user.role !== 'designer') {
+      client.release();
       return res.status(403).json({ error: 'Access denied.' });
     }
+
+    await client.query('BEGIN');
 
     const updatedOrder = await Order.update(id, {
       clientName: clientName || order.client_name,
@@ -304,11 +311,137 @@ exports.updateOrder = async (req, res) => {
       discount: discount !== undefined ? (Number(discount) || 0) : order.discount,
       source: source !== undefined ? source : order.source,
       versement: versement !== undefined ? versement : order.versement
-    });
+    }, client);
 
+    // Process products if present in request body
+    if (req.body.products && Array.isArray(req.body.products)) {
+      if (req.user.role !== 'admin' && req.user.role !== 'designer') {
+        await client.query('ROLLBACK');
+        client.release();
+        return res.status(403).json({ error: 'Seul l\'administrateur ou l\'atelier peut modifier les produits de la commande.' });
+      }
+
+      const oldProducts = await Product.findByOrderId(id);
+      const newProducts = req.body.products;
+
+      // Identify removed products and delete them, returning stock
+      const newProductIds = newProducts.map(p => Number(p.id)).filter(Boolean);
+      const removedProducts = oldProducts.filter(op => !newProductIds.includes(Number(op.id)));
+
+      for (const op of removedProducts) {
+        if (op.article_type === 'stock' && op.inventory_item_id) {
+          await Stock.updateItemQuantity(op.inventory_item_id, op.quantity, client);
+        }
+        await Product.delete(op.id, client);
+      }
+
+      // Process new and existing products
+      for (const p of newProducts) {
+        const safeQuantity = p.quantity != null ? Number(p.quantity) : 1;
+        const rawPrice = p.unitPrice ?? p.unit_price;
+        const safeUnitPrice = (rawPrice !== undefined && rawPrice !== null && rawPrice !== '')
+          ? Number(rawPrice)
+          : 0;
+        const invId = p.inventoryItemId || p.inventory_item_id || null;
+
+        if (!p.id) {
+          // Fetch product stock image if available
+          let imageUrl = p.imageUrl || p.image_url || null;
+          if (invId) {
+            const item = await Stock.getItemById(invId, client);
+            if (item) {
+              imageUrl = item.image_url;
+            }
+          }
+
+          // New product
+          await Product.create({
+            orderId: id,
+            type: p.type,
+            quantity: safeQuantity,
+            unitPrice: safeUnitPrice,
+            status: p.status || 'En attente',
+            imageUrl: imageUrl,
+            articleType: p.article_type || 'stock',
+            inventoryItemId: invId
+          }, client);
+
+          // Deduct stock if applicable
+          if ((p.article_type || 'stock') === 'stock' && invId) {
+            await Stock.updateItemQuantity(invId, -safeQuantity, client);
+          }
+        } else {
+          // Existing product
+          const oldP = oldProducts.find(op => Number(op.id) === Number(p.id));
+          if (oldP) {
+            // Handle stock logic if inventory item or quantity changed, or if article type changed
+            const oldInvId = oldP.inventory_item_id;
+            const newInvId = invId;
+            const oldIsStock = oldP.article_type === 'stock' && oldInvId;
+            const newIsStock = (p.article_type || oldP.article_type) === 'stock' && newInvId;
+
+            if (oldIsStock && newIsStock && Number(oldInvId) === Number(newInvId)) {
+              // Same inventory item, adjust difference
+              const qtyDiff = oldP.quantity - safeQuantity;
+              if (qtyDiff !== 0) {
+                await Stock.updateItemQuantity(oldInvId, qtyDiff, client);
+              }
+            } else {
+              // Different inventory items, or changed stock type
+              if (oldIsStock) {
+                // Return old quantity to old stock
+                await Stock.updateItemQuantity(oldInvId, oldP.quantity, client);
+              }
+              if (newIsStock) {
+                // Deduct new quantity from new stock
+                await Stock.updateItemQuantity(newInvId, -safeQuantity, client);
+              }
+            }
+
+            // Fetch current imageUrl (ensure it doesn't get wiped if not provided)
+            let imageUrl = p.imageUrl || p.image_url || oldP.image_url || null;
+            // If stock item changed, update image to new stock item image
+            if (newIsStock && Number(oldInvId) !== Number(newInvId)) {
+              const item = await Stock.getItemById(newInvId, client);
+              if (item) {
+                imageUrl = item.image_url;
+              }
+            }
+
+            await Product.update(p.id, {
+              type: p.type || oldP.type,
+              quantity: safeQuantity,
+              unitPrice: safeUnitPrice,
+              status: p.status || oldP.status,
+              articleType: p.article_type || oldP.article_type,
+              inventoryItemId: invId,
+              imageUrl: imageUrl
+            }, client);
+          }
+        }
+      }
+    }
+
+    await client.query('COMMIT');
+    client.release();
     invalidateStatsCache();
-    res.json({ message: 'Order updated successfully', order: updatedOrder });
+
+    // Fetch full updated order with updated products and photos
+    const finalOrder = await Order.findById(id);
+    const finalProducts = await Product.findByOrderId(id);
+    const finalPhotos = await Photo.findByOrderId(id);
+
+    res.json({
+      message: 'Order updated successfully',
+      order: {
+        ...finalOrder,
+        products: finalProducts || [],
+        photos: finalPhotos || []
+      }
+    });
   } catch (error) {
+    await client.query('ROLLBACK');
+    client.release();
     console.error('Update order error:', error);
     res.status(500).json({ error: 'Server error' });
   }
