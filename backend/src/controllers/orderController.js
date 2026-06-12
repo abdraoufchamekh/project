@@ -65,6 +65,19 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({ error: 'At least one product is required' });
     }
 
+    const hasZeroPriceProduct = products.some(p => {
+      const rawPrice = p.unitPrice ?? p.unit_price;
+      const safeUnitPrice = (rawPrice !== undefined && rawPrice !== null && rawPrice !== '')
+        ? Number(rawPrice)
+        : 0;
+      return safeUnitPrice === 0;
+    });
+
+    if (hasZeroPriceProduct) {
+      client.release();
+      return res.status(400).json({ error: 'Le prix unitaire d\'un produit ne peut pas être 0.' });
+    }
+
     await client.query('BEGIN');
 
     for (const productData of products) {

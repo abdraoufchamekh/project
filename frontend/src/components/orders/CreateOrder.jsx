@@ -281,6 +281,13 @@ export default function CreateOrder({ onSave }) {
       return;
     }
 
+    // Vérifier que le prix unitaire de chaque produit est supérieur à 0 / différent de 0
+    const hasZeroPriceProduct = products.some(p => Number(p.unitPrice) === 0);
+    if (hasZeroPriceProduct) {
+      alert("Le prix unitaire d'un produit ne peut pas être égal à 0 DA.");
+      return;
+    }
+
     const newOrder = {
       id: Date.now(),
       firstName,
