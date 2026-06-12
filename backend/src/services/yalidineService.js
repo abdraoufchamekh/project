@@ -136,7 +136,7 @@ function formatPhone(phone) {
   // If it starts with +213, replace with 0
   if (p.startsWith('+213')) p = '0' + p.substring(4);
   if (p.startsWith('00213')) p = '0' + p.substring(5);
-  
+
   // Strict matching checking for valid format
   if (/^0\d{8,9}$/.test(p)) {
     return p;
@@ -214,7 +214,7 @@ const syncOrder = async (orderId) => {
   }
 
   // 3. Build payload with ALL required Yalidine fields
-  const uniqueOrderId = `D${orderId}`;
+  const uniqueOrderId = `#${orderId}`;
   const payload = [{
     order_id: uniqueOrderId,
     firstname: order.first_name || 'Client',
@@ -323,7 +323,7 @@ const syncOrderGuepex = async (orderId) => {
   let fixedPhone = String(order.phone || '0000000000').replace(/\s/g, '').trim();
   if (fixedPhone.length < 10) fixedPhone = fixedPhone.padEnd(10, '0');
 
-  const uniqueOrderId = `D${orderId}`;
+  const uniqueOrderId = `#${orderId}`;
   const payload = [{
     order_id: uniqueOrderId,
     firstname: order.first_name || 'Client',
