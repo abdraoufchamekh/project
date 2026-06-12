@@ -214,7 +214,7 @@ const syncOrder = async (orderId) => {
   }
 
   // 3. Build payload with ALL required Yalidine fields
-  const uniqueOrderId = `#${orderId}`;
+  const uniqueOrderId = order.seq_id || orderId;
   const payload = [{
     order_id: uniqueOrderId,
     firstname: order.first_name || 'Client',
@@ -323,7 +323,7 @@ const syncOrderGuepex = async (orderId) => {
   let fixedPhone = String(order.phone || '0000000000').replace(/\s/g, '').trim();
   if (fixedPhone.length < 10) fixedPhone = fixedPhone.padEnd(10, '0');
 
-  const uniqueOrderId = `#${orderId}`;
+  const uniqueOrderId = order.seq_id || orderId;
   const payload = [{
     order_id: uniqueOrderId,
     firstname: order.first_name || 'Client',
